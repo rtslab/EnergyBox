@@ -1,7 +1,9 @@
 package energybox;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -17,10 +19,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
+import org.jnetpcap.protocol.network.Ip4;
 /**
  * @author Rihards Polis
  * Linkoping University
@@ -42,6 +46,10 @@ public class FormController implements Initializable
     @FXML
     private TableColumn<?, ?> lengthCol;
     @FXML
+    private TableColumn<?, ?> sourceCol;
+    @FXML
+    private TableColumn<?, ?> destinationCol;
+    @FXML
     private void handleButtonAction(ActionEvent event)
     {
         // Error buffer for file handling
@@ -49,9 +57,9 @@ public class FormController implements Initializable
         // Wrapped lists in JavaFX ObservableList for the table view
         final ObservableList<PcapPacket> packetList = FXCollections.observableList(new ArrayList());
         final ObservableList<Packet> tableList = FXCollections.observableArrayList(new ArrayList());
-        String path = "D:\\Source\\NetBeansProjects\\EnergyBox\\src\\energybox\\chunks5mins3.pcap"; // FOR TESTING
+        //String path = "D:\\Source\\NetBeansProjects\\EnergyBox\\src\\energybox\\chunks5mins4.pcap"; // FOR TESTING
         
-        //String path = textField.getText();
+        String path = textField.getText();
         errorText.setText("");
         final Pcap pcap = Pcap.openOffline(path, errbuf);
         
@@ -76,17 +84,35 @@ public class FormController implements Initializable
         finally 
         {   
             pcap.close();
-            for (int i = 0; i < packetList.size(); i++) {
+            for (int i = 0; i < packetList.size(); i++) 
+            {
                 // Adding required values to list of objects with property attributes.
                 // Property attributes are easier to display in a TableView and provide
                 // the ability to display changes in the table automatically using events.
-                Packet pack = new Packet(
-                    packetList.get(i).getCaptureHeader().timestampInMicros(),
-                    packetList.get(i).getCaptureHeader().caplen());
-                tableList.add(pack);
+                try
+                {
+                    Ip4 ip = new Ip4();
+                    Packet pack = new Packet(
+                        // Time of packet's arrival
+                        packetList.get(i).getCaptureHeader().timestampInMicros(),
+                        // Packet's full length
+                        packetList.get(i).getCaptureHeader().caplen(),
+                        // This terrible spaghetti code adds source and 
+                        // destination IP addresses as Strings to the constructor
+                        InetAddress.getByAddress(packetList.get(i).getHeader(ip).source()).getHostAddress(),
+                        InetAddress.getByAddress(packetList.get(i).getHeader(ip).destination()).getHostAddress());
+                    tableList.add(pack);
+                }
+                catch(UnknownHostException e){ e.printStackTrace(); }
             }
         }
         // TODO: put Property Factories in control instead of FXML
+        /*
+        timeCol.setCellFactory(new PropertyValueFactory<Packet, Long>("time"));
+        lengthCol.setCellFactory(new PropertyValueFactory<Packet, Integer>("length"));
+        sourceCol.setCellFactory(new PropertyValueFactory<Packet, String>("source"));
+        destinationCol.setCellFactory(new PropertyValueFactory<Packet, String>("destination"));
+                */
         packetTable.getItems().setAll(tableList);
         
         // Opens a new ResultsForm window and passes packet list
@@ -100,7 +126,7 @@ public class FormController implements Initializable
     {
         try
         {
-            // Creates stage from loader which gets scene from the fxml file
+            // Creates stage from loader which gets the scene from the fxml file
             FXMLLoader loader = new FXMLLoader(getClass().getResource("ResultsForm.fxml"));
             Stage stage = new Stage();
             stage.setScene(new Scene((Parent)loader.load()));
