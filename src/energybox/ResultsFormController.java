@@ -7,6 +7,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.AnchorPane;
 /**
  * @author Rihards Polis
  * Linkoping University
@@ -15,6 +18,18 @@ public class ResultsFormController implements Initializable
 {
     @FXML
     private LineChart<Long, Integer> chart;
+    @FXML
+    private AnchorPane ActionPane1;
+    @FXML
+    private TableView<Packet> packetTable;
+    @FXML
+    private TableColumn<?, ?> timeCol;
+    @FXML
+    private TableColumn<?, ?> lengthCol;
+    @FXML
+    private TableColumn<?, ?> sourceCol;
+    @FXML
+    private TableColumn<?, ?> destinationCol;
     
     @Override
     public void initialize(URL url, ResourceBundle rb){}
@@ -34,5 +49,15 @@ public class ResultsFormController implements Initializable
                     packetList.get(i).getLength()));
         }
         chart.getData().add(series);
+        
+        // Populates the packet detail list
+        packetTable.getItems().setAll(packetList);
+        // TODO: put Property Factories in control instead of FXML
+        /*
+        timeCol.setCellFactory(new PropertyValueFactory<Packet, Long>("time"));
+        lengthCol.setCellFactory(new PropertyValueFactory<Packet, Integer>("length"));
+        sourceCol.setCellFactory(new PropertyValueFactory<Packet, String>("source"));
+        destinationCol.setCellFactory(new PropertyValueFactory<Packet, String>("destination"));
+        */
     }
 }

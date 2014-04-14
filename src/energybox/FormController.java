@@ -38,8 +38,6 @@ public class FormController implements Initializable
     @FXML
     private Button button;
     @FXML
-    private Label label;
-    @FXML
     private TextField textField;
     @FXML
     private TableColumn<?, ?> timeCol;
@@ -50,6 +48,14 @@ public class FormController implements Initializable
     @FXML
     private TableColumn<?, ?> destinationCol;
     @FXML
+    private TextField deviceField;
+    @FXML
+    private TextField networkField;
+    @FXML
+    private Button deviceButton;
+    @FXML
+    private Button networkButton;
+    @FXML
     private void handleButtonAction(ActionEvent event)
     {
         // Error buffer for file handling
@@ -58,7 +64,6 @@ public class FormController implements Initializable
         final ObservableList<PcapPacket> packetList = FXCollections.observableList(new ArrayList());
         final ObservableList<Packet> tableList = FXCollections.observableArrayList(new ArrayList());
         //String path = "D:\\Source\\NetBeansProjects\\EnergyBox\\src\\energybox\\chunks5mins4.pcap"; // FOR TESTING
-        
         String path = textField.getText();
         errorText.setText("");
         final Pcap pcap = Pcap.openOffline(path, errbuf);
@@ -105,18 +110,21 @@ public class FormController implements Initializable
                 }
                 catch(UnknownHostException e){ e.printStackTrace(); }
             }
-        }
-        // TODO: put Property Factories in control instead of FXML
-        /*
-        timeCol.setCellFactory(new PropertyValueFactory<Packet, Long>("time"));
-        lengthCol.setCellFactory(new PropertyValueFactory<Packet, Integer>("length"));
-        sourceCol.setCellFactory(new PropertyValueFactory<Packet, String>("source"));
-        destinationCol.setCellFactory(new PropertyValueFactory<Packet, String>("destination"));
-                */
-        packetTable.getItems().setAll(tableList);
-        
+        }        
         // Opens a new ResultsForm window and passes packet list
         showResultsForm(tableList);        
+    }
+    
+    @FXML
+    private void handleDeviceButton(ActionEvent event)
+    {
+        // TODO
+    }
+    
+    @FXML
+    private void handleNetworkButton(ActionEvent event)
+    {
+        // TODO
     }
     
     @Override

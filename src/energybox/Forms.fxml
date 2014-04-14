@@ -2,40 +2,11 @@
 
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.control.cell.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="196.0" prefWidth="545.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="energybox.FormController">
-    <children><SplitPane dividerPositions="0.3949416342412451" focusTraversable="true" layoutX="25.0" prefHeight="200.0" prefWidth="320.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-  <items>
-    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="198.0" prefWidth="182.0">
-<children>
-        <Button fx:id="button" layoutX="49.0" layoutY="10.0" onAction="#handleButtonAction" text="Click Me!" />
-        <Label fx:id="label" layoutX="15.0" layoutY="82.0" minHeight="16" minWidth="69" text="Trace Location:" /><TextField fx:id="textField" layoutX="104.0" layoutY="78.0" prefHeight="25.0" prefWidth="92.0" /><Label fx:id="errorText" layoutX="16.0" layoutY="111.0" minHeight="16" minWidth="69" prefHeight="75.0" prefWidth="179.0" textFill="RED" wrapText="true" />
-</children></AnchorPane>
-    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-<children><TableView fx:id="packetTable" prefHeight="198.0" prefWidth="220.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-  <columns>
-    <TableColumn fx:id="timeCol" text="Time">
-        <cellValueFactory><PropertyValueFactory property="time" />
-        </cellValueFactory>
-     </TableColumn>
-     <TableColumn fx:id="lengthCol" text="Length">
-        <cellValueFactory><PropertyValueFactory property="length" />
-        </cellValueFactory>
-     </TableColumn>
-     <TableColumn fx:id="sourceCol" text="Source">
-        <cellValueFactory><PropertyValueFactory property="source" />
-        </cellValueFactory>
-    </TableColumn>
-    <TableColumn fx:id="destinationCol" text="Destination">
-        <cellValueFactory><PropertyValueFactory property="destination" />
-        </cellValueFactory>
-    </TableColumn>
-  </columns>
-</TableView>
-</children></AnchorPane>
-  </items>
-</SplitPane>
+<AnchorPane id="AnchorPane" prefHeight="115.0" prefWidth="305.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="energybox.FormController">
+    <children>
+        <Button fx:id="button" layoutX="202.0" layoutY="66.0" onAction="#handleButtonAction" prefHeight="45.0" prefWidth="72.0" text="EnergyBox" />
+        <Label layoutX="15.0" layoutY="82.0" minHeight="16" minWidth="69" text="Packet Trace:" /><TextField fx:id="textField" layoutX="104.0" layoutY="78.0" prefHeight="25.0" prefWidth="92.0" text="D:\\Source\\NetBeansProjects\\EnergyBox\\src\\energybox\\chunks5mins3.pcap" /><Label fx:id="errorText" layoutX="16.0" layoutY="155.0" minHeight="16" minWidth="69" prefHeight="31.0" prefWidth="257.0" textFill="RED" wrapText="true" /><Label layoutX="16.0" layoutY="32.0" minHeight="16" minWidth="69" text="Device Model:" /><TextField fx:id="deviceField" layoutX="104.0" layoutY="28.0" prefHeight="25.0" prefWidth="92.0" /><Label layoutX="16.0" layoutY="129.0" minHeight="16" minWidth="69" text="Network Model:" /><TextField fx:id="networkField" layoutX="104.0" layoutY="125.0" prefHeight="25.0" prefWidth="92.0" /><Button fx:id="deviceButton" layoutX="202.0" layoutY="18.0" mnemonicParsing="false" onAction="#handleDeviceButton" prefHeight="45.0" prefWidth="72.0" text="Device Model" textAlignment="CENTER" wrapText="true" /><Button fx:id="networkButton" layoutX="202.0" layoutY="115.0" mnemonicParsing="false" onAction="#handleNetworkButton" prefHeight="45.0" prefWidth="72.0" text="Network Model" textAlignment="CENTER" wrapText="true" />
     </children>
 </AnchorPane>
