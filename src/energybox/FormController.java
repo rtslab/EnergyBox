@@ -1,10 +1,16 @@
 package energybox;
 
+import energybox.properties.device.*;
+import energybox.properties.network.*;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,10 +22,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.packet.PcapPacket;
@@ -32,21 +35,11 @@ import org.jnetpcap.protocol.network.Ip4;
 public class FormController implements Initializable
 {
     @FXML
-    private TableView<Packet> packetTable;     
-    @FXML
     private Label errorText;
     @FXML
     private Button button;
     @FXML
     private TextField textField;
-    @FXML
-    private TableColumn<?, ?> timeCol;
-    @FXML
-    private TableColumn<?, ?> lengthCol;
-    @FXML
-    private TableColumn<?, ?> sourceCol;
-    @FXML
-    private TableColumn<?, ?> destinationCol;
     @FXML
     private TextField deviceField;
     @FXML
@@ -56,6 +49,8 @@ public class FormController implements Initializable
     @FXML
     private Button networkButton;
     @FXML
+    private TextField ipField;
+    @FXML
     private void handleButtonAction(ActionEvent event)
     {
         // Error buffer for file handling
@@ -63,10 +58,9 @@ public class FormController implements Initializable
         // Wrapped lists in JavaFX ObservableList for the table view
         final ObservableList<PcapPacket> packetList = FXCollections.observableList(new ArrayList());
         final ObservableList<Packet> tableList = FXCollections.observableArrayList(new ArrayList());
-        //String path = "D:\\Source\\NetBeansProjects\\EnergyBox\\src\\energybox\\chunks5mins4.pcap"; // FOR TESTING
-        String path = textField.getText();
+        
         errorText.setText("");
-        final Pcap pcap = Pcap.openOffline(path, errbuf);
+        final Pcap pcap = Pcap.openOffline(textField.getText(), errbuf);
         
         if (pcap == null)
         {
@@ -110,9 +104,37 @@ public class FormController implements Initializable
                 }
                 catch(UnknownHostException e){ e.printStackTrace(); }
             }
-        }        
+        }
+        
+        Properties properties = new Properties();
+        // First the two variable are defined as abstract classes
+        Network networkProperties = null;
+        Device deviceProperties = null;
+        
+        properties = pathToProperties(networkField.getText());
+        String type = properties.getProperty("TYPE");
+        // TODO: Turn the IF into a SWITCH with all possible configuration cases
+        if ("3G".equals(type))
+        {
+            // The variable is initiated with the constructor of the appropriate
+            // class depending on the TYPE of the .config file
+            networkProperties = new Properties3G(properties);
+        }
+        
+        properties = pathToProperties(deviceField.getText());
+        type = properties.getProperty("TYPE");
+        // TODO: Turn the IF into a SWITCH with all possible configuration cases
+        if ("Device3G".equals(type))
+        {
+            deviceProperties = new PropertiesDevice3G(properties);
+        }
+        
+        // TODO: Move enigine instance to the results form controler
+        Engine3G engine3g = new Engine3G(tableList, ipField.getText(), ((Properties3G)networkProperties), ((PropertiesDevice3G)deviceProperties));
+        engine3g.sortUplinkDownlink(tableList, ipField.getText());
+        
         // Opens a new ResultsForm window and passes packet list
-        showResultsForm(tableList);        
+         showResultsForm(tableList);        
     }
     
     @FXML
@@ -148,5 +170,18 @@ public class FormController implements Initializable
         }
         catch (IOException e){ e.printStackTrace(); }
         return null;
+    }
+    
+    public Properties pathToProperties(String path)
+    {
+        Properties properties = new Properties();
+        try
+        {
+            File f = new File(path);
+            InputStream in = new FileInputStream (f);
+            properties.load(in);
+        }
+        catch (IOException e){ e.printStackTrace(); }
+        return properties;
     }
 }

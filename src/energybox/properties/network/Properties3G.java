@@ -1,19 +1,13 @@
-package energybox;
+package energybox.properties.network;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 import javafx.beans.property.SimpleDoubleProperty;
 /**
  * @author Rihards Polis
  * Linkoping University
  */
-public class Properties3G
-{
-    Properties properties = new Properties();
-    
+public class Properties3G extends Network
+{ 
     // The default values are taken from the TelianSonera configuration
     SimpleDoubleProperty DCH_FACH_INACTIVITY_TIME = new SimpleDoubleProperty(4.1);
     SimpleDoubleProperty FACH_IDLE_INACTIVITY_TIME = new SimpleDoubleProperty(5.6);
@@ -33,14 +27,16 @@ public class Properties3G
     SimpleDoubleProperty DCH_TO_FACH_TRANSITION_TIME = new SimpleDoubleProperty(0.7);
     SimpleDoubleProperty FACH_TO_IDLE_TRANSITION_TIME = new SimpleDoubleProperty(0.3);
     
-    public Properties3G(String path)
+    public Properties3G(Properties properties)
     {
-        try
+        //try
         {
+            /*
             File f = new File(path);
             InputStream in = new FileInputStream (f);
             Properties properties = new Properties();
             properties.load(in);
+                    */
             DCH_FACH_INACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DCH_FACH_INACTIVITY_TIME")));
             FACH_IDLE_INACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("FACH_IDLE_INACTIVITY_TIME")));
             DCH_LOW_ACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DCH_LOW_ACTIVITY_TIME")));
@@ -59,7 +55,7 @@ public class Properties3G
             DCH_TO_FACH_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DCH_TO_FACH_TRANSITION_TIME")));
             FACH_TO_IDLE_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("FACH_TO_IDLE_TRANSITION_TIME")));
         }
-        catch (IOException e){ e.printStackTrace(); }
+        //catch (IOException e){ e.printStackTrace(); }
     }
     
     // GETTERS
