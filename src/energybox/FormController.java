@@ -92,8 +92,8 @@ public class FormController implements Initializable
                 {
                     Ip4 ip = new Ip4();
                     Packet pack = new Packet(
-                        // Time of packet's arrival
-                        packetList.get(i).getCaptureHeader().timestampInMicros(),
+                        // Time of packet's arrival relative to first packet
+                        packetList.get(i).getCaptureHeader().timestampInMicros()-packetList.get(0).getCaptureHeader().timestampInMicros(),
                         // Packet's full length
                         packetList.get(i).getCaptureHeader().caplen(),
                         // This terrible spaghetti code adds source and 

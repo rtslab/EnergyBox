@@ -48,7 +48,7 @@
   <yAxis>
     <NumberAxis side="LEFT" />
   </yAxis>
-</StackedAreaChart><LineChart fx:id="chart" layoutY="45.0" prefHeight="600.0" prefWidth="500.0" title="Packets over time" AnchorPane.bottomAnchor="450.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.rowIndex="1">
+</StackedAreaChart><LineChart fx:id="packetChart" layoutY="45.0" prefHeight="600.0" prefWidth="500.0" title="Packets over time" AnchorPane.bottomAnchor="450.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.rowIndex="1">
   <xAxis>
     <NumberAxis side="BOTTOM" />
   </xAxis>
@@ -117,14 +117,14 @@
   </rowConstraints>
 <children><AreaChart title="States">
   <xAxis>
-    <CategoryAxis side="BOTTOM" />
+    <NumberAxis side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />
   </yAxis>
-</AreaChart><LineChart title="Packets" GridPane.rowIndex="1">
+</AreaChart><LineChart fx:id="packetChart2" layoutY="45.0" prefHeight="600.0" prefWidth="500.0" title="Packets over time" GridPane.rowIndex="1">
   <xAxis>
-    <CategoryAxis side="BOTTOM" />
+    <NumberAxis side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />
@@ -156,21 +156,21 @@
   </rowConstraints>
 <children><LineChart title="Power">
   <xAxis>
-    <CategoryAxis side="BOTTOM" />
+    <NumberAxis side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />
   </yAxis>
 </LineChart><AreaChart title="States" GridPane.rowIndex="1">
   <xAxis>
-    <CategoryAxis side="BOTTOM" />
+    <NumberAxis side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />
   </yAxis>
-</AreaChart><LineChart title="Packets" GridPane.rowIndex="2">
+</AreaChart><LineChart fx:id="packetChart3" title="Packets over time" GridPane.rowIndex="2">
   <xAxis>
-    <CategoryAxis side="BOTTOM" />
+    <NumberAxis side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />
