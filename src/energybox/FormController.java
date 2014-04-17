@@ -10,6 +10,8 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -91,16 +93,21 @@ public class FormController implements Initializable
                 try
                 {
                     Ip4 ip = new Ip4();
-                    Packet pack = new Packet(
-                        // Time of packet's arrival relative to first packet
-                        packetList.get(i).getCaptureHeader().timestampInMicros()-packetList.get(0).getCaptureHeader().timestampInMicros(),
-                        // Packet's full length
-                        packetList.get(i).getCaptureHeader().caplen(),
-                        // This terrible spaghetti code adds source and 
-                        // destination IP addresses as Strings to the constructor
-                        InetAddress.getByAddress(packetList.get(i).getHeader(ip).source()).getHostAddress(),
-                        InetAddress.getByAddress(packetList.get(i).getHeader(ip).destination()).getHostAddress());
-                    tableList.add(pack);
+                    // Check to see if it's a layer 3 packet
+                    // TODO: Add support for layer 2
+                    if (packetList.get(i).hasHeader(ip))
+                    {
+                        Packet pack = new Packet(
+                            // Time of packet's arrival relative to first packet
+                            packetList.get(i).getCaptureHeader().timestampInMillis()-packetList.get(0).getCaptureHeader().timestampInMillis(),
+                            // Packet's full length
+                            packetList.get(i).getCaptureHeader().caplen(),
+                            // This terrible spaghetti code adds source and 
+                            // destination IP addresses as Strings to the constructor
+                            InetAddress.getByAddress(packetList.get(i).getHeader(ip).source()).getHostAddress(),
+                            InetAddress.getByAddress(packetList.get(i).getHeader(ip).destination()).getHostAddress());
+                        tableList.add(pack);
+                    }
                 }
                 catch(UnknownHostException e){ e.printStackTrace(); }
             }
@@ -113,25 +120,38 @@ public class FormController implements Initializable
         
         properties = pathToProperties(networkField.getText());
         String type = properties.getProperty("TYPE");
-        // TODO: Turn the IF into a SWITCH with all possible configuration cases
-        if ("3G".equals(type))
+        // networkProperties is initiated with the constructor of the appropriate
+        // class depending on the TYPE of the .config file
+        switch (type)
         {
-            // The variable is initiated with the constructor of the appropriate
-            // class depending on the TYPE of the .config file
-            networkProperties = new Properties3G(properties);
+            case "3G": networkProperties = new Properties3G(properties);
+            break;
+                
+            case "Wifi": //TODO
+            break;
         }
         
+        // deviceProperties is initiated the same way as networkProperties
         properties = pathToProperties(deviceField.getText());
         type = properties.getProperty("TYPE");
-        // TODO: Turn the IF into a SWITCH with all possible configuration cases
-        if ("Device3G".equals(type))
+        switch (type)
         {
-            deviceProperties = new PropertiesDevice3G(properties);
+            case "Device3G": deviceProperties = new PropertiesDevice3G(properties);
+            break;
+                
+            case "DeviceWifi": //TODO
+            break;
         }
-        
+
         // TODO: Move enigine instance to the results form controler
         Engine3G engine3g = new Engine3G(tableList, ipField.getText(), ((Properties3G)networkProperties), ((PropertiesDevice3G)deviceProperties));
         engine3g.sortUplinkDownlink(tableList, ipField.getText());
+        HashMap map = engine3g.modelStates();
+        for (int i = 0; i < tableList.get(tableList.size()-1).getTime(); i++) {
+            if (map.containsKey(i))
+                System.out.println(i +", "+map.get(i));
+        }
+ 
         
         // Opens a new ResultsForm window and passes packet list
          showResultsForm(tableList);        
