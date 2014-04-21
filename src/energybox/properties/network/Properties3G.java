@@ -18,8 +18,8 @@ public class Properties3G extends Network
     SimpleDoubleProperty DOWNLINK_BUFFER_IDLE_TO_FACH_OR_DCH = new SimpleDoubleProperty(515);
     SimpleDoubleProperty UPLINK_BUFFER_FACH_TO_DCH = new SimpleDoubleProperty(294);
     SimpleDoubleProperty DOWNLINK_BUFFER_FACH_TO_DCH = new SimpleDoubleProperty(515);
-    SimpleDoubleProperty UPLINK_BUFFER_EMPTY_TIME = new SimpleDoubleProperty(12.36);
-    SimpleDoubleProperty DOWNLINK_BUFFER_EMPTY_TIME = new SimpleDoubleProperty(12.36);
+    SimpleDoubleProperty UPLINK_BUFFER_EMPTY_TIME = new SimpleDoubleProperty(1.2);
+    SimpleDoubleProperty DOWNLINK_BUFFER_EMPTY_TIME = new SimpleDoubleProperty(10.0);
 
     SimpleDoubleProperty IDLE_TO_FACH_TRANSITION_TIME = new SimpleDoubleProperty(0.43);
     SimpleDoubleProperty IDLE_TO_DCH_TRANSITION_TIME = new SimpleDoubleProperty(1.7);
@@ -29,14 +29,6 @@ public class Properties3G extends Network
     
     public Properties3G(Properties properties)
     {
-        //try
-        {
-            /*
-            File f = new File(path);
-            InputStream in = new FileInputStream (f);
-            Properties properties = new Properties();
-            properties.load(in);
-                    */
             DCH_FACH_INACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DCH_FACH_INACTIVITY_TIME")));
             FACH_IDLE_INACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("FACH_IDLE_INACTIVITY_TIME")));
             DCH_LOW_ACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DCH_LOW_ACTIVITY_TIME")));
@@ -54,8 +46,6 @@ public class Properties3G extends Network
             FACH_TO_DCH_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("FACH_TO_DCH_TRANSITION_TIME")));
             DCH_TO_FACH_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DCH_TO_FACH_TRANSITION_TIME")));
             FACH_TO_IDLE_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("FACH_TO_IDLE_TRANSITION_TIME")));
-        }
-        //catch (IOException e){ e.printStackTrace(); }
     }
     
     // GETTERS

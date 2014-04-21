@@ -1,11 +1,16 @@
 package energybox;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
 import java.util.ResourceBundle;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -36,15 +41,21 @@ public class ResultsFormController implements Initializable
     private TableColumn<?, ?> destinationCol;
     @FXML
     private TableColumn<?, ?> linkCol;
+    @FXML
+    private StackedAreaChart<Long, Long> throughputChart;
     
     @Override
     public void initialize(URL url, ResourceBundle rb){}
     
-    void initData(ObservableList<Packet> packetList) 
+    void initData(Engine3G engine)
     {
+        List<Packet> packetList = engine.packetList;
         packetChart.getXAxis().setAutoRanging(true);
         packetChart.getYAxis().setAutoRanging(true);
         
+        //ObservableList<ThroughputEntry> oMapThroughput = FXCollections.observableList(engine.getThroughput());
+        XYChart.Series<Long, Long> throughputSeries = new XYChart.Series();
+        HashMap states = engine.modelStates();
         // Temp fix to charts not drawing with the same data series
         // TODO: get all three charts to draw using the same data series without
         // creating redundant series that take up memmory
@@ -108,7 +119,8 @@ public class ResultsFormController implements Initializable
                         packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
             }
         }
-
+        throughputChart.getData().add(engine.getUplinkThroughput());
+        throughputChart.getData().add(engine.getDownlinkThroughput());
         packetChart.getData().add(uplinkSeries);
         packetChart.getData().add(downlinkSeries);
         

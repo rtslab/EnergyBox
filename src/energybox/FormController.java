@@ -100,8 +100,10 @@ public class FormController implements Initializable
                         Packet pack = new Packet(
                             // Time of packet's arrival relative to first packet
                             packetList.get(i).getCaptureHeader().timestampInMillis()-packetList.get(0).getCaptureHeader().timestampInMillis(),
-                            // Packet's full length
-                            packetList.get(i).getCaptureHeader().caplen(),
+                            // Packet's full length (on the wire) could differ from
+                            // the captured length if the capture happens before sending
+                            //packetList.get(i).getCaptureHeader().caplen(), // CAPTURED LENGTH
+                            packetList.get(i).getPacketWirelen(), // LENGTH ON THE WIRE
                             // This terrible spaghetti code adds source and 
                             // destination IP addresses as Strings to the constructor
                             InetAddress.getByAddress(packetList.get(i).getHeader(ip).source()).getHostAddress(),
@@ -143,18 +145,17 @@ public class FormController implements Initializable
             break;
         }
 
-        // TODO: Move enigine instance to the results form controler
-        Engine3G engine3g = new Engine3G(tableList, ipField.getText(), ((Properties3G)networkProperties), ((PropertiesDevice3G)deviceProperties));
-        engine3g.sortUplinkDownlink(tableList, ipField.getText());
-        HashMap map = engine3g.modelStates();
-        for (int i = 0; i < tableList.get(tableList.size()-1).getTime(); i++) {
-            if (map.containsKey(i))
-                System.out.println(i +", "+map.get(i));
-        }
- 
-        
+        // Keeping the engine in the main FormController because the Engine object
+        // would also contain all of the data that would have to be passed
+        // to instanciate the object in the ResultsFormController
+        Engine3G engine3g = new Engine3G(tableList, 
+                ipField.getText(),
+                //networkProperties instanced as Properties3G
+                ((Properties3G)networkProperties), 
+                // deviceProperties instanced as PropertiesDevice3G
+                ((PropertiesDevice3G)deviceProperties));
         // Opens a new ResultsForm window and passes packet list
-         showResultsForm(tableList);        
+         showResultsForm(engine3g);        
     }
     
     @FXML
@@ -172,7 +173,9 @@ public class FormController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb){}
     
-    public Stage showResultsForm(ObservableList<Packet> packets) 
+    
+    // method to launch the ResultsFormController with the custom init method
+    public Stage showResultsForm(Engine3G engine) 
     {
         try
         {
@@ -184,7 +187,7 @@ public class FormController implements Initializable
             // Calls a method on the controller to initialize it with the required data values
             ResultsFormController controller = 
             loader.<ResultsFormController>getController();
-            controller.initData(packets);
+            controller.initData(engine);
             stage.show();
             return stage;
         }
