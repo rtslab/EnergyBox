@@ -10,8 +10,6 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -58,8 +56,7 @@ public class FormController implements Initializable
         // Error buffer for file handling
         StringBuilder errbuf = new StringBuilder();
         // Wrapped lists in JavaFX ObservableList for the table view
-        final ObservableList<PcapPacket> packetList = FXCollections.observableList(new ArrayList());
-        final ObservableList<Packet> tableList = FXCollections.observableArrayList(new ArrayList());
+        final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList());
         
         errorText.setText("");
         final Pcap pcap = Pcap.openOffline(textField.getText(), errbuf);
@@ -71,22 +68,19 @@ public class FormController implements Initializable
         }
         
         PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() 
-        {  
+        {
+            boolean first = true;
+            long startTime = 0;
             @Override
             public void nextPacket(PcapPacket packet, String user) 
             {
                 // Copies every packet in the loop to an ArrayList for later use
-                packetList.add(packet);
-            }  
-        };
-        
-        try {  pcap.loop(pcap.LOOP_INFINATE, jpacketHandler, "") ; }
-        
-        finally 
-        {   
-            pcap.close();
-            for (int i = 0; i < packetList.size(); i++) 
-            {
+                //packetList.add(packet);
+                if (first)
+                {
+                    startTime = packet.getCaptureHeader().timestampInMillis();
+                    first = false;
+                }
                 // Adding required values to list of objects with property attributes.
                 // Property attributes are easier to display in a TableView and provide
                 // the ability to display changes in the table automatically using events.
@@ -95,24 +89,30 @@ public class FormController implements Initializable
                     Ip4 ip = new Ip4();
                     // Check to see if it's a layer 3 packet
                     // TODO: Add support for layer 2
-                    if (packetList.get(i).hasHeader(ip))
+                    if (packet.hasHeader(ip))
                     {
-                        Packet pack = new Packet(
+                        packetList.add(new Packet(
                             // Time of packet's arrival relative to first packet
-                            packetList.get(i).getCaptureHeader().timestampInMillis()-packetList.get(0).getCaptureHeader().timestampInMillis(),
+                            packet.getCaptureHeader().timestampInMillis() - startTime,
                             // Packet's full length (on the wire) could differ from
                             // the captured length if the capture happens before sending
                             //packetList.get(i).getCaptureHeader().caplen(), // CAPTURED LENGTH
-                            packetList.get(i).getPacketWirelen(), // LENGTH ON THE WIRE
+                            packet.getPacketWirelen(), // LENGTH ON THE WIRE
                             // This terrible spaghetti code adds source and 
                             // destination IP addresses as Strings to the constructor
-                            InetAddress.getByAddress(packetList.get(i).getHeader(ip).source()).getHostAddress(),
-                            InetAddress.getByAddress(packetList.get(i).getHeader(ip).destination()).getHostAddress());
-                        tableList.add(pack);
+                            InetAddress.getByAddress(packet.getHeader(ip).source()).getHostAddress(),
+                            InetAddress.getByAddress(packet.getHeader(ip).destination()).getHostAddress()));
+                        //tableList.add(pack);
                     }
                 }
                 catch(UnknownHostException e){ e.printStackTrace(); }
-            }
+            }  
+        };
+        try {  pcap.loop(pcap.LOOP_INFINATE, jpacketHandler, "") ; }
+        
+        finally 
+        {
+            pcap.close();
         }
         
         Properties properties = new Properties();
@@ -144,11 +144,10 @@ public class FormController implements Initializable
             case "DeviceWifi": //TODO
             break;
         }
-
         // Keeping the engine in the main FormController because the Engine object
         // would also contain all of the data that would have to be passed
         // to instanciate the object in the ResultsFormController
-        Engine3G engine3g = new Engine3G(tableList, 
+        Engine3G engine3g = new Engine3G(packetList, 
                 ipField.getText(),
                 //networkProperties instanced as Properties3G
                 ((Properties3G)networkProperties), 

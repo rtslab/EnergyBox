@@ -1,16 +1,12 @@
 package energybox;
 
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -42,7 +38,9 @@ public class ResultsFormController implements Initializable
     @FXML
     private TableColumn<?, ?> linkCol;
     @FXML
-    private StackedAreaChart<Long, Long> throughputChart;
+    private AreaChart<Long, Long> throughputChart;
+    @FXML
+    private AreaChart<Long, Integer> stateChart;
     
     @Override
     public void initialize(URL url, ResourceBundle rb){}
@@ -52,83 +50,21 @@ public class ResultsFormController implements Initializable
         List<Packet> packetList = engine.packetList;
         packetChart.getXAxis().setAutoRanging(true);
         packetChart.getYAxis().setAutoRanging(true);
+        stateChart.getXAxis().setAutoRanging(true);
+        stateChart.getYAxis().setAutoRanging(true);
+        stateChart.getData().add(engine.modelStates());
         
-        //ObservableList<ThroughputEntry> oMapThroughput = FXCollections.observableList(engine.getThroughput());
-        XYChart.Series<Long, Long> throughputSeries = new XYChart.Series();
-        HashMap states = engine.modelStates();
-        // Temp fix to charts not drawing with the same data series
-        // TODO: get all three charts to draw using the same data series without
-        // creating redundant series that take up memmory
-        XYChart.Series<Long, Integer> uplinkSeries = new XYChart.Series();
-        XYChart.Series<Long, Integer> uplinkSeries2 = new XYChart.Series();
-        XYChart.Series<Long, Integer> uplinkSeries3 = new XYChart.Series();
-        
-        XYChart.Series<Long, Integer> downlinkSeries = new XYChart.Series();
-        XYChart.Series<Long, Integer> downlinkSeries2 = new XYChart.Series();
-        XYChart.Series<Long, Integer> downlinkSeries3 = new XYChart.Series();
-        
-        uplinkSeries.setName("Uplink");
-        downlinkSeries.setName("Downlink");
-        for (int i = 0; i < packetList.size(); i++) {
-            // Adds three points to either the UL or DL series - 
-            // one on the axis, one at 2(UL) or 1(DL), and one more on the axis
-            if (packetList.get(i).getUplink())
-            {
-                uplinkSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
-                uplinkSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,2));//- packetList.get(0).getTime(), 2));
-                uplinkSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
-                
-                uplinkSeries2.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
-                uplinkSeries2.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,2));//- packetList.get(0).getTime(), 2));
-                uplinkSeries2.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
-                
-                uplinkSeries3.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
-                uplinkSeries3.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,2));//- packetList.get(0).getTime(), 2));
-                uplinkSeries3.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
-            }
-            else
-            {
-                downlinkSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
-                downlinkSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,1));//- packetList.get(0).getTime(), 1));
-                downlinkSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
-                
-                downlinkSeries2.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
-                downlinkSeries2.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,1));//- packetList.get(0).getTime(), 1));
-                downlinkSeries2.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
-                
-                downlinkSeries3.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
-                downlinkSeries3.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,1));//- packetList.get(0).getTime(), 1));
-                downlinkSeries3.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));//- packetList.get(0).getTime(), 0));
-            }
-        }
         throughputChart.getData().add(engine.getUplinkThroughput());
         throughputChart.getData().add(engine.getDownlinkThroughput());
-        packetChart.getData().add(uplinkSeries);
-        packetChart.getData().add(downlinkSeries);
         
-        packetChart2.getData().add(uplinkSeries2);
-        packetChart2.getData().add(downlinkSeries2);
+        packetChart.getData().add(new XYChart.Series("Uplink", engine.getUplinkPackets().getData()));
+        packetChart.getData().add(new XYChart.Series("Downlink", engine.getDownlinkPackets().getData()));
         
-        packetChart3.getData().add(uplinkSeries3);
-        packetChart3.getData().add(downlinkSeries3);
+        packetChart2.getData().add(new XYChart.Series("Uplink", engine.getUplinkPackets().getData()));
+        packetChart2.getData().add(new XYChart.Series("Downlink", engine.getDownlinkPackets().getData()));
+        
+        packetChart3.getData().add(new XYChart.Series("Uplink", engine.getUplinkPackets().getData()));
+        packetChart3.getData().add(new XYChart.Series("Downlink", engine.getDownlinkPackets().getData()));
         
         // Populates the packet detail list
         packetTable.getItems().setAll(packetList);

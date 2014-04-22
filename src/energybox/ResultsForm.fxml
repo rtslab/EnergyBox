@@ -41,6 +41,8 @@
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
   </rowConstraints>
+  
+<!--  
 <children><StackedAreaChart fx:id="throughputChart" title="Throughput">
   <xAxis>
     <NumberAxis side="BOTTOM" />
@@ -48,7 +50,21 @@
   <yAxis>
     <NumberAxis side="LEFT" />
   </yAxis>
-</StackedAreaChart><LineChart fx:id="packetChart" layoutY="45.0" prefHeight="600.0" prefWidth="500.0" title="Packets over time" AnchorPane.bottomAnchor="450.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.rowIndex="1">
+</StackedAreaChart>
+-->
+
+<children><AreaChart fx:id="throughputChart" title="Throughput">
+  <xAxis>
+    <NumberAxis side="BOTTOM" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis side="LEFT" />
+  </yAxis>
+</AreaChart> 
+
+
+
+<LineChart fx:id="packetChart" layoutY="45.0" prefHeight="600.0" prefWidth="500.0" title="Packets over time" AnchorPane.bottomAnchor="450.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.rowIndex="1">
   <xAxis>
     <NumberAxis side="BOTTOM" />
   </xAxis>
@@ -115,7 +131,7 @@
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
   </rowConstraints>
-<children><AreaChart title="States">
+<children><AreaChart fx:id="stateChart" title="States" verticalZeroLineVisible="false">
   <xAxis>
     <NumberAxis side="BOTTOM" />
   </xAxis>
