@@ -129,32 +129,50 @@ public class FormController implements Initializable
             case "3G": networkProperties = new Properties3G(properties);
             break;
                 
-            case "Wifi": //TODO
+            case "Wifi": networkProperties = new PropertiesWifi(properties);
             break;
         }
         
         // deviceProperties is initiated the same way as networkProperties
         properties = pathToProperties(deviceField.getText());
-        type = properties.getProperty("TYPE");
-        switch (type)
+        switch (properties.getProperty("TYPE"))
         {
             case "Device3G": deviceProperties = new PropertiesDevice3G(properties);
             break;
                 
-            case "DeviceWifi": //TODO
+            case "DeviceWifi": deviceProperties = new PropertiesDeviceWifi(properties);
             break;
         }
         // Keeping the engine in the main FormController because the Engine object
         // would also contain all of the data that would have to be passed
         // to instanciate the object in the ResultsFormController
-        Engine3G engine3g = new Engine3G(packetList, 
-                ipField.getText(),
-                //networkProperties instanced as Properties3G
-                ((Properties3G)networkProperties), 
-                // deviceProperties instanced as PropertiesDevice3G
-                ((PropertiesDevice3G)deviceProperties));
-        // Opens a new ResultsForm window and passes packet list
-         showResultsForm(engine3g);        
+        switch (type)
+        {
+            case "3G":
+            {
+                Engine3G engine = new Engine3G(packetList, 
+                        ipField.getText(),
+                        //networkProperties instanced as Properties3G
+                        ((Properties3G)networkProperties), 
+                        // deviceProperties instanced as PropertiesDevice3G
+                        ((PropertiesDevice3G)deviceProperties));
+                // Opens a new ResultsForm window and passes packet list
+                showResultsForm(engine);
+            }
+            break;
+            
+            case "Wifi":
+            {
+                EngineWifi engine = new EngineWifi(packetList, 
+                        ipField.getText(),
+                        //networkProperties instanced as Properties3G
+                        ((PropertiesWifi)networkProperties), 
+                        // deviceProperties instanced as PropertiesDevice3G
+                        ((PropertiesDeviceWifi)deviceProperties));
+                // Opens a new ResultsForm window and passes packet list
+                //showResultsForm(engine);
+            }
+        }
     }
     
     @FXML

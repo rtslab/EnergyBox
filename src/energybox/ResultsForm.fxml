@@ -28,9 +28,11 @@
   </menus>
 </MenuBar><TabPane prefHeight="605.0" prefWidth="500.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
   <tabs>
+
+
     <Tab text="Packet Trace">
       <content>
-        <AnchorPane fx:id="ActionPane1" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+        <AnchorPane fx:id="ActionPane1" minHeight="0.0" minWidth="0.0" prefHeight="528.0" prefWidth="500.0">
 <children><GridPane prefHeight="600.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -42,7 +44,7 @@
 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
   </rowConstraints>
   
-<!--  
+
 <children><StackedAreaChart fx:id="throughputChart" title="Throughput">
   <xAxis>
     <NumberAxis side="BOTTOM" />
@@ -51,8 +53,9 @@
     <NumberAxis side="LEFT" />
   </yAxis>
 </StackedAreaChart>
--->
 
+
+<!--
 <children><AreaChart fx:id="throughputChart" title="Throughput">
   <xAxis>
     <NumberAxis side="BOTTOM" />
@@ -61,7 +64,7 @@
     <NumberAxis side="LEFT" />
   </yAxis>
 </AreaChart> 
-
+-->
 
 
 <LineChart fx:id="packetChart" layoutY="45.0" prefHeight="600.0" prefWidth="500.0" title="Packets over time" AnchorPane.bottomAnchor="450.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.rowIndex="1">
@@ -199,6 +202,23 @@
 </TableView>
 </children>
 </GridPane>
+</children></AnchorPane>
+  </content>
+</Tab>
+      
+      <Tab closable="false" disable="true" text="Untitled Tab">
+  <content>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+<children>
+<ScrollPane fitToWidth="true" prefHeight="575.0" prefViewportHeight="575.0" prefViewportWidth="500.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<content><TableView prefHeight="200.0" prefWidth="498.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <columns>
+    <TableColumn prefWidth="75.0" text="C1" />
+    <TableColumn prefWidth="75.0" text="C2" />
+  </columns>
+</TableView>
+</content>
+</ScrollPane>
 </children></AnchorPane>
   </content>
 </Tab>

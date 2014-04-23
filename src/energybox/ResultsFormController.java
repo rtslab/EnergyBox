@@ -7,7 +7,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.AnchorPane;
@@ -38,7 +40,7 @@ public class ResultsFormController implements Initializable
     @FXML
     private TableColumn<?, ?> linkCol;
     @FXML
-    private AreaChart<Long, Long> throughputChart;
+    private StackedAreaChart<Long, Long> throughputChart;
     @FXML
     private AreaChart<Long, Integer> stateChart;
     
