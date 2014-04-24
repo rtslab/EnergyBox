@@ -112,15 +112,6 @@ public class Engine3G
         return downlinkSeries;
     }
     
-    // Formula for calculating buffer empty time depending on buffer occupancy
-    // (Downlink is modeled with a constant occupancy - the value in networkProperties)
-    public double timeToEmptyUplink(int buffer) { return networkProperties.getUPLINK_BUFFER_EMPTY_TIME() * buffer + 10; }
-    
-    // GETTERS
-    public XYChart.Series<Long, Integer> getUplinkPackets(){ return uplinkPacketSeries; }
-    public XYChart.Series<Long, Integer> getDownlinkPackets(){ return downlinkPacketSeries; }
-    public XYChart.Series<Long, Integer> getStates(){ return stateSeries; }
-    
     public XYChart.Series<Long, Integer> modelStates()
     {
         // Buffer control variables
@@ -142,6 +133,7 @@ public class Engine3G
         // Packet list points
         for (int i = 0; i < packetList.size(); i++) 
         {
+            // Populating the packetChart series
             if (packetList.get(i).getUplink())
             {
                 uplinkPacketSeries.getData().add(new XYChart.Data(
@@ -342,4 +334,13 @@ public class Engine3G
     {
         stateSeries.getData().add(new XYChart.Data(time, state));
     }
+
+    // Formula for calculating buffer empty time depending on buffer occupancy
+    // (Downlink is modeled with a constant occupancy - the value in networkProperties)
+    public double timeToEmptyUplink(int buffer) { return networkProperties.getUPLINK_BUFFER_EMPTY_TIME() * buffer + 10; }
+    
+    // GETTERS
+    public XYChart.Series<Long, Integer> getUplinkPackets(){ return uplinkPacketSeries; }
+    public XYChart.Series<Long, Integer> getDownlinkPackets(){ return downlinkPacketSeries; }
+    public XYChart.Series<Long, Integer> getStates(){ return stateSeries; }
 }

@@ -17,7 +17,7 @@ import javafx.scene.layout.AnchorPane;
  * @author Rihards Polis
  * Linkoping University
  */
-public class ResultsFormController implements Initializable
+public class ResultsForm3GController implements Initializable
 {
     @FXML
     private LineChart<Long, Integer> packetChart;
@@ -49,7 +49,6 @@ public class ResultsFormController implements Initializable
     
     void initData(Engine3G engine)
     {
-        List<Packet> packetList = engine.packetList;
         packetChart.getXAxis().setAutoRanging(true);
         packetChart.getYAxis().setAutoRanging(true);
         stateChart.getXAxis().setAutoRanging(true);
@@ -69,7 +68,7 @@ public class ResultsFormController implements Initializable
         packetChart3.getData().add(new XYChart.Series("Downlink", engine.getDownlinkPackets().getData()));
         
         // Populates the packet detail list
-        packetTable.getItems().setAll(packetList);
+        packetTable.getItems().setAll(engine.packetList);
         // TODO: put Property Factories in control instead of FXML
         /*
         timeCol.setCellFactory(new PropertyValueFactory<Packet, Long>("time"));

@@ -6,7 +6,7 @@
 <?import javafx.scene.control.cell.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="629.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="energybox.ResultsFormController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="629.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="energybox.ResultsFormWifiController">
 <children><AnchorPane prefHeight="629.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 <children><MenuBar prefHeight="629.0" prefWidth="500.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
   <menus>
@@ -38,6 +38,7 @@
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
   </columnConstraints>
   <rowConstraints>
+<RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" vgrow="SOMETIMES" />
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -45,7 +46,7 @@
   </rowConstraints>
   
 
-<children><StackedAreaChart fx:id="throughputChart" title="Throughput">
+<children><TextField fx:id="descriptionField" alignment="CENTER_RIGHT" disable="true" editable="false" focusTraversable="false" text="8.8.8.8" /><StackedAreaChart fx:id="throughputChart" title="Throughput" GridPane.rowIndex="1">
   <xAxis>
     <NumberAxis side="BOTTOM" />
   </xAxis>
@@ -67,14 +68,14 @@
 -->
 
 
-<LineChart fx:id="packetChart" layoutY="45.0" prefHeight="600.0" prefWidth="500.0" title="Packets over time" AnchorPane.bottomAnchor="450.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.rowIndex="1">
+<LineChart fx:id="packetChart" layoutY="45.0" prefHeight="600.0" prefWidth="500.0" title="Packets over time" AnchorPane.bottomAnchor="450.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.rowIndex="2">
   <xAxis>
     <NumberAxis side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />
   </yAxis>
-</LineChart><TableView fx:id="packetTable" layoutY="147.0" prefHeight="450.0" prefWidth="500.0" AnchorPane.bottomAnchor="300.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.rowIndex="2">
+</LineChart><TableView fx:id="packetTable" layoutY="147.0" prefHeight="450.0" prefWidth="500.0" AnchorPane.bottomAnchor="300.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.rowIndex="3">
 <columns>
 <TableColumn fx:id="timeCol" prefWidth="131.0" text="Time">
 <cellValueFactory>
@@ -102,7 +103,7 @@
 </cellValueFactory>
 </TableColumn>
 </columns>
-</TableView><SplitPane dividerPositions="0.5" focusTraversable="true" layoutX="102.0" layoutY="-24.0" prefHeight="160.0" prefWidth="200.0" GridPane.rowIndex="3">
+</TableView><SplitPane dividerPositions="0.5" focusTraversable="true" layoutX="102.0" layoutY="-24.0" prefHeight="160.0" prefWidth="200.0" GridPane.rowIndex="4">
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
 <children><PieChart layoutY="411.0" prefHeight="148.0" prefWidth="145.0" title="UL/DL distribution" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />

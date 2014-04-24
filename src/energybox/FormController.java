@@ -6,8 +6,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -23,6 +25,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.packet.PcapPacket;
@@ -51,7 +54,39 @@ public class FormController implements Initializable
     @FXML
     private TextField ipField;
     @FXML
-    private void handleButtonAction(ActionEvent event)
+    private Button traceButton;
+    
+    Network networkProperties = null;
+    Device deviceProperties = null;
+    String tracePath;
+    String type;
+    
+    @Override
+    public void initialize(URL url, ResourceBundle rb)
+    {
+        /*
+        // Default 3G values for testing
+        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\random31.pcap";
+        type = "3G";
+        Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\device_3g.config");
+        deviceProperties = new PropertiesDevice3G(properties);
+        properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
+        networkProperties = new Properties3G(properties);
+        */
+        // Default Wifi values for testing
+            tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2.pcap";
+            textField.setText("round2.pcap");
+            type = "Wifi";
+            Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\samsungS2_wifi.config");
+            deviceField.setText("samsungS2_wifi.config");
+            deviceProperties = new PropertiesDeviceWifi(properties);
+            properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\wifi_general.config");
+            networkField.setText("wifi_general.config");
+            networkProperties = new PropertiesWifi(properties);
+    }
+    
+    @FXML
+    public void handleButtonAction(ActionEvent event)
     {
         // Error buffer for file handling
         StringBuilder errbuf = new StringBuilder();
@@ -59,7 +94,7 @@ public class FormController implements Initializable
         final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList());
         
         errorText.setText("");
-        final Pcap pcap = Pcap.openOffline(textField.getText(), errbuf);
+        final Pcap pcap = Pcap.openOffline(tracePath, errbuf);
         
         if (pcap == null)
         {
@@ -113,36 +148,7 @@ public class FormController implements Initializable
         finally 
         {
             pcap.close();
-        }
-        
-        Properties properties = new Properties();
-        // First the two variable are defined as abstract classes
-        Network networkProperties = null;
-        Device deviceProperties = null;
-        
-        properties = pathToProperties(networkField.getText());
-        String type = properties.getProperty("TYPE");
-        // networkProperties is initiated with the constructor of the appropriate
-        // class depending on the TYPE of the .config file
-        switch (type)
-        {
-            case "3G": networkProperties = new Properties3G(properties);
-            break;
-                
-            case "Wifi": networkProperties = new PropertiesWifi(properties);
-            break;
-        }
-        
-        // deviceProperties is initiated the same way as networkProperties
-        properties = pathToProperties(deviceField.getText());
-        switch (properties.getProperty("TYPE"))
-        {
-            case "Device3G": deviceProperties = new PropertiesDevice3G(properties);
-            break;
-                
-            case "DeviceWifi": deviceProperties = new PropertiesDeviceWifi(properties);
-            break;
-        }
+        } 
         // Keeping the engine in the main FormController because the Engine object
         // would also contain all of the data that would have to be passed
         // to instanciate the object in the ResultsFormController
@@ -156,8 +162,8 @@ public class FormController implements Initializable
                         ((Properties3G)networkProperties), 
                         // deviceProperties instanced as PropertiesDevice3G
                         ((PropertiesDevice3G)deviceProperties));
-                // Opens a new ResultsForm window and passes packet list
-                showResultsForm(engine);
+                // Opens a new ResultsForm window and passes appropriate engine
+                showResultsForm3G(engine);
             }
             break;
             
@@ -169,8 +175,8 @@ public class FormController implements Initializable
                         ((PropertiesWifi)networkProperties), 
                         // deviceProperties instanced as PropertiesDevice3G
                         ((PropertiesDeviceWifi)deviceProperties));
-                // Opens a new ResultsForm window and passes packet list
-                //showResultsForm(engine);
+                // Opens a new ResultsForm window and passes appropriate engine
+                showResultsFormWifi(engine);
             }
         }
     }
@@ -178,32 +184,110 @@ public class FormController implements Initializable
     @FXML
     private void handleDeviceButton(ActionEvent event)
     {
-        // TODO
+        Stage stage = new Stage();
+        FileChooser fileChooser = new FileChooser();
+        String path = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String decodedPath = "";
+        
+        try { decodedPath = URLDecoder.decode(path, "UTF-8"); }
+        catch (UnsupportedEncodingException e){ e.printStackTrace(); }
+        fileChooser.setInitialDirectory((new File(decodedPath)).getParentFile().getParentFile());
+        fileChooser.setTitle("Open Device Configuration File");
+        File file = fileChooser.showOpenDialog(stage);
+        Properties properties = fileToProperties(file);
+        
+        // deviceProperties is initiated the same way as networkProperties
+        switch (properties.getProperty("TYPE"))
+        {
+            case "Device3G": deviceProperties = new PropertiesDevice3G(properties);
+            break;
+                
+            case "DeviceWifi": deviceProperties = new PropertiesDeviceWifi(properties);
+            break;
+        }
+        deviceField.setText(file.getName());
     }
     
     @FXML
     private void handleNetworkButton(ActionEvent event)
     {
-        // TODO
+        Stage stage = new Stage();
+        FileChooser fileChooser = new FileChooser();
+        String path = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String decodedPath = "";
+        
+        try { decodedPath = URLDecoder.decode(path, "UTF-8"); }
+        catch (UnsupportedEncodingException e){ e.printStackTrace(); }
+        fileChooser.setInitialDirectory((new File(decodedPath)).getParentFile().getParentFile());
+        fileChooser.setTitle("Open Network Configuration File");
+        File file = fileChooser.showOpenDialog(stage);
+        Properties properties = fileToProperties(file);
+        // networkProperties is initiated with the constructor of the appropriate
+        // class depending on the TYPE of the .config file
+        switch (properties.getProperty("TYPE"))
+        {
+            case "3G": networkProperties = new Properties3G(properties);
+            break;
+                
+            case "Wifi": networkProperties = new PropertiesWifi(properties);
+            break;
+        }
+        type = properties.getProperty("TYPE");
+        networkField.setText(file.getName());
     }
     
-    @Override
-    public void initialize(URL url, ResourceBundle rb){}
-    
+    @FXML
+    private void handleTraceButton(ActionEvent event)
+    {
+        Stage stage = new Stage();
+        FileChooser fileChooser = new FileChooser();
+        String path = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String decodedPath = "";
+        
+        try { decodedPath = URLDecoder.decode(path, "UTF-8"); }
+        catch (UnsupportedEncodingException e){ e.printStackTrace(); }
+        fileChooser.setInitialDirectory((new File(decodedPath)).getParentFile().getParentFile());
+        fileChooser.setTitle("Open Network Configuration File");
+        File file = fileChooser.showOpenDialog(stage);
+        
+        tracePath = file.getAbsolutePath();
+        textField.setText(file.getName());
+    }
     
     // method to launch the ResultsFormController with the custom init method
-    public Stage showResultsForm(Engine3G engine) 
+    public Stage showResultsForm3G(Engine3G engine) 
     {
         try
         {
             // Creates stage from loader which gets the scene from the fxml file
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("ResultsForm.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("ResultsForm3G.fxml"));
             Stage stage = new Stage();
             stage.setScene(new Scene((Parent)loader.load()));
 
             // Calls a method on the controller to initialize it with the required data values
-            ResultsFormController controller = 
-            loader.<ResultsFormController>getController();
+            ResultsForm3GController controller = 
+            loader.<ResultsForm3GController>getController();
+            controller.initData(engine);
+            stage.show();
+            return stage;
+        }
+        catch (IOException e){ e.printStackTrace(); }
+        return null;
+    }
+    
+    // method to launch the ResultsFormWifiController with the custom init method
+    public Stage showResultsFormWifi(EngineWifi engine) 
+    {
+        try
+        {
+            // Creates stage from loader which gets the scene from the fxml file
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("ResultsFormWifi.fxml"));
+            Stage stage = new Stage();
+            stage.setScene(new Scene((Parent)loader.load()));
+
+            // Calls a method on the controller to initialize it with the required data values
+            ResultsFormWifiController controller = 
+            loader.<ResultsFormWifiController>getController();
             controller.initData(engine);
             stage.show();
             return stage;
@@ -218,6 +302,18 @@ public class FormController implements Initializable
         try
         {
             File f = new File(path);
+            InputStream in = new FileInputStream (f);
+            properties.load(in);
+        }
+        catch (IOException e){ e.printStackTrace(); }
+        return properties;
+    }
+    
+    public Properties fileToProperties(File f)
+    {
+        Properties properties = new Properties();
+        try
+        {
             InputStream in = new FileInputStream (f);
             properties.load(in);
         }
