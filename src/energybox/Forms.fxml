@@ -21,7 +21,7 @@
         <TextField fx:id="networkField" editable="false" focusTraversable="false" layoutX="173.0" layoutY="154.0" prefHeight="25.0" prefWidth="92.0" text="3g_teliasonera.config" />
         <Button fx:id="deviceButton" layoutX="266.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleDeviceButton" prefHeight="45.0" prefWidth="72.0" text="Device Model" textAlignment="CENTER" wrapText="true" />
         <Button fx:id="networkButton" layoutX="266.0" layoutY="134.0" mnemonicParsing="false" onAction="#handleNetworkButton" prefHeight="45.0" prefWidth="72.0" text="Network Model" textAlignment="CENTER" wrapText="true" />
-        <TextField fx:id="ipField" layoutX="10.0" layoutY="135.0" prefHeight="25.0" prefWidth="92.0" text="10.188.137.59" />
+        <TextField fx:id="ipField" layoutX="10.0" layoutY="135.0" prefHeight="25.0" prefWidth="92.0" text="" />
         <Label layoutX="10.0" layoutY="119.0" minHeight="16" minWidth="69" text="Source IP:" />
         <Button fx:id="traceButton" layoutX="102.0" layoutY="73.0" onAction="#handleTraceButton" prefHeight="45.0" prefWidth="72.0" text="Trace" /><Line endX="-12.0" layoutX="275.0" layoutY="95.0" startX="-100.0" stroke="#8e93a1" strokeWidth="5.0" /><Line endY="12.0" layoutX="300.0" layoutY="60.0" stroke="#8e93a1" strokeWidth="5.0" /><Line endY="15.0" layoutX="300.0" layoutY="118.0" stroke="#8e93a1" strokeWidth="5.0" />
     </children>

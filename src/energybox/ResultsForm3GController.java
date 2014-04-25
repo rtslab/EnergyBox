@@ -12,6 +12,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 /**
  * @author Rihards Polis
@@ -40,15 +41,20 @@ public class ResultsForm3GController implements Initializable
     @FXML
     private TableColumn<?, ?> linkCol;
     @FXML
+    private TableColumn<?, ?> protocolCol;
+    @FXML
     private StackedAreaChart<Long, Long> throughputChart;
     @FXML
     private AreaChart<Long, Integer> stateChart;
-    
+    @FXML
+    private TextField descriptionField;
+
     @Override
     public void initialize(URL url, ResourceBundle rb){}
     
     void initData(Engine3G engine)
     {
+        descriptionField.setText(engine.sourceIP);
         packetChart.getXAxis().setAutoRanging(true);
         packetChart.getYAxis().setAutoRanging(true);
         stateChart.getXAxis().setAutoRanging(true);

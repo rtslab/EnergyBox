@@ -53,12 +53,7 @@ public class ResultsFormWifiController implements Initializable
     
     void initData(EngineWifi engine)
     {
-        /*
-        HashMap<String, Integer> count = new HashMap();
-        count.put("MAXIMAL", 10);
-        count.put("NOTHING", 5);
-        count.put("MINIMAL", 10);
-        Collections.max(count.values());*/
+        descriptionField.setText(engine.sourceIP);
         stateChart.getData().add(engine.modelStates());
         
         packetTable.getItems().setAll(engine.packetList);

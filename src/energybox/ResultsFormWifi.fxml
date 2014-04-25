@@ -82,22 +82,27 @@
 <PropertyValueFactory property="time" />
 </cellValueFactory>
 </TableColumn>
-<TableColumn fx:id="lengthCol" prefWidth="86.0" text="Length">
+<TableColumn fx:id="lengthCol" prefWidth="89.0" text="Length">
 <cellValueFactory>
 <PropertyValueFactory property="length" />
 </cellValueFactory>
 </TableColumn>
-<TableColumn fx:id="sourceCol" prefWidth="94.0" text="Source">
+<TableColumn fx:id="sourceCol" prefWidth="112.0" text="Source">
 <cellValueFactory>
 <PropertyValueFactory property="source" />
 </cellValueFactory>
 </TableColumn>
-<TableColumn fx:id="destinationCol" minWidth="0.0" prefWidth="102.0" text="Destination">
+<TableColumn fx:id="destinationCol" minWidth="0.0" prefWidth="101.0" text="Destination">
 <cellValueFactory>
 <PropertyValueFactory property="destination" />
 </cellValueFactory>
 </TableColumn>
-<TableColumn fx:id="linkCol" minWidth="0.0" prefWidth="85.0" text="Link">
+<TableColumn fx:id="protocolCol" minWidth="0.0" prefWidth="65.0" text="Protocol">
+<cellValueFactory>
+<PropertyValueFactory property="protocol" />
+</cellValueFactory>
+</TableColumn>
+<TableColumn fx:id="linkCol" minWidth="0.0" prefWidth="102.0" text="Link">
 <cellValueFactory>
 <PropertyValueFactory property="link" />
 </cellValueFactory>

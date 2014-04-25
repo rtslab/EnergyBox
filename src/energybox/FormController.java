@@ -12,6 +12,8 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -30,7 +32,12 @@ import javafx.stage.Stage;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
+import org.jnetpcap.protocol.lan.Ethernet;
+import org.jnetpcap.protocol.network.Arp;
 import org.jnetpcap.protocol.network.Ip4;
+import org.jnetpcap.protocol.tcpip.Http;
+import org.jnetpcap.protocol.tcpip.Tcp;
+import org.jnetpcap.protocol.tcpip.Udp;
 /**
  * @author Rihards Polis
  * Linkoping University
@@ -60,13 +67,21 @@ public class FormController implements Initializable
     Device deviceProperties = null;
     String tracePath;
     String type;
+    // Two possible criteria that can indicate the source IP:
+    // -> "HTTP" - a phone is usually not running a web server, so any GET requests are from the the recording device
+    // -> "DNS" - a phone is usually not running a DNS server so any requests are from the the recording device 
+    HashMap<String, String> criteria = new HashMap();
+    String sourceIP = "";
+    HashMap<String, Integer> addressOccurrence = new HashMap();
     
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
         /*
         // Default 3G values for testing
-        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\random31.pcap";
+        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\chunks5mins3.pcap";
+        textField.setText("chunks5mins3.pcap");
+        //ipField.setText("10.209.43.104");
         type = "3G";
         Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\device_3g.config");
         deviceProperties = new PropertiesDevice3G(properties);
@@ -110,7 +125,6 @@ public class FormController implements Initializable
             public void nextPacket(PcapPacket packet, String user) 
             {
                 // Copies every packet in the loop to an ArrayList for later use
-                //packetList.add(packet);
                 if (first)
                 {
                     startTime = packet.getCaptureHeader().timestampInMillis();
@@ -121,11 +135,76 @@ public class FormController implements Initializable
                 // the ability to display changes in the table automatically using events.
                 try
                 {
-                    Ip4 ip = new Ip4();
-                    // Check to see if it's a layer 3 packet
-                    // TODO: Add support for layer 2
-                    if (packet.hasHeader(ip))
+                    // PROTOCOL AND SOURCEIP DETECTION
+                    // Marks packets with the appropriate protocol and adds an
+                    // entry to the HashMap if there's a protocol related with
+                    // a criteria for sourceIP
+                    String protocol = "";  
+                    if (packet.hasHeader(new Http())) 
                     {
+                        if ((packet.getHeader(new Tcp()).source() == 443) ||
+                            (packet.getHeader(new Tcp()).destination() == 443))
+                        protocol = "HTTPS";
+                        else 
+                        {
+                            protocol = "HTTP";
+                            // Source if it's a request, destination if response
+                            if (!criteria.containsKey("HTTP"))
+                            {
+                                if (!packet.getHeader(new Http()).isResponse())
+                                    criteria.put("HTTP", InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress());
+                                else 
+                                    criteria.put("HTTP", InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress());
+                            }
+                        }
+                    }
+                    else if (packet.hasHeader(new Tcp())) 
+                        protocol = "TCP";
+                    else if (packet.hasHeader(new Udp())) 
+                    {
+                        // if either of the ports for any UDP packet is 53, it's
+                        // a DNS packet
+                        if (packet.getHeader(new Udp()).source() == 53)
+                        {
+                            protocol = "DNS";
+                            if (!criteria.containsKey("DNS"))
+                            {
+                                criteria.put("DNS", InetAddress.getByAddress(packet.getHeader(new Ip4()).destination()).getHostAddress());
+                            }
+                        }
+                        if (packet.getHeader(new Udp()).destination() == 53)
+                        {
+                            if (!criteria.containsKey("DNS"))
+                            {
+                                criteria.put("DNS", InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress());
+                            }
+                            protocol = "DNS";
+                        }
+                        
+                        else protocol = "UDP";
+                    }
+                    else if (packet.hasHeader(new Arp())) 
+                        protocol = "ARP";
+                    
+                    // LAYER 3+ PACKETS
+                    if (packet.hasHeader(new Ip4()))
+                    {
+                        // This terrible spaghetti code extracts source and
+                        // destination IP addresses as strings
+                        String source = InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress(),
+                                destination = InetAddress.getByAddress(packet.getHeader(new Ip4()).destination()).getHostAddress();
+                        
+                        // IP ADDRESS COUNTER for SOURCE
+                        if (addressOccurrence.containsKey(source))
+                            addressOccurrence.put(source, addressOccurrence.get(source)+1);
+                        else
+                            addressOccurrence.put(source, 1);
+                        // ... and DESTINATION
+                        if (addressOccurrence.containsKey(destination))
+                            addressOccurrence.put(destination, addressOccurrence.get(destination)+1);
+                        else
+                            addressOccurrence.put(destination, 1);
+                        
                         packetList.add(new Packet(
                             // Time of packet's arrival relative to first packet
                             packet.getCaptureHeader().timestampInMillis() - startTime,
@@ -133,11 +212,35 @@ public class FormController implements Initializable
                             // the captured length if the capture happens before sending
                             //packetList.get(i).getCaptureHeader().caplen(), // CAPTURED LENGTH
                             packet.getPacketWirelen(), // LENGTH ON THE WIRE
-                            // This terrible spaghetti code adds source and 
-                            // destination IP addresses as Strings to the constructor
-                            InetAddress.getByAddress(packet.getHeader(ip).source()).getHostAddress(),
-                            InetAddress.getByAddress(packet.getHeader(ip).destination()).getHostAddress()));
-                        //tableList.add(pack);
+                            source,
+                            destination,
+                            protocol));
+                    }
+                    // LAYER 2 PACKETS
+                    else
+                    {
+                        if (packet.hasHeader(new Ethernet()))
+                        {
+                            // Converts layers 2 addresses to String
+                            byte[] mac = packet.getHeader(new Ethernet()).source();
+                            StringBuilder sb = new StringBuilder();
+                            for (int i = 0; i < mac.length; i++) {
+                                    sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
+                            }
+                            String source = sb.toString();
+                            mac = packet.getHeader(new Ethernet()).destination();
+                            for (int i = 0; i < mac.length; i++) {
+                                    sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
+                            }
+                            String destination = sb.toString();
+                            
+                            packetList.add(new Packet(
+                            packet.getCaptureHeader().timestampInMillis() - startTime,
+                            packet.getPacketWirelen(),
+                            source,
+                            destination,
+                            protocol));
+                        }
                     }
                 }
                 catch(UnknownHostException e){ e.printStackTrace(); }
@@ -148,7 +251,26 @@ public class FormController implements Initializable
         finally 
         {
             pcap.close();
-        } 
+            // Gets most used IP address and chooses sourceIP in the following order:
+            // DNS criteria, HTTP criteria and finally most frequent.
+            // If the first two criteria aren't available and there are two IPs
+            // with the same occurrence, the one that was added first is chosen.
+            Map.Entry<String, Integer> maxEntry = null;
+            for (Map.Entry<String, Integer> entry : addressOccurrence.entrySet())
+            {
+                if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
+                {
+                    maxEntry = entry;
+                }
+            }
+            String testing = maxEntry.getKey();
+            if (criteria.containsKey("DNS"))
+                    sourceIP = criteria.get("DNS");
+            else if (criteria.containsKey("HTTP"))
+                sourceIP = criteria.get("HTTP");
+            else
+                sourceIP = maxEntry.getKey();
+        }  
         // Keeping the engine in the main FormController because the Engine object
         // would also contain all of the data that would have to be passed
         // to instanciate the object in the ResultsFormController
@@ -157,7 +279,7 @@ public class FormController implements Initializable
             case "3G":
             {
                 Engine3G engine = new Engine3G(packetList, 
-                        ipField.getText(),
+                        sourceIP,
                         //networkProperties instanced as Properties3G
                         ((Properties3G)networkProperties), 
                         // deviceProperties instanced as PropertiesDevice3G
@@ -170,7 +292,7 @@ public class FormController implements Initializable
             case "Wifi":
             {
                 EngineWifi engine = new EngineWifi(packetList, 
-                        ipField.getText(),
+                        sourceIP,
                         //networkProperties instanced as Properties3G
                         ((PropertiesWifi)networkProperties), 
                         // deviceProperties instanced as PropertiesDevice3G

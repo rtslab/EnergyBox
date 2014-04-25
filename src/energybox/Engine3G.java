@@ -10,6 +10,7 @@ import javafx.scene.chart.XYChart;
  */
 public class Engine3G
 {
+    String sourceIP;
     ObservableList<Packet> packetList; 
     Properties3G networkProperties; 
     PropertiesDevice3G deviceProperties;
@@ -33,6 +34,7 @@ public class Engine3G
         this.networkProperties = networkProperties;
         this.deviceProperties = deviceProperties;
         this.packetList = sortUplinkDownlink(packetList, sourceIP);
+        this.sourceIP = sourceIP;
     }
     
     public ObservableList<Packet> sortUplinkDownlink(ObservableList<Packet> packetList, String sourceIP)

@@ -11,6 +11,7 @@ import javafx.scene.chart.XYChart;
  */
 public class EngineWifi
 {
+    String sourceIP;
     ObservableList<Packet> packetList; 
     PropertiesWifi networkProperties; 
     PropertiesDeviceWifi deviceProperties;
@@ -34,6 +35,7 @@ public class EngineWifi
         this.networkProperties = networkProperties;
         this.deviceProperties = deviceProperties;
         this.packetList = sortUplinkDownlink(packetList, sourceIP);
+        this.sourceIP = sourceIP;
     }
     
     public ObservableList<Packet> sortUplinkDownlink(ObservableList<Packet> packetList, String sourceIP)
@@ -155,7 +157,7 @@ public class EngineWifi
                     {
                         drawState(previousTime + networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
                         state = State.PSM;
-                        System.out.println("Demote at: "+(previousTime + networkProperties.getCAM_PSM_INACTIVITY_TIME())+" to "+ state.getValue());
+                        //System.out.println("Demote at: "+(previousTime + networkProperties.getCAM_PSM_INACTIVITY_TIME())+" to "+ state.getValue());
                         drawState(previousTime + networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
                     }
                 }
