@@ -77,7 +77,7 @@ public class FormController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-        /*
+        
         // Default 3G values for testing
         tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\chunks5mins3.pcap";
         textField.setText("chunks5mins3.pcap");
@@ -87,7 +87,7 @@ public class FormController implements Initializable
         deviceProperties = new PropertiesDevice3G(properties);
         properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
         networkProperties = new Properties3G(properties);
-        */
+        /*
         // Default Wifi values for testing
             tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2.pcap";
             textField.setText("round2.pcap");
@@ -97,12 +97,16 @@ public class FormController implements Initializable
             deviceProperties = new PropertiesDeviceWifi(properties);
             properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\wifi_general.config");
             networkField.setText("wifi_general.config");
-            networkProperties = new PropertiesWifi(properties);
+            networkProperties = new PropertiesWifi(properties);*/
     }
     
     @FXML
     public void handleButtonAction(ActionEvent event)
     {
+        // Clear variables in case the button was used before
+        sourceIP = "";
+        addressOccurrence.clear();
+        criteria.clear();
         // Error buffer for file handling
         StringBuilder errbuf = new StringBuilder();
         // Wrapped lists in JavaFX ObservableList for the table view
@@ -385,6 +389,7 @@ public class FormController implements Initializable
             FXMLLoader loader = new FXMLLoader(getClass().getResource("ResultsForm3G.fxml"));
             Stage stage = new Stage();
             stage.setScene(new Scene((Parent)loader.load()));
+            stage.setTitle(textField.getText());
 
             // Calls a method on the controller to initialize it with the required data values
             ResultsForm3GController controller = 
@@ -406,6 +411,7 @@ public class FormController implements Initializable
             FXMLLoader loader = new FXMLLoader(getClass().getResource("ResultsFormWifi.fxml"));
             Stage stage = new Stage();
             stage.setScene(new Scene((Parent)loader.load()));
+            stage.setTitle(textField.getText());
 
             // Calls a method on the controller to initialize it with the required data values
             ResultsFormWifiController controller = 

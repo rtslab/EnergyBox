@@ -59,7 +59,10 @@ public class ResultsForm3GController implements Initializable
         packetChart.getYAxis().setAutoRanging(true);
         stateChart.getXAxis().setAutoRanging(true);
         stateChart.getYAxis().setAutoRanging(true);
-        stateChart.getData().add(engine.modelStates());
+        //stateChart.getData().add(engine.modelStates());
+        engine.modelStates();
+        stateChart.getData().add(engine.getFACH());
+        stateChart.getData().add(engine.getDCH());
         
         throughputChart.getData().add(engine.getUplinkThroughput());
         throughputChart.getData().add(engine.getDownlinkThroughput());
