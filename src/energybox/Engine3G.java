@@ -2,7 +2,11 @@ package energybox;
 
 import energybox.properties.device.PropertiesDevice3G;
 import energybox.properties.network.Properties3G;
+import java.util.ArrayList;
+import java.util.List;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 /**
  * @author Rihards Polis
@@ -10,10 +14,6 @@ import javafx.scene.chart.XYChart;
  */
 public class Engine3G
 {
-    String sourceIP;
-    ObservableList<Packet> packetList; 
-    Properties3G networkProperties; 
-    PropertiesDevice3G deviceProperties;
     enum State 
     { 
         IDLE(0), FACH(1), DCH(3);
@@ -21,14 +21,38 @@ public class Engine3G
         private State(int value){this.value = value;}
         public int getValue() { return this.value; }
     }
+    
+    // used for a list of transitions for the total power used
+    private class TransitionPair
+    {
+        private double time;
+        private String state;
+        public TransitionPair(double time, String state)
+        {
+            this.time = time;
+            this.state = state;
+        }
+    }
+    
+    // VARIABLES TAKEN FROM THE CONSTRUCTOR
+    String sourceIP;
+    ObservableList<Packet> packetList;
+    Properties3G networkProperties; 
+    PropertiesDevice3G deviceProperties;
+    
+    // CHART VARIABLES
     XYChart.Series<Long, Integer> stateSeries = new XYChart.Series();
-
     XYChart.Series<Long, Integer> fachSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> dchSeries = new XYChart.Series();
-    
     XYChart.Series<Long, Integer> uplinkPacketSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> downlinkPacketSeries = new XYChart.Series();
+    ObservableList<PieChart.Data> linkDistroData = 
+            FXCollections.observableArrayList(new ArrayList());
+    int uplinkPacketCount = 0;
+    List<TransitionPair> transitions = new ArrayList();
+    ObservableList<StatisticsEntry> statisticsList = FXCollections.observableList(new ArrayList());
     
+    // MAIN CONSTRUCTOR
     public Engine3G(ObservableList<Packet> packetList,
             String sourceIP,
             Properties3G networkProperties, 
@@ -41,6 +65,7 @@ public class Engine3G
         this.sourceIP = sourceIP;
     }
     
+    // PACKET SORTING METHOD
     public ObservableList<Packet> sortUplinkDownlink(ObservableList<Packet> packetList, String sourceIP)
     {
         for (int i = 0; i < packetList.size(); i++) 
@@ -118,6 +143,9 @@ public class Engine3G
         return downlinkSeries;
     }
     
+    // MAIN MODELING METHOD
+    // Loops through the packetList once and calculates:
+    // -State chart -State transitions -Packet chart -Distribution pie chart
     public XYChart.Series<Long, Integer> modelStates()
     {
         // Buffer control variables
@@ -135,7 +163,7 @@ public class Engine3G
                 // timeToEmptyDownlink = networkProperties.getDOWNLINK_BUFFER_EMPTY_TIME;
         State state = State.IDLE; // State enumeration
         // Start off in IDLE at time 0
-        //System.out.println("Start time:"+packetList.get(0).getTime()+" state "+ state.getValue());
+        transitions.add(new TransitionPair(0, state.toString()));
         // Packet list points
         for (int i = 0; i < packetList.size(); i++) 
         {
@@ -148,6 +176,7 @@ public class Engine3G
                         packetList.get(i).getTime() ,2));
                 uplinkPacketSeries.getData().add(new XYChart.Data(
                         packetList.get(i).getTime() ,0));
+                uplinkPacketCount++;
             }
             else
             {
@@ -179,6 +208,7 @@ public class Engine3G
                         fachToIdle(previousTime + networkProperties.getFACH_IDLE_INACTIVITY_TIME());
                         drawState(previousTime + networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
                         state = State.IDLE;
+                        transitions.add(new TransitionPair(previousTime + networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.toString()));
                         //System.out.println("Demote at: "+(previousTime + networkProperties.getFACH_IDLE_INACTIVITY_TIME())+" to "+ state.getValue());
                         drawState(previousTime + networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
                     }
@@ -198,14 +228,15 @@ public class Engine3G
                                 networkProperties.getFACH_IDLE_INACTIVITY_TIME());
                         drawState(previousTime + networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
                         state = State.FACH;
+                        transitions.add(new TransitionPair(previousTime + networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.toString()));
                         drawState(previousTime + networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
                         drawState(previousTime + 
                                 networkProperties.getDCH_FACH_INACTIVITY_TIME() +
                                 networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
                         state = State.IDLE;
-                        //System.out.println("Demote at: "+((previousTime + 
-                        //        networkProperties.getDCH_FACH_INACTIVITY_TIME() + 
-                        //        networkProperties.getDCH_FACH_INACTIVITY_TIME()))+" to "+ state.getValue());
+                        transitions.add(new TransitionPair(previousTime + 
+                                networkProperties.getDCH_FACH_INACTIVITY_TIME() +
+                                networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.toString()));
                         drawState(previousTime + 
                                 networkProperties.getDCH_FACH_INACTIVITY_TIME() +
                                 networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
@@ -217,6 +248,7 @@ public class Engine3G
                         dchToFach(previousTime + networkProperties.getDCH_FACH_INACTIVITY_TIME());
                         drawState(previousTime + networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
                         state = State.FACH;
+                        transitions.add(new TransitionPair(previousTime + networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.toString()));
                         //System.out.println("Demote at:"+(previousTime +
                         //        networkProperties.getDCH_FACH_INACTIVITY_TIME())+" to "+ state.getValue());
                         drawState(previousTime + networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
@@ -238,8 +270,8 @@ public class Engine3G
                             idleToDch(packetList.get(i).getTime() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME());
                             drawState(packetList.get(i).getTime() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
                             state = State.DCH;
-                            //System.out.println("Promote at:"+(packetList.get(i).getTime() + 
-                            //        networkProperties.getIDLE_TO_DCH_TRANSITION_TIME())+" to "+ state.getValue());
+                            //transitions.add(new TransitionPair(0, state.toString()));
+                            transitions.add(new TransitionPair(packetList.get(i).getTime() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.toString()));
                             drawState(packetList.get(i).getTime() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
                         }
                         else
@@ -247,8 +279,7 @@ public class Engine3G
                             idleToFach(packetList.get(i).getTime() + networkProperties.getIDLE_TO_FACH_TRANSITION_TIME());
                             drawState(packetList.get(i).getTime() + networkProperties.getIDLE_TO_FACH_TRANSITION_TIME(), state.getValue());
                             state = State.FACH;
-                            //System.out.println("Promote at:"+(packetList.get(i).getTime() + 
-                            //        networkProperties.getIDLE_TO_FACH_TRANSITION_TIME())+" to "+ state.getValue());
+                            transitions.add(new TransitionPair(packetList.get(i).getTime() + networkProperties.getIDLE_TO_FACH_TRANSITION_TIME(), state.toString()));
                             drawState(packetList.get(i).getTime() + networkProperties.getIDLE_TO_FACH_TRANSITION_TIME(), state.getValue());
                             bufferIDLEtoFACHuplink += packetList.get(i).getLength();
                         }
@@ -261,8 +292,7 @@ public class Engine3G
                             idleToDch(packetList.get(i).getTime() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME());
                             drawState(packetList.get(i).getTime() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
                             state = State.DCH;
-                            //System.out.println("Promote at:"+(packetList.get(i).getTime() + 
-                            //        networkProperties.getIDLE_TO_DCH_TRANSITION_TIME())+" to "+ state.getValue());
+                            transitions.add(new TransitionPair(packetList.get(i).getTime() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.toString()));
                             drawState(packetList.get(i).getTime() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
                         }
                         else
@@ -270,8 +300,7 @@ public class Engine3G
                             idleToFach(packetList.get(i).getTime() + networkProperties.getIDLE_TO_FACH_TRANSITION_TIME());
                             drawState(packetList.get(i).getTime() + networkProperties.getIDLE_TO_FACH_TRANSITION_TIME(), state.getValue());
                             state = State.FACH;
-                            //System.out.println("Promote at:"+(packetList.get(i).getTime() + 
-                            //        networkProperties.getIDLE_TO_FACH_TRANSITION_TIME())+" to "+ state.getValue());
+                            transitions.add(new TransitionPair(packetList.get(i).getTime() + networkProperties.getIDLE_TO_FACH_TRANSITION_TIME(), state.toString()));
                             drawState(packetList.get(i).getTime() + networkProperties.getIDLE_TO_FACH_TRANSITION_TIME(), state.getValue());
                             bufferIDLEtoFACHdownlink += packetList.get(i).getLength();
                         }
@@ -302,6 +331,7 @@ public class Engine3G
                         {
                             fachToDch((double)packetList.get(i).getTime());
                             state = State.DCH;
+                            transitions.add(new TransitionPair((double)packetList.get(i).getTime(), state.toString()));
                             bufferFACHtoDCHuplink = 0;
                         }
                         // TODO: Check weather this is accurate, since the original
@@ -319,6 +349,7 @@ public class Engine3G
                         {
                             fachToDch((double)packetList.get(i).getTime());
                             state = State.DCH;
+                            transitions.add(new TransitionPair((double)packetList.get(i).getTime(), state.toString()));
                             bufferFACHtoDCHdownlink = 0;
                         }
                         // TODO: Check weather this is accurate, since the original
@@ -345,13 +376,41 @@ public class Engine3G
                 previousTimeUplink = packetList.get(i).getTime();            
             else            
                 previousTimeDownlink = packetList.get(i).getTime();
-        }        
+        }
+        linkDistroData.add(new PieChart.Data("Downlink", packetList.size()-uplinkPacketCount));
+        linkDistroData.add(new PieChart.Data("Uplink", uplinkPacketCount));
+        transitions.add(new TransitionPair((double)packetList.get(packetList.size()-1).getTime(), state.toString()));
         return stateSeries;
     }
+    
     private void drawState(Double time, int state)
     {
         stateSeries.getData().add(new XYChart.Data(time, state));
         
+    }
+    
+    public void getPower()
+    {
+        Double power = Double.valueOf(0);
+        for (int i = 1; i < transitions.size(); i++) 
+        {
+            switch(transitions.get(i-1).state)
+            {
+                case "IDLE":
+                    power += (transitions.get(i).time - transitions.get(i-1).time) 
+                            / 1000 * deviceProperties.getPOWER_IN_IDLE();
+                    
+                case "FACH":
+                    power += (transitions.get(i).time - transitions.get(i-1).time) 
+                            / 1000 * deviceProperties.getPOWER_IN_FACH();
+                    
+                case "DCH":
+                    power += (transitions.get(i).time - transitions.get(i-1).time) 
+                            / 1000 * deviceProperties.getPOWER_IN_DCH();
+            }
+        }
+        // Total power used rounded down to two decimal places
+        statisticsList.add(new StatisticsEntry("Total Power Used",((double) Math.round(power * 100) / 100)));
     }
     // State transition drawing methods to seperate state series
     private void dchToFach(Double time)
@@ -399,4 +458,5 @@ public class Engine3G
     public XYChart.Series<Long, Integer> getStates(){ return stateSeries; }
     public XYChart.Series<Long, Integer> getFACH(){ return fachSeries; }
     public XYChart.Series<Long, Integer> getDCH(){ return dchSeries; }
+    public ObservableList<PieChart.Data> getLinkDistroData() { return linkDistroData; }
 }

@@ -77,7 +77,7 @@ public class FormController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-        
+        /*
         // Default 3G values for testing
         tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\chunks5mins3.pcap";
         textField.setText("chunks5mins3.pcap");
@@ -87,7 +87,7 @@ public class FormController implements Initializable
         deviceProperties = new PropertiesDevice3G(properties);
         properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
         networkProperties = new Properties3G(properties);
-        /*
+        */
         // Default Wifi values for testing
             tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2.pcap";
             textField.setText("round2.pcap");
@@ -97,7 +97,7 @@ public class FormController implements Initializable
             deviceProperties = new PropertiesDeviceWifi(properties);
             properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\wifi_general.config");
             networkField.setText("wifi_general.config");
-            networkProperties = new PropertiesWifi(properties);*/
+            networkProperties = new PropertiesWifi(properties);
     }
     
     @FXML
@@ -267,7 +267,6 @@ public class FormController implements Initializable
                     maxEntry = entry;
                 }
             }
-            String testing = maxEntry.getKey();
             if (criteria.containsKey("DNS"))
                     sourceIP = criteria.get("DNS");
             else if (criteria.containsKey("HTTP"))

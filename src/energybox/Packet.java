@@ -5,6 +5,10 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 
+/**
+ * @author Rihards Polis
+ * Linkoping University
+ */
 public class Packet
 {
     private final SimpleLongProperty time;

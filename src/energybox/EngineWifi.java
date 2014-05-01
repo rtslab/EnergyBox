@@ -2,6 +2,9 @@ package energybox;
 
 import energybox.properties.device.PropertiesDeviceWifi;
 import energybox.properties.network.PropertiesWifi;
+import java.util.ArrayList;
+import java.util.List;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart;
 
@@ -22,9 +25,22 @@ public class EngineWifi
         private State(int value){this.value = value;}
         public int getValue() { return this.value; }
     }
+    private class TransitionPair
+    {
+        private double time;
+        private String state;
+        public TransitionPair(double time, String state)
+        {
+            this.time = time;
+            this.state = state;
+        }
+    }
     XYChart.Series<Long, Integer> stateSeries = new XYChart.Series();
+    XYChart.Series<Long, Integer> camSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> uplinkPacketSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> downlinkPacketSeries = new XYChart.Series();
+    List<TransitionPair> transitions = new ArrayList();
+    ObservableList<StatisticsEntry> statisticsList = FXCollections.observableList(new ArrayList());
     
     public EngineWifi(ObservableList<Packet> packetList,
             String sourceIP,
@@ -122,6 +138,7 @@ public class EngineWifi
         long previousTime = packetList.get(0).getTime();
         
         State state = State.CAM;
+        transitions.add(new TransitionPair(0, state.toString()));
         
         for (int i = 0; i < packetList.size(); i++) 
         {
@@ -155,8 +172,10 @@ public class EngineWifi
                     // demote to PSM
                     if (deltaT > networkProperties.getCAM_PSM_INACTIVITY_TIME())
                     {
+                        camToPsm(previousTime + networkProperties.getCAM_PSM_INACTIVITY_TIME());
                         drawState(previousTime + networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
                         state = State.PSM;
+                        transitions.add(new TransitionPair(previousTime + networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.toString()));
                         //System.out.println("Demote at: "+(previousTime + networkProperties.getCAM_PSM_INACTIVITY_TIME())+" to "+ state.getValue());
                         drawState(previousTime + networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
                     }
@@ -176,15 +195,17 @@ public class EngineWifi
                 // In PSM promotion happens whenever a packet is sent
                 case PSM:
                 {
+                    psmToCam((double)packetList.get(i).getTime());
                     drawState((double)packetList.get(i).getTime(), state.getValue());
                     state = State.CAM;
+                    transitions.add(new TransitionPair((double)packetList.get(i).getTime(), state.toString()));
                     drawState((double)packetList.get(i).getTime(), state.getValue());
                 }
                 break;
                     
                 case CAM:
                 {
-                    
+                    // TODO
                 }
                 break;
             }
@@ -199,8 +220,41 @@ public class EngineWifi
         stateSeries.getData().add(new XYChart.Data(time, state));
     }
     
+    public void getPower()
+    {
+        Double power = Double.valueOf(0);
+        for (int i = 1; i < transitions.size(); i++) 
+        {
+            switch(transitions.get(i-1).state)
+            {
+                case "PSM":
+                    power += (transitions.get(i).time - transitions.get(i-1).time) 
+                            / 1000 * deviceProperties.getPOWER_IN_PSM();
+                    
+                case "CAM":
+                    power += (transitions.get(i).time - transitions.get(i-1).time) 
+                            / 1000 * deviceProperties.getPOWER_IN_CAM();
+            }
+        }
+        // Total power used rounded down to two decimal places
+        statisticsList.add(new StatisticsEntry("Total Power Used",((double) Math.round(power * 100) / 100)));
+    }
+    
+    private void psmToCam(Double time)
+    {
+        camSeries.getData().add(new XYChart.Data(time, 0));
+        camSeries.getData().add(new XYChart.Data(time, State.CAM.getValue()));
+    }
+    
+    private void camToPsm(Double time)
+    {
+        camSeries.getData().add(new XYChart.Data(time, State.CAM.getValue()));
+        camSeries.getData().add(new XYChart.Data(time, 0));
+    }
+    
     // GETTERS
     public XYChart.Series<Long, Integer> getUplinkPackets(){ return uplinkPacketSeries; }
     public XYChart.Series<Long, Integer> getDownlinkPackets(){ return downlinkPacketSeries; }
     public XYChart.Series<Long, Integer> getStates(){ return stateSeries; }
+    public XYChart.Series<Long, Integer> getCAM(){ return camSeries; }
 }

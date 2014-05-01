@@ -1,16 +1,14 @@
 package energybox;
 
 import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.PieChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
@@ -30,16 +28,6 @@ public class ResultsFormWifiController implements Initializable
     @FXML
     private TableView<Packet> packetTable;
     @FXML
-    private TableColumn<?, ?> timeCol;
-    @FXML
-    private TableColumn<?, ?> lengthCol;
-    @FXML
-    private TableColumn<?, ?> sourceCol;
-    @FXML
-    private TableColumn<?, ?> destinationCol;
-    @FXML
-    private TableColumn<?, ?> linkCol;
-    @FXML
     private AreaChart<Long, Integer> stateChart;
     @FXML
     private LineChart<?, ?> packetChart2;
@@ -47,6 +35,14 @@ public class ResultsFormWifiController implements Initializable
     private LineChart<?, ?> packetChart3;
     @FXML
     private TextField descriptionField;
+    @FXML
+    private PieChart linkDistroPieChart;
+    @FXML
+    private LineChart<Long, Integer> powerChart;
+    @FXML
+    private AreaChart<?, ?> stateChart2;
+    @FXML
+    private TableView<StatisticsEntry> statsTable;
 
     @Override
     public void initialize(URL url, ResourceBundle rb){}
@@ -54,9 +50,19 @@ public class ResultsFormWifiController implements Initializable
     void initData(EngineWifi engine)
     {
         descriptionField.setText(engine.sourceIP);
-        stateChart.getData().add(engine.modelStates());
+        //stateChart.getData().add(engine.modelStates());
+        engine.modelStates();
+        engine.getPower();
+        stateChart.getData().add(new XYChart.Series("CAM", engine.getCAM().getData()));
+        
+        stateChart2.getData().add(new XYChart.Series("CAM", engine.getCAM().getData()));
+        
+        powerChart.getData().add(engine.getStates());
         
         packetTable.getItems().setAll(engine.packetList);
+        statsTable.getItems().setAll(engine.statisticsList);
+        
+        //linkDistroPieChart.getData().addAll(engine.getLinkDistroData());
         
         throughputChart.getData().add(engine.getUplinkThroughput());
         throughputChart.getData().add(engine.getDownlinkThroughput());
