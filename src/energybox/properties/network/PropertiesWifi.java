@@ -16,8 +16,8 @@ public class PropertiesWifi extends Network
     public PropertiesWifi(Properties properties)
     {
         PSM_TO_CAM_THRESHOLD = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("PSM_TO_CAM_THRESHOLD")));
-        CAM_PSM_INACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("CAM_PSM_INACTIVITY_TIME")));
-        CAM_TIME_WIMDOW = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("CAM_TIME_WIMDOW")));
+        CAM_PSM_INACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("CAM_PSM_INACTIVITY_TIME"))*1000);
+        CAM_TIME_WIMDOW = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("CAM_TIME_WIMDOW"))*1000);
         WINDOW_DATA_RATE_THRESHOLD = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("WINDOW_DATA_RATE_THRESHOLD")));
     }
     

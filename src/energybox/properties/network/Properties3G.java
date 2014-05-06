@@ -29,23 +29,23 @@ public class Properties3G extends Network
     
     public Properties3G(Properties properties)
     {
-            DCH_FACH_INACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DCH_FACH_INACTIVITY_TIME")));
-            FACH_IDLE_INACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("FACH_IDLE_INACTIVITY_TIME")));
-            DCH_LOW_ACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DCH_LOW_ACTIVITY_TIME")));
+            DCH_FACH_INACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DCH_FACH_INACTIVITY_TIME"))*1000);
+            FACH_IDLE_INACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("FACH_IDLE_INACTIVITY_TIME"))*1000);
+            DCH_LOW_ACTIVITY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DCH_LOW_ACTIVITY_TIME"))*1000);
             DATA_THRESHOLD = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DATA_THRESHOLD")));
             
             UPLINK_BUFFER_IDLE_TO_FACH_OR_DCH = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("UPLINK_BUFFER_IDLE_TO_FACH_OR_DCH")));
             DOWNLINK_BUFFER_IDLE_TO_FACH_OR_DCH = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DOWNLINK_BUFFER_IDLE_TO_FACH_OR_DCH")));
             UPLINK_BUFFER_FACH_TO_DCH = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("UPLINK_BUFFER_FACH_TO_DCH")));
             DOWNLINK_BUFFER_FACH_TO_DCH = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DOWNLINK_BUFFER_FACH_TO_DCH")));
-            UPLINK_BUFFER_EMPTY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("UPLINK_BUFFER_EMPTY_TIME")));
-            DOWNLINK_BUFFER_EMPTY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DOWNLINK_BUFFER_EMPTY_TIME")));
+            UPLINK_BUFFER_EMPTY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("UPLINK_BUFFER_EMPTY_TIME"))*1000);
+            DOWNLINK_BUFFER_EMPTY_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DOWNLINK_BUFFER_EMPTY_TIME"))*1000);
             
-            IDLE_TO_FACH_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("IDLE_TO_FACH_TRANSITION_TIME")));
-            IDLE_TO_DCH_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("IDLE_TO_DCH_TRANSITION_TIME")));
-            FACH_TO_DCH_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("FACH_TO_DCH_TRANSITION_TIME")));
-            DCH_TO_FACH_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DCH_TO_FACH_TRANSITION_TIME")));
-            FACH_TO_IDLE_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("FACH_TO_IDLE_TRANSITION_TIME")));
+            IDLE_TO_FACH_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("IDLE_TO_FACH_TRANSITION_TIME"))*1000);
+            IDLE_TO_DCH_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("IDLE_TO_DCH_TRANSITION_TIME"))*1000);
+            FACH_TO_DCH_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("FACH_TO_DCH_TRANSITION_TIME"))*1000);
+            DCH_TO_FACH_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("DCH_TO_FACH_TRANSITION_TIME"))*1000);
+            FACH_TO_IDLE_TRANSITION_TIME = new SimpleDoubleProperty(Double.parseDouble(properties.getProperty("FACH_TO_IDLE_TRANSITION_TIME"))*1000);
     }
     
     // GETTERS

@@ -11,7 +11,7 @@
 <children><MenuBar prefHeight="629.0" prefWidth="500.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
   <menus>
     <Menu mnemonicParsing="false" text="File">
-      <items>
+      <items><MenuItem fx:id="menuItemExportCSV" mnemonicParsing="false" onAction="#exportCSVAction" text="Export to CSV" />
         <MenuItem mnemonicParsing="false" text="Close" />
       </items>
     </Menu>

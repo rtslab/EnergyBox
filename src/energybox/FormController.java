@@ -77,17 +77,16 @@ public class FormController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-        /*
         // Default 3G values for testing
-        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\chunks5mins3.pcap";
-        textField.setText("chunks5mins3.pcap");
+        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
+        textField.setText("test1UL.pcap");
         //ipField.setText("10.209.43.104");
         type = "3G";
         Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\device_3g.config");
         deviceProperties = new PropertiesDevice3G(properties);
         properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
         networkProperties = new Properties3G(properties);
-        */
+        /*
         // Default Wifi values for testing
             tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2.pcap";
             textField.setText("round2.pcap");
@@ -97,7 +96,7 @@ public class FormController implements Initializable
             deviceProperties = new PropertiesDeviceWifi(properties);
             properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\wifi_general.config");
             networkField.setText("wifi_general.config");
-            networkProperties = new PropertiesWifi(properties);
+            networkProperties = new PropertiesWifi(properties);*/
     }
     
     @FXML
@@ -131,7 +130,7 @@ public class FormController implements Initializable
                 // Copies every packet in the loop to an ArrayList for later use
                 if (first)
                 {
-                    startTime = packet.getCaptureHeader().timestampInMillis();
+                    startTime = packet.getCaptureHeader().timestampInMicros();
                     first = false;
                 }
                 // Adding required values to list of objects with property attributes.
@@ -211,7 +210,7 @@ public class FormController implements Initializable
                         
                         packetList.add(new Packet(
                             // Time of packet's arrival relative to first packet
-                            packet.getCaptureHeader().timestampInMillis() - startTime,
+                            packet.getCaptureHeader().timestampInMicros() - startTime,
                             // Packet's full length (on the wire) could differ from
                             // the captured length if the capture happens before sending
                             //packetList.get(i).getCaptureHeader().caplen(), // CAPTURED LENGTH
@@ -239,7 +238,7 @@ public class FormController implements Initializable
                             String destination = sb.toString();
                             
                             packetList.add(new Packet(
-                            packet.getCaptureHeader().timestampInMillis() - startTime,
+                            packet.getCaptureHeader().timestampInMicros() - startTime,
                             packet.getPacketWirelen(),
                             source,
                             destination,

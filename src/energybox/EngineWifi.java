@@ -71,16 +71,16 @@ public class EngineWifi
         XYChart.Series<Long, Long> uplinkSeries = new XYChart.Series();
         uplinkSeries.setName("Uplink");
         long throughput = 0,
-                chunkSize = packetList.get(packetList.size()-1).getTime()/50, 
+                chunkSize = packetList.get(packetList.size()-1).getTimeInMicros()/50, 
                 currentChunk = chunkSize;
         
-        uplinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTime(), 0));
+        uplinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTimeInMicros(), 0));
         int i = 0;
-        while ((currentChunk < packetList.get(packetList.size()-1).getTime()) && (i<packetList.size()))
+        while ((currentChunk < packetList.get(packetList.size()-1).getTimeInMicros()) && (i<packetList.size()))
         {
             if (packetList.get(i).getUplink())
             {
-                if (packetList.get(i).getTime() < currentChunk)
+                if (packetList.get(i).getTimeInMicros() < currentChunk)
                 {
                     throughput += packetList.get(i).getLength();
                     i++;
@@ -94,7 +94,7 @@ public class EngineWifi
             }
             else i++;
         }
-        uplinkSeries.getData().add(new XYChart.Data(packetList.get(packetList.size()-1).getTime(), throughput));
+        uplinkSeries.getData().add(new XYChart.Data(packetList.get(packetList.size()-1).getTimeInMicros(), throughput));
         return uplinkSeries;
     }
     
@@ -102,18 +102,18 @@ public class EngineWifi
     {
         XYChart.Series<Long, Long> downlinkSeries = new XYChart.Series();
         downlinkSeries.setName("Downlink");
-        downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTime(), 0));
+        downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTimeInMicros(), 0));
         long throughput = 0,
-                chunkSize = packetList.get(packetList.size()-1).getTime()/50, 
+                chunkSize = packetList.get(packetList.size()-1).getTimeInMicros()/50, 
                 currentChunk = chunkSize;
         
-        downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTime(), 0));
+        downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTimeInMicros(), 0));
         int i = 0;
-        while ((currentChunk < packetList.get(packetList.size()-1).getTime()) && (i<packetList.size()))
+        while ((currentChunk < packetList.get(packetList.size()-1).getTimeInMicros()) && (i<packetList.size()))
         {
             if (!packetList.get(i).getUplink())
             {
-                if (packetList.get(i).getTime() < currentChunk)
+                if (packetList.get(i).getTimeInMicros() < currentChunk)
                 {
                     throughput += packetList.get(i).getLength();
                     i++;
@@ -127,7 +127,7 @@ public class EngineWifi
             }
             else i++;
         }
-        downlinkSeries.getData().add(new XYChart.Data(packetList.get(packetList.size()-1).getTime(), throughput));
+        downlinkSeries.getData().add(new XYChart.Data(packetList.get(packetList.size()-1).getTimeInMicros(), throughput));
         return downlinkSeries;
     }
     
@@ -135,7 +135,7 @@ public class EngineWifi
     {
         // Timer variables
         long deltaT = 0;
-        long previousTime = packetList.get(0).getTime();
+        long previousTime = packetList.get(0).getTimeInMicros();
         
         State state = State.CAM;
         transitions.add(new TransitionPair(0, state.toString()));
@@ -145,23 +145,23 @@ public class EngineWifi
             if (packetList.get(i).getUplink())
             {
                 uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));
+                        packetList.get(i).getTimeInMicros() ,0));
                 uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,2));
+                        packetList.get(i).getTimeInMicros() ,2));
                 uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));
+                        packetList.get(i).getTimeInMicros() ,0));
             }
             else
             {
                 downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));
+                        packetList.get(i).getTimeInMicros() ,0));
                 downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,1));
+                        packetList.get(i).getTimeInMicros() ,1));
                 downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));
+                        packetList.get(i).getTimeInMicros() ,0));
             }
             
-            deltaT = packetList.get(i).getTime() - previousTime;
+            deltaT = packetList.get(i).getTimeInMicros() - previousTime;
             
             // DEMOTIONS
             switch (state)
@@ -195,11 +195,11 @@ public class EngineWifi
                 // In PSM promotion happens whenever a packet is sent
                 case PSM:
                 {
-                    psmToCam((double)packetList.get(i).getTime());
-                    drawState((double)packetList.get(i).getTime(), state.getValue());
+                    psmToCam((double)packetList.get(i).getTimeInMicros());
+                    drawState((double)packetList.get(i).getTimeInMicros(), state.getValue());
                     state = State.CAM;
-                    transitions.add(new TransitionPair((double)packetList.get(i).getTime(), state.toString()));
-                    drawState((double)packetList.get(i).getTime(), state.getValue());
+                    transitions.add(new TransitionPair((double)packetList.get(i).getTimeInMicros(), state.toString()));
+                    drawState((double)packetList.get(i).getTimeInMicros(), state.getValue());
                 }
                 break;
                     
@@ -210,7 +210,7 @@ public class EngineWifi
                 break;
             }
             // Save timestamps for the next loop
-            previousTime = packetList.get(i).getTime();
+            previousTime = packetList.get(i).getTimeInMicros();
         }
         return stateSeries;
     }

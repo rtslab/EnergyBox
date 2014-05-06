@@ -28,7 +28,8 @@ public class Packet
     }
     
     // GETTERS
-    public long getTime() {return time.get();}
+    public long getTimeInMicros() {return (time.get());}
+    public double getTime() {return Double.valueOf(time.get())/1000000;}
     public int getLength() {return length.get();}
     public String getSource() {return source.get();}
     public String getDestination() {return destination.get();}

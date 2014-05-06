@@ -1,7 +1,12 @@
 package energybox;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
@@ -9,6 +14,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
@@ -18,6 +24,9 @@ import javafx.scene.layout.AnchorPane;
  */
 public class ResultsForm3GController implements Initializable
 {
+    XYChart.Series<Long, Integer> states;
+    List<Engine3G.TransitionPair> transitions = new ArrayList();
+    
     @FXML
     private LineChart<Long, Integer> packetChart;
     @FXML
@@ -42,12 +51,17 @@ public class ResultsForm3GController implements Initializable
     private AreaChart<?, ?> stateChart2;
     @FXML
     private TableView<StatisticsEntry> statsTable;
+    @FXML
+    private MenuItem menuItemExportCSV;
 
     @Override
     public void initialize(URL url, ResourceBundle rb){}
     
     void initData(Engine3G engine)
     {
+        transitions = engine.transitions;
+        states = engine.getStates();
+        
         descriptionField.setText(engine.sourceIP);
         packetChart.getXAxis().setAutoRanging(true);
         packetChart.getYAxis().setAutoRanging(true);
@@ -86,5 +100,24 @@ public class ResultsForm3GController implements Initializable
         sourceCol.setCellFactory(new PropertyValueFactory<Packet, String>("source"));
         destinationCol.setCellFactory(new PropertyValueFactory<Packet, String>("destination"));
         */
+    }
+
+    @FXML
+    private void exportCSVAction(ActionEvent event)
+    {
+        try
+        {
+            FileWriter writer = new FileWriter("D:\\Source\\NetBeansProjects\\EnergyBox\\export.csv");
+            for (int i = 0; i < states.getData().size(); i++)
+            {
+                writer.append(states.getData().get(i).getYValue().toString());
+                writer.append(",");
+                writer.append(Double.valueOf(states.getData().get(i).getXValue().doubleValue()/1000000).toString());
+                writer.append("\n");
+            }
+            writer.flush();
+	    writer.close();
+        }
+        catch(IOException e){ e.printStackTrace();}
     }
 }
