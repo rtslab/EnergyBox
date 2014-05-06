@@ -108,16 +108,24 @@
 </cellValueFactory>
 </TableColumn>
 </columns>
-</TableView><SplitPane dividerPositions="0.5" focusTraversable="true" layoutX="102.0" layoutY="-24.0" prefHeight="160.0" prefWidth="200.0" GridPane.rowIndex="4">
+</TableView><SplitPane dividerPositions="0.6" focusTraversable="true" layoutX="102.0" layoutY="-24.0" prefHeight="160.0" prefWidth="200.0" GridPane.rowIndex="4">
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-<children><PieChart fx:id="linkDistroPieChart" layoutY="411.0" prefHeight="148.0" prefWidth="145.0" title="UL/DL distribution" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+<children><PieChart fx:id="linkDistroPieChart" layoutY="411.0" legendSide="LEFT" prefHeight="148.0" prefWidth="145.0" title="UL/DL distribution" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
 </children></AnchorPane>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-<children><TableView prefHeight="148.0" prefWidth="246.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<children><TableView fx:id="linkDistroTable" prefHeight="148.0" prefWidth="246.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
   <columns>
-    <TableColumn prefWidth="137.0" text="Parameter" />
-    <TableColumn prefWidth="112.0" text="Value" />
+    <TableColumn prefWidth="111.0" text="Parameter">
+    <cellValueFactory>
+        <PropertyValueFactory property="parameter" />
+    </cellValueFactory>
+    </TableColumn>
+    <TableColumn prefWidth="84.0" text="Value">
+    <cellValueFactory>
+        <PropertyValueFactory property="value" />
+    </cellValueFactory>
+    </TableColumn>
   </columns>
 </TableView>
 </children></AnchorPane>
@@ -154,10 +162,10 @@
   <yAxis>
     <NumberAxis side="LEFT" />
   </yAxis>
-</LineChart><SplitPane dividerPositions="0.5040160642570282" focusTraversable="true" prefHeight="160.0" prefWidth="200.0" GridPane.rowIndex="2">
+</LineChart><SplitPane dividerPositions="0.6" focusTraversable="true" prefHeight="160.0" prefWidth="200.0" GridPane.rowIndex="2">
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-<children><PieChart prefHeight="148.0" prefWidth="248.0" title="Time per state distribution" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+<children><PieChart fx:id="stateTimePieChart" legendSide="LEFT" prefHeight="148.0" prefWidth="248.0" title="Time per state distribution" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
 </children></AnchorPane>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
   </items>

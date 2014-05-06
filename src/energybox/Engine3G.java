@@ -23,11 +23,11 @@ public class Engine3G
     }
     
     // used for a list of transitions for the total power used
-    public class TransitionPair
+    private class TransitionPair
     {
-        public double time;
-        public String state;
-        public TransitionPair(double time, String state)
+        private double time;
+        private String state;
+        private TransitionPair(double time, String state)
         {
             this.time = time;
             this.state = state;
@@ -46,11 +46,14 @@ public class Engine3G
     XYChart.Series<Long, Integer> dchSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> uplinkPacketSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> downlinkPacketSeries = new XYChart.Series();
-    ObservableList<PieChart.Data> linkDistroData = 
+    ObservableList<PieChart.Data> linkDistrData = 
             FXCollections.observableArrayList(new ArrayList());
     int uplinkPacketCount = 0;
+    ObservableList<PieChart.Data> stateTimeData = 
+            FXCollections.observableArrayList(new ArrayList());
     List<TransitionPair> transitions = new ArrayList();
     ObservableList<StatisticsEntry> statisticsList = FXCollections.observableList(new ArrayList());
+    ObservableList<StatisticsEntry> distrStatisticsList = FXCollections.observableList(new ArrayList());
     
     // MAIN CONSTRUCTOR
     public Engine3G(ObservableList<Packet> packetList,
@@ -174,7 +177,7 @@ public class Engine3G
                 uplinkPacketSeries.getData().add(new XYChart.Data(
                         packetList.get(i).getTimeInMicros() ,0));
                 uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTimeInMicros() ,2));
+                        packetList.get(i).getTimeInMicros() , packetList.get(i).getLength()));
                 uplinkPacketSeries.getData().add(new XYChart.Data(
                         packetList.get(i).getTimeInMicros() ,0));
                 uplinkPacketCount++;
@@ -184,7 +187,7 @@ public class Engine3G
                 downlinkPacketSeries.getData().add(new XYChart.Data(
                         packetList.get(i).getTimeInMicros() ,0));
                 downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTimeInMicros() ,1));
+                        packetList.get(i).getTimeInMicros() , packetList.get(i).getLength()));
                 downlinkPacketSeries.getData().add(new XYChart.Data(
                         packetList.get(i).getTimeInMicros() ,0));
             }
@@ -405,12 +408,11 @@ public class Engine3G
             transitions.add(new TransitionPair(previousTime + networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.toString()));
             drawState(previousTime + networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
         }
-        
-        linkDistroData.add(new PieChart.Data("Uplink", uplinkPacketCount));
-        linkDistroData.add(new PieChart.Data("Downlink", packetList.size()-uplinkPacketCount));
+        linkDistrData.add(new PieChart.Data("Uplink", uplinkPacketCount));
+        linkDistrData.add(new PieChart.Data("Downlink", packetList.size()-uplinkPacketCount));
+        distrStatisticsList.add(new StatisticsEntry("Nr of UL packets",uplinkPacketCount));
+        distrStatisticsList.add(new StatisticsEntry("Nr of DL packets",packetList.size()-uplinkPacketCount));
         transitions.add(new TransitionPair((double)packetList.get(packetList.size()-1).getTimeInMicros(), state.toString()));
-
-        // THE WHOLE TRY OVER THE LOOP IS FOR TESTING
         return stateSeries;
     }
     
@@ -424,6 +426,7 @@ public class Engine3G
     public void getPower()
     {
         Double power = Double.valueOf(0);
+        int timeInIDLE = 0, timeInFACH = 0, timeInDCH = 0;
         for (int i = 1; i < transitions.size(); i++) 
         {
             switch(transitions.get(i-1).state)
@@ -432,7 +435,7 @@ public class Engine3G
                 {
                     power += (transitions.get(i).time - transitions.get(i-1).time) 
                             / 1000000 * deviceProperties.getPOWER_IN_IDLE();
-                    System.out.println(power);
+                    timeInIDLE += (transitions.get(i).time - transitions.get(i-1).time);
                 }
                 break;
                     
@@ -440,7 +443,7 @@ public class Engine3G
                 {
                     power += (transitions.get(i).time - transitions.get(i-1).time) 
                             / 1000000 * deviceProperties.getPOWER_IN_FACH();
-                    System.out.println(power);
+                    timeInFACH += (transitions.get(i).time - transitions.get(i-1).time);
                 }
                 break;
                     
@@ -448,13 +451,16 @@ public class Engine3G
                 {
                     power += (transitions.get(i).time - transitions.get(i-1).time) 
                             / 1000000 * deviceProperties.getPOWER_IN_DCH();
-                    System.out.println(power);
+                    timeInDCH += (transitions.get(i).time - transitions.get(i-1).time);
                 }
                 break;
             }
         }
         // Total power used rounded down to four decimal places
         statisticsList.add(new StatisticsEntry("Total Power Used",((double) Math.round(power * 10000) / 10000)));
+        stateTimeData.add(new PieChart.Data("FACH", timeInFACH));
+        stateTimeData.add(new PieChart.Data("DCH", timeInDCH));
+        stateTimeData.add(new PieChart.Data("IDLE", timeInIDLE));
     }
     // State transition drawing methods to seperate state series
     private void dchToFach(Double time)
@@ -508,5 +514,6 @@ public class Engine3G
     public XYChart.Series<Long, Integer> getStates(){ return stateSeries; }
     public XYChart.Series<Long, Integer> getFACH(){ return fachSeries; }
     public XYChart.Series<Long, Integer> getDCH(){ return dchSeries; }
-    public ObservableList<PieChart.Data> getLinkDistroData() { return linkDistroData; }
+    public ObservableList<PieChart.Data> getLinkDistroData() { return linkDistrData; }
+    public ObservableList<PieChart.Data> getStateTimeData() { return stateTimeData; }
 }
