@@ -1,5 +1,7 @@
 package energybox;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,13 +17,26 @@ public class EnergyBox extends Application
     @Override
     public void start(Stage stage) throws Exception
     {
-        Parent root = FXMLLoader.load(getClass().getResource("Forms.fxml"));
+        String[] testArgs = new String[] {"D:\\Source\\NetBeansProjects\\EnergyBox\\test\\test1UL.pcap", "D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config", "D:\\Source\\NetBeansProjects\\EnergyBox\\test\\device_3g.config"};
+        // If there are no command line arguments, the application launches the
+        // graphical interface.
         
-        Scene scene = new Scene(root);
-        
-        stage.setScene(scene);
-        stage.setTitle("EnergyBox");
-        stage.show();
+        if (this.getParameters().getUnnamed().isEmpty())
+        {
+            Parent root = FXMLLoader.load(getClass().getResource("Forms.fxml"));
+
+            Scene scene = new Scene(root);
+
+            stage.setScene(scene);
+            stage.setTitle("EnergyBox");
+            stage.show();
+        }
+        // Otherwise it launches the terminal version
+        else
+        {
+            //List<String> args = this.getParameters().getUnnamed();
+            //ConsoleBox consoleBox = new ConsoleBox(args.get(0), args.get(1), args.get(2));
+        }
     }
 
     /**
@@ -36,5 +51,4 @@ public class EnergyBox extends Application
     {
         launch(args);
     }
-    
 }
