@@ -112,7 +112,7 @@ public class ConsoleBox
                         protocol = "TCP";
                     else if (packet.hasHeader(new Udp())) 
                     {
-                        // if either of the ports for any UDP packet is 53, it's
+                        // if either of the ports for any UDP pakcet is 53, it's
                         // a DNS packet
                         if (packet.getHeader(new Udp()).source() == 53)
                         {

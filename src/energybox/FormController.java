@@ -78,7 +78,7 @@ public class FormController implements Initializable
     public void initialize(URL url, ResourceBundle rb)
     {
         // Default 3G values for testing
-        /*tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
+        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
         textField.setText("test1UL.pcap");
         //ipField.setText("10.209.43.104");
         type = "3G";
@@ -86,7 +86,7 @@ public class FormController implements Initializable
         deviceProperties = new PropertiesDevice3G(properties);
         properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
         networkProperties = new Properties3G(properties);
-        
+        /*
         // Default Wifi values for testing
             tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2.pcap";
             textField.setText("round2.pcap");
