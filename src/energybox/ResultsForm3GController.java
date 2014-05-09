@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
@@ -28,6 +29,7 @@ import javafx.stage.Stage;
 public class ResultsForm3GController implements Initializable
 {
     XYChart.Series<Long, Integer> states;
+    Engine3G engine = null;
     
     @FXML
     private LineChart<Long, Integer> packetChart;
@@ -59,12 +61,19 @@ public class ResultsForm3GController implements Initializable
     private TableView<StatisticsEntry> linkDistroTable;
     @FXML
     private PieChart stateTimePieChart;
+    @FXML
+    private TextField chuckSizeField;
+    @FXML
+    private TextField fromTimeField;
+    @FXML
+    private TextField toTimeField;
 
     @Override
     public void initialize(URL url, ResourceBundle rb){}
     
     void initData(Engine3G engine)
     {
+        this.engine = engine;
         states = engine.getStates();
         
         descriptionField.setText(engine.sourceIP);
@@ -94,8 +103,10 @@ public class ResultsForm3GController implements Initializable
         
         throughputChart.getXAxis().setLabel("Time(s)");
         throughputChart.getYAxis().setLabel("Bytes/s");
-        throughputChart.getData().add(engine.getUplinkThroughput());
-        throughputChart.getData().add(engine.getDownlinkThroughput());
+        throughputChart.getData().add(engine.getUplinkThroughput(
+                engine.packetList.get(engine.packetList.size()-1).getTimeInMicros()/50));
+        throughputChart.getData().add(engine.getDownlinkThroughput(
+                engine.packetList.get(engine.packetList.size()-1).getTimeInMicros()/50));
         
         packetChart.getXAxis().setLabel("Time(s)");
         packetChart.getYAxis().setLabel("Size(bytes)");
@@ -152,5 +163,26 @@ public class ResultsForm3GController implements Initializable
 	    writer.close();
         }
         catch(IOException e){ e.printStackTrace();}
+    }
+
+    @FXML
+    private void fromTimeAction(ActionEvent event)
+    {
+    }
+
+    @FXML
+    private void toTimeAction(ActionEvent event)
+    {
+        long newToTime = (long)(Double.parseDouble(toTimeField.getText())*1000000);
+        //throughputChart.getXAxis()
+    }
+
+    @FXML
+    private void chunkSizeAction(ActionEvent event)
+    {
+        long newChunkValue = (long)(Double.parseDouble(chuckSizeField.getText())*1000000);
+        throughputChart.getData().clear();
+        throughputChart.getData().add(engine.getUplinkThroughput(newChunkValue));
+        throughputChart.getData().add(engine.getDownlinkThroughput(newChunkValue));
     }
 }

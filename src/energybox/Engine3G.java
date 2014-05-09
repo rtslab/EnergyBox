@@ -81,12 +81,12 @@ public class Engine3G
     
     // TODO: integrate into modelStates() so that you wouldn't have to loop
     // through the lacketList twice
-    public XYChart.Series<Long, Long> getUplinkThroughput()
+    public XYChart.Series<Long, Long> getUplinkThroughput(long chunkSize)
     {
         XYChart.Series<Long, Long> uplinkSeries = new XYChart.Series();
         uplinkSeries.setName("Uplink");
         long throughput = 0,
-                chunkSize = packetList.get(packetList.size()-1).getTimeInMicros()/50, 
+                //chunkSize = packetList.get(packetList.size()-1).getTimeInMicros()/50, 
                 currentChunk = chunkSize;
         
         uplinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTimeInMicros(), 0));
@@ -113,13 +113,13 @@ public class Engine3G
         return uplinkSeries;
     }
     
-    public XYChart.Series<Long, Long> getDownlinkThroughput()
+    public XYChart.Series<Long, Long> getDownlinkThroughput(long chunkSize)
     {
         XYChart.Series<Long, Long> downlinkSeries = new XYChart.Series();
         downlinkSeries.setName("Downlink");
         downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTimeInMicros(), 0));
         long throughput = 0,
-                chunkSize = packetList.get(packetList.size()-1).getTimeInMicros()/50, 
+                //chunkSize = packetList.get(packetList.size()-1).getTimeInMicros()/50, 
                 currentChunk = chunkSize;
         
         downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTimeInMicros(), 0));

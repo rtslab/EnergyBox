@@ -6,7 +6,7 @@
 <?import javafx.scene.control.cell.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="629.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="energybox.ResultsForm3GController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="629.0" prefWidth="609.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="energybox.ResultsForm3GController">
 <children><AnchorPane prefHeight="629.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 <children><MenuBar prefHeight="629.0" prefWidth="500.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
   <menus>
@@ -46,7 +46,22 @@
   </rowConstraints>
   
 
-<children><TextField fx:id="descriptionField" alignment="CENTER_RIGHT" disable="true" editable="false" focusTraversable="false" text="8.8.8.8" /><StackedAreaChart fx:id="throughputChart" title="Throughput" GridPane.rowIndex="1">
+<children><GridPane>
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+<children><HBox prefHeight="100.0" prefWidth="200.0">
+<children><Label text="Chunk Size: " /><TextField fx:id="chuckSizeField" onAction="#chunkSizeAction" prefWidth="50.0" />
+</children></HBox><HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+<children><Label prefHeight="15.0" text="From (s): " /><TextField fx:id="fromTimeField" onAction="#fromTimeAction" prefWidth="50.0" /><Label prefHeight="15.0" text="To (s): " /><TextField fx:id="toTimeField" onAction="#toTimeAction" prefWidth="50.0" />
+</children></HBox><TextField fx:id="descriptionField" alignment="CENTER_RIGHT" disable="true" editable="false" focusTraversable="false" text="8.8.8.8" GridPane.columnIndex="2" />
+</children>
+</GridPane><StackedAreaChart fx:id="throughputChart" title="Throughput" GridPane.rowIndex="1">
   <xAxis>
     <NumberAxis side="BOTTOM" />
   </xAxis>
@@ -102,7 +117,7 @@
 <PropertyValueFactory property="protocol" />
 </cellValueFactory>
 </TableColumn>
-<TableColumn minWidth="0.0" prefWidth="102.0" text="Link">
+<TableColumn minWidth="0.0" prefWidth="110.0" text="Link">
 <cellValueFactory>
 <PropertyValueFactory property="link" />
 </cellValueFactory>
@@ -116,12 +131,12 @@
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
 <children><TableView fx:id="linkDistroTable" prefHeight="148.0" prefWidth="246.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
   <columns>
-    <TableColumn prefWidth="111.0" text="Parameter">
+    <TableColumn prefWidth="130.0" text="Parameter">
     <cellValueFactory>
         <PropertyValueFactory property="parameter" />
     </cellValueFactory>
     </TableColumn>
-    <TableColumn prefWidth="84.0" text="Value">
+    <TableColumn prefWidth="109.0" text="Value">
     <cellValueFactory>
         <PropertyValueFactory property="value" />
     </cellValueFactory>
@@ -210,12 +225,12 @@
   </yAxis>
 </LineChart><TableView fx:id="statsTable" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
   <columns>
-    <TableColumn prefWidth="247.0" text="Parameter">
+    <TableColumn prefWidth="168.0" text="Parameter">
     <cellValueFactory>
         <PropertyValueFactory property="parameter" />
     </cellValueFactory>
     </TableColumn>
-    <TableColumn prefWidth="252.0" text="Value">
+    <TableColumn prefWidth="440.0" text="Value">
     <cellValueFactory>
         <PropertyValueFactory property="value" />
     </cellValueFactory>

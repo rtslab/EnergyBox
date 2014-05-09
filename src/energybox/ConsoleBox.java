@@ -10,8 +10,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.URLDecoder;
 import java.net.UnknownHostException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,18 +57,40 @@ public class ConsoleBox
         Device deviceProperties = null;
         final HashMap<String, String> criteria = new HashMap();
         final HashMap<String, Integer> addressOccurrence = new HashMap();
-        String sourceIP = "", type = "";
+        String sourceIP = "";
         StringBuilder errbuf = new StringBuilder();
         // Wrapped lists in JavaFX ObservableList for the table view
-        final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList());
+        final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList());    
         
         // READING THE PACKET TRACE
-        final Pcap pcap = Pcap.openOffline(tracePath, errbuf);
+        Pcap pcap = null;
         
-        if (pcap == null)
+        if (!new File(tracePath).exists())
         {
-            System.err.printf("Error while opening device for capture: " + errbuf.toString());
-            System.out.println("Error: " + errbuf.toString());
+            String location = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            String decodedLocation = "";
+            
+            try { decodedLocation = URLDecoder.decode(location, "UTF-8"); }
+            catch (UnsupportedEncodingException e){ e.printStackTrace(); }
+            if (new File(decodedLocation).exists())
+            {
+                StringBuilder relativePath = new StringBuilder();
+                relativePath.append(new File(decodedLocation).getParent());
+                relativePath.append(File.separator);
+                relativePath.append(tracePath);
+                
+                //System.out.println(new File(decodedLocation).getParent());
+                pcap = Pcap.openOffline(relativePath.toString(), errbuf);
+            }
+            if (pcap == null)
+            {
+                System.err.println("Error while opening device for capture: " + errbuf.toString());
+                return;
+            }
+        }
+        else
+        {
+            pcap = Pcap.openOffline(tracePath, errbuf);
         }
         
         PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() 
@@ -222,80 +248,104 @@ public class ConsoleBox
         }
         
         // OPENING THE CONFIGURATION FILES
-        // DEVICE PROPERTIES
-        Properties properties = pathToProperties(devicePath);
-        
-        // deviceProperties is initiated the same way as networkProperties
-        switch (properties.getProperty("TYPE"))
+        try
         {
-            case "Device3G": deviceProperties = new PropertiesDevice3G(properties);
-            break;
-                
-            case "DeviceWifi": deviceProperties = new PropertiesDeviceWifi(properties);
-            break;
-        }
-        
-        // NETWORK PROPERTIES
-        properties = pathToProperties(networkPath);
-        // networkProperties is initiated with the constructor of the appropriate
-        // class depending on the TYPE of the .config file
-        switch (properties.getProperty("TYPE"))
-        {
-            case "3G": networkProperties = new Properties3G(properties);
-            break;
-                
-            case "Wifi": networkProperties = new PropertiesWifi(properties);
-            break;
-        }
-        
-        // CHOOSING THE ENGINE
-        switch (type)
-        {
-            case "3G":
+            // DEVICE PROPERTIES
+            Properties properties = pathToProperties(devicePath);
+
+            // deviceProperties is initiated the same way as networkProperties
+            switch (properties.getProperty("TYPE"))
             {
-                Engine3G engine = new Engine3G(packetList, 
-                        sourceIP,
-                        //networkProperties instanced as Properties3G
-                        ((Properties3G)networkProperties), 
-                        // deviceProperties instanced as PropertiesDevice3G
-                        ((PropertiesDevice3G)deviceProperties));
-                engine.getPower();
-                System.out.println("Network model: 3G");
-                System.out.println("Detected recorder device IP: " + sourceIP);
-                System.out.println("Total power in Joules: " + engine.statisticsList.get(0).getValue());
+                case "Device3G": deviceProperties = new PropertiesDevice3G(properties);
+                break;
+
+                case "DeviceWifi": deviceProperties = new PropertiesDeviceWifi(properties);
+                break;
             }
-            break;
-            
-            case "Wifi":
+
+            // NETWORK PROPERTIES
+            properties = pathToProperties(networkPath);
+            // networkProperties is initiated with the constructor of the appropriate
+            // class depending on the TYPE of the .config file
+            switch (properties.getProperty("TYPE"))
             {
-                EngineWifi engine = new EngineWifi(packetList, 
-                        sourceIP,
-                        //networkProperties instanced as Properties3G
-                        ((PropertiesWifi)networkProperties), 
-                        // deviceProperties instanced as PropertiesDevice3G
-                        ((PropertiesDeviceWifi)deviceProperties));
-                engine.getPower();
-                System.out.println("Network model: 3G");
-                System.out.println("Detected recorder device IP: " + sourceIP);
-                System.out.println("Total power in Joules: " + engine.statisticsList.get(0).getValue());
+                case "3G": networkProperties = new Properties3G(properties);
+                break;
+
+                case "Wifi": networkProperties = new PropertiesWifi(properties);
+                break;
             }
+
+            // CHOOSING THE ENGINE
+            switch (properties.getProperty("TYPE"))
+            {
+                case "3G":
+                {
+                    Engine3G engine = new Engine3G(packetList, 
+                            sourceIP,
+                            //networkProperties instanced as Properties3G
+                            ((Properties3G)networkProperties), 
+                            // deviceProperties instanced as PropertiesDevice3G
+                            ((PropertiesDevice3G)deviceProperties));
+                    engine.modelStates();
+                    engine.getPower();
+                    System.out.println("Network model: 3G");
+                    System.out.println("Detected recorder device IP: " + sourceIP);
+                    System.out.println("Total power in Joules: " + engine.statisticsList.get(0).getValue());
+                }
+                break;
+
+                case "Wifi":
+                {
+                    EngineWifi engine = new EngineWifi(packetList, 
+                            sourceIP,
+                            //networkProperties instanced as Properties3G
+                            ((PropertiesWifi)networkProperties), 
+                            // deviceProperties instanced as PropertiesDevice3G
+                            ((PropertiesDeviceWifi)deviceProperties));
+                    engine.modelStates();
+                    engine.getPower();
+                    System.out.println("Network model: 3G");
+                    System.out.println("Detected recorder device IP: " + sourceIP);
+                    System.out.println("Total power in Joules: " + engine.statisticsList.get(0).getValue());
+                }
+            }
+        }
+        // Prints the error if the one of the files could not be opened.
+        catch (IOException e)
+        {
+            System.out.println(e.getMessage());
         }
     }
     
-    public Properties pathToProperties(String path)
+    public Properties pathToProperties(String path) throws IOException
     {
         Properties properties = new Properties();
-        try
+        if (new File(path).exists())
         {
             File f = new File(path);
             InputStream in = new FileInputStream (f);
             properties.load(in);
+            return properties;
         }
-        catch (IOException e)
-        { 
-            e.printStackTrace(); 
-            System.out.println("Properties file in '"+path+"' could not be opened!");
+        else
+        {
+            String location = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            String decodedLocation = "";
+
+            try { decodedLocation = URLDecoder.decode(location, "UTF-8"); }
+            catch (UnsupportedEncodingException e){ e.printStackTrace(); }
+            if (new File(decodedLocation).exists())
+            {
+                StringBuilder relativePath = new StringBuilder();
+                relativePath.append(new File(decodedLocation).getParent());
+                relativePath.append(File.separator);
+                relativePath.append(path);
+                File f = new File(relativePath.toString());
+                InputStream in = new FileInputStream (f);
+                properties.load(in);
+            }
+            return properties;
         }
-        return properties;
     }
 }

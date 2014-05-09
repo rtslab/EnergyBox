@@ -1,8 +1,8 @@
 package energybox;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -17,11 +17,10 @@ public class EnergyBox extends Application
     @Override
     public void start(Stage stage) throws Exception
     {
-        String[] testArgs = new String[] {"D:\\Source\\NetBeansProjects\\EnergyBox\\test\\test1UL.pcap", "D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config", "D:\\Source\\NetBeansProjects\\EnergyBox\\test\\device_3g.config"};
+        Map<String, String> flags = this.getParameters().getNamed();
         // If there are no command line arguments, the application launches the
         // graphical interface.
-        
-        if (this.getParameters().getUnnamed().isEmpty())
+        if (this.getParameters().getRaw().isEmpty())
         {
             Parent root = FXMLLoader.load(getClass().getResource("Forms.fxml"));
 
@@ -32,10 +31,21 @@ public class EnergyBox extends Application
             stage.show();
         }
         // Otherwise it launches the terminal version
-        else
+        else if (flags.containsKey("t") && flags.containsKey("n") && flags.containsKey("d"))
         {
-            //List<String> args = this.getParameters().getUnnamed();
-            //ConsoleBox consoleBox = new ConsoleBox(args.get(0), args.get(1), args.get(2));
+            ConsoleBox consoleBox = new ConsoleBox(flags.get("t"), flags.get("n"), flags.get("d"));
+            consoleBox.printResults();
+            Platform.exit();
+            this.stop();
+        }
+        else if (!this.getParameters().getRaw().isEmpty())
+        {
+            System.out.println("To run the the application from the command line add flags:");
+            System.out.println("--t=<trace file path>");
+            System.out.println("--n=<network configuration file path>");
+            System.out.println("--d=<device configuration file path>");
+            Platform.exit();
+            this.stop();
         }
     }
 
