@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
@@ -22,13 +25,14 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javax.swing.JOptionPane;
 /**
  * @author Rihards Polis
  * Linkoping University
  */
 public class ResultsForm3GController implements Initializable
 {
-    XYChart.Series<Long, Integer> states;
+    XYChart.Series<Double, Integer> states;
     Engine3G engine = null;
     
     @FXML
@@ -52,7 +56,7 @@ public class ResultsForm3GController implements Initializable
     @FXML
     private PieChart linkDistroPieChart;
     @FXML
-    private LineChart<Long, Integer> powerChart;
+    private LineChart<Double, Integer> powerChart;
     @FXML
     private TableView<StatisticsEntry> statsTable;
     @FXML
@@ -67,6 +71,22 @@ public class ResultsForm3GController implements Initializable
     private TextField fromTimeField;
     @FXML
     private TextField toTimeField;
+    @FXML
+    private NumberAxis throughputXAxis;
+    @FXML
+    private NumberAxis packetXAxis;
+    @FXML
+    private NumberAxis stateXAxis;
+    @FXML
+    private NumberAxis packetXAxis2;
+    @FXML
+    private NumberAxis powerXAxis;
+    @FXML
+    private NumberAxis stateXAxis2;
+    @FXML
+    private NumberAxis packetXAxis3;
+    
+    private List<NumberAxis> axisList = new ArrayList();
 
     @Override
     public void initialize(URL url, ResourceBundle rb){}
@@ -75,13 +95,15 @@ public class ResultsForm3GController implements Initializable
     {
         this.engine = engine;
         states = engine.getStates();
-        
+
+        axisList.add(throughputXAxis);
+        axisList.add(packetXAxis);
+        axisList.add(stateXAxis);
+        axisList.add(packetXAxis2);
+        axisList.add(powerXAxis);
+        axisList.add(stateXAxis2);
+        axisList.add(packetXAxis3);
         descriptionField.setText(engine.sourceIP);
-        /*
-        packetChart.getXAxis().setAutoRanging(true);
-        packetChart.getYAxis().setAutoRanging(true);
-        stateChart.getXAxis().setAutoRanging(true);
-        stateChart.getYAxis().setAutoRanging(true);*/
         engine.modelStates();
         engine.getPower();
         stateChart.getXAxis().setLabel("Time(s)");
@@ -104,9 +126,9 @@ public class ResultsForm3GController implements Initializable
         throughputChart.getXAxis().setLabel("Time(s)");
         throughputChart.getYAxis().setLabel("Bytes/s");
         throughputChart.getData().add(engine.getUplinkThroughput(
-                engine.packetList.get(engine.packetList.size()-1).getTimeInMicros()/50));
+                engine.packetList.get(engine.packetList.size()-1).getTime()/50));
         throughputChart.getData().add(engine.getDownlinkThroughput(
-                engine.packetList.get(engine.packetList.size()-1).getTimeInMicros()/50));
+                engine.packetList.get(engine.packetList.size()-1).getTime()/50));
         
         packetChart.getXAxis().setLabel("Time(s)");
         packetChart.getYAxis().setLabel("Size(bytes)");
@@ -156,7 +178,7 @@ public class ResultsForm3GController implements Initializable
             {
                 writer.append(states.getData().get(i).getYValue().toString());
                 writer.append(",");
-                writer.append(Double.valueOf(states.getData().get(i).getXValue().doubleValue()/1000000).toString());
+                writer.append(Double.valueOf(states.getData().get(i).getXValue().doubleValue()).toString());
                 writer.append("\n");
             }
             writer.flush();
@@ -168,21 +190,95 @@ public class ResultsForm3GController implements Initializable
     @FXML
     private void fromTimeAction(ActionEvent event)
     {
+        if (!fromTimeField.getText().equals(""))
+        {
+            try
+            {
+                double newFromTime = Double.parseDouble(fromTimeField.getText());
+                NumberAxis something = new NumberAxis();
+                //something.setRange();
+                for (NumberAxis axis : axisList)
+                {
+                    axis.setAutoRanging(false);
+                    axis.setLowerBound(newFromTime);
+                    axis.setTickUnit(Math.round((axis.getUpperBound()-newFromTime)*0.1));
+                }
+            }
+            catch (NumberFormatException e)
+            {
+                // TODO: Replace with the ControlFX third party error dialogues
+                JOptionPane.showMessageDialog(null, "Not a number!\nPlease input a number with decimal seperator '.'");
+            }
+        }
+        else
+        {
+            for (NumberAxis axis : axisList)
+            {
+                axis.setAutoRanging(false);
+                axis.setLowerBound(0);
+                axis.setTickUnit(Math.round(axis.getUpperBound()*0.1));
+            }
+        }
     }
 
     @FXML
     private void toTimeAction(ActionEvent event)
     {
-        long newToTime = (long)(Double.parseDouble(toTimeField.getText())*1000000);
-        //throughputChart.getXAxis()
+        if (!toTimeField.getText().equals(""))
+        {
+            try
+            {
+                double newToTime = Double.parseDouble(toTimeField.getText());
+                for (NumberAxis axis : axisList)
+                {
+                    axis.setAutoRanging(false);
+                    axis.setUpperBound(newToTime);
+                    axis.setTickUnit(Math.round((newToTime-axis.getLowerBound())*0.1));
+                }
+            }
+            catch (NumberFormatException e)
+            {
+                // TODO: Replace with the ControlFX third party error dialogues
+                JOptionPane.showMessageDialog(null, "Not a number!\nPlease input a number with decimal seperator '.'");
+            }
+        }
+        else
+        {
+            double newToTime = Double.valueOf(engine.packetList.get(engine.packetList.size()-1).getTime());
+            for (NumberAxis axis : axisList)
+            {
+                axis.setAutoRanging(false);
+                axis.setUpperBound(newToTime);
+                axis.getParent().layout();
+                axis.setTickUnit(Math.round((newToTime-axis.getLowerBound())*0.1));
+            }
+        }        
     }
 
     @FXML
     private void chunkSizeAction(ActionEvent event)
     {
-        long newChunkValue = (long)(Double.parseDouble(chuckSizeField.getText())*1000000);
-        throughputChart.getData().clear();
-        throughputChart.getData().add(engine.getUplinkThroughput(newChunkValue));
-        throughputChart.getData().add(engine.getDownlinkThroughput(newChunkValue));
+        if (!chuckSizeField.getText().equals(""))
+        {
+            try
+            {
+                long newChunkValue = (long)(Double.parseDouble(chuckSizeField.getText()));
+                throughputChart.getData().clear();
+                throughputChart.getData().add(engine.getUplinkThroughput(newChunkValue));
+                throughputChart.getData().add(engine.getDownlinkThroughput(newChunkValue));
+            }
+            catch (NumberFormatException e)
+            {
+                // TODO: Replace with the ControlFX third party error dialogues
+                JOptionPane.showMessageDialog(null, "Not a number!\nPlease input a number with decimal seperator '.'");
+            }
+        }
+        else
+        {
+            long newChunkValue = engine.packetList.get(engine.packetList.size()-1).getTimeInMicros()/50;
+            throughputChart.getData().clear();
+            throughputChart.getData().add(engine.getUplinkThroughput(newChunkValue));
+            throughputChart.getData().add(engine.getDownlinkThroughput(newChunkValue));
+        }
     }
 }

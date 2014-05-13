@@ -26,7 +26,22 @@
       </items>
     </Menu>
   </menus>
-</MenuBar><TabPane prefHeight="605.0" prefWidth="500.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+</MenuBar><GridPane prefHeight="15.0" prefWidth="609.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+<children><HBox prefHeight="15.0" prefWidth="200.0">
+<children><Label text="Chunk Size: " textFill="WHITE" /><TextField fx:id="chuckSizeField" onAction="#chunkSizeAction" prefHeight="15.0" prefWidth="50.0" />
+</children></HBox><HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+<children><Label prefHeight="15.0" text="From (s): " textFill="WHITE" /><TextField fx:id="fromTimeField" onAction="#fromTimeAction" prefHeight="15.0" prefWidth="50.0" /><Label prefHeight="15.0" text="To (s): " textFill="WHITE" /><TextField fx:id="toTimeField" onAction="#toTimeAction" prefHeight="15.0" prefWidth="50.0" />
+</children></HBox><TextField fx:id="descriptionField" alignment="CENTER_RIGHT" disable="true" editable="false" focusTraversable="false" text="8.8.8.8" GridPane.columnIndex="2" />
+</children>
+</GridPane><TabPane prefHeight="605.0" prefWidth="500.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
   <tabs>
 
 
@@ -46,24 +61,9 @@
   </rowConstraints>
   
 
-<children><GridPane>
-  <columnConstraints>
-    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-  </columnConstraints>
-  <rowConstraints>
-    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-  </rowConstraints>
-<children><HBox prefHeight="100.0" prefWidth="200.0">
-<children><Label text="Chunk Size: " /><TextField fx:id="chuckSizeField" onAction="#chunkSizeAction" prefWidth="50.0" />
-</children></HBox><HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
-<children><Label prefHeight="15.0" text="From (s): " /><TextField fx:id="fromTimeField" onAction="#fromTimeAction" prefWidth="50.0" /><Label prefHeight="15.0" text="To (s): " /><TextField fx:id="toTimeField" onAction="#toTimeAction" prefWidth="50.0" />
-</children></HBox><TextField fx:id="descriptionField" alignment="CENTER_RIGHT" disable="true" editable="false" focusTraversable="false" text="8.8.8.8" GridPane.columnIndex="2" />
-</children>
-</GridPane><StackedAreaChart fx:id="throughputChart" title="Throughput" GridPane.rowIndex="1">
+<children><StackedAreaChart fx:id="throughputChart" title="Throughput" GridPane.rowIndex="1">
   <xAxis>
-    <NumberAxis side="BOTTOM" />
+    <NumberAxis fx:id="throughputXAxis" side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />
@@ -85,7 +85,7 @@
 
 <LineChart fx:id="packetChart" layoutY="45.0" prefHeight="600.0" prefWidth="500.0" title="Packets over time" AnchorPane.bottomAnchor="450.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.rowIndex="2">
   <xAxis>
-    <NumberAxis side="BOTTOM" />
+    <NumberAxis fx:id="packetXAxis" side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />
@@ -165,14 +165,14 @@
   </rowConstraints>
 <children><AreaChart fx:id="stateChart" title="States" verticalZeroLineVisible="false">
   <xAxis>
-    <NumberAxis side="BOTTOM" />
+    <NumberAxis fx:id="stateXAxis" side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />
   </yAxis>
 </AreaChart><LineChart fx:id="packetChart2" layoutY="45.0" prefHeight="600.0" prefWidth="500.0" title="Packets over time" GridPane.rowIndex="1">
   <xAxis>
-    <NumberAxis side="BOTTOM" />
+    <NumberAxis fx:id="packetXAxis2" side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />
@@ -204,21 +204,21 @@
   </rowConstraints>
 <children><LineChart fx:id="powerChart" title="Power">
   <xAxis>
-    <NumberAxis side="BOTTOM" />
+    <NumberAxis fx:id="powerXAxis" side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />
   </yAxis>
 </LineChart><AreaChart fx:id="stateChart2" title="States" GridPane.rowIndex="1">
   <xAxis>
-    <NumberAxis side="BOTTOM" />
+    <NumberAxis fx:id="stateXAxis2" side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />
   </yAxis>
 </AreaChart><LineChart fx:id="packetChart3" title="Packets over time" GridPane.rowIndex="2">
   <xAxis>
-    <NumberAxis side="BOTTOM" />
+    <NumberAxis fx:id="packetXAxis3" side="BOTTOM" />
   </xAxis>
   <yAxis>
     <NumberAxis side="LEFT" />

@@ -41,7 +41,7 @@ public class Engine3G
     PropertiesDevice3G deviceProperties;
     
     // CHART VARIABLES
-    XYChart.Series<Long, Integer> stateSeries = new XYChart.Series();
+    XYChart.Series<Double, Integer> stateSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> fachSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> dchSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> uplinkPacketSeries = new XYChart.Series();
@@ -81,21 +81,21 @@ public class Engine3G
     
     // TODO: integrate into modelStates() so that you wouldn't have to loop
     // through the lacketList twice
-    public XYChart.Series<Long, Long> getUplinkThroughput(long chunkSize)
+    public XYChart.Series<Long, Long> getUplinkThroughput(double chunkSize)
     {
         XYChart.Series<Long, Long> uplinkSeries = new XYChart.Series();
         uplinkSeries.setName("Uplink");
-        long throughput = 0,
-                //chunkSize = packetList.get(packetList.size()-1).getTimeInMicros()/50, 
-                currentChunk = chunkSize;
+        long throughput = 0;
+                //chunkSize = packetList.get(packetList.size()-1).getTime()/50, 
+        double currentChunk = chunkSize;
         
-        uplinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTimeInMicros(), 0));
+        uplinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTime(), 0));
         int i = 0;
-        while ((currentChunk < packetList.get(packetList.size()-1).getTimeInMicros()) && (i<packetList.size()))
+        while ((currentChunk < packetList.get(packetList.size()-1).getTime()) && (i<packetList.size()))
         {
             if (packetList.get(i).getUplink())
             {
-                if (packetList.get(i).getTimeInMicros() < currentChunk)
+                if (packetList.get(i).getTime() < currentChunk)
                 {
                     throughput += packetList.get(i).getLength();
                     i++;
@@ -109,26 +109,26 @@ public class Engine3G
             }
             else i++;
         }
-        uplinkSeries.getData().add(new XYChart.Data(packetList.get(packetList.size()-1).getTimeInMicros(), throughput));
+        uplinkSeries.getData().add(new XYChart.Data(packetList.get(packetList.size()-1).getTime(), throughput));
         return uplinkSeries;
     }
     
-    public XYChart.Series<Long, Long> getDownlinkThroughput(long chunkSize)
+    public XYChart.Series<Long, Long> getDownlinkThroughput(double chunkSize)
     {
         XYChart.Series<Long, Long> downlinkSeries = new XYChart.Series();
         downlinkSeries.setName("Downlink");
-        downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTimeInMicros(), 0));
-        long throughput = 0,
-                //chunkSize = packetList.get(packetList.size()-1).getTimeInMicros()/50, 
-                currentChunk = chunkSize;
+        downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTime(), 0));
+        long throughput = 0;
+                //chunkSize = packetList.get(packetList.size()-1).getTime()/50, 
+        double currentChunk = chunkSize;
         
-        downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTimeInMicros(), 0));
+        downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTime(), 0));
         int i = 0;
-        while ((currentChunk < packetList.get(packetList.size()-1).getTimeInMicros()) && (i<packetList.size()))
+        while ((currentChunk < packetList.get(packetList.size()-1).getTime()) && (i<packetList.size()))
         {
             if (!packetList.get(i).getUplink())
             {
-                if (packetList.get(i).getTimeInMicros() < currentChunk)
+                if (packetList.get(i).getTime() < currentChunk)
                 {
                     throughput += packetList.get(i).getLength();
                     i++;
@@ -142,14 +142,14 @@ public class Engine3G
             }
             else i++;
         }
-        downlinkSeries.getData().add(new XYChart.Data(packetList.get(packetList.size()-1).getTimeInMicros(), throughput));
+        downlinkSeries.getData().add(new XYChart.Data(packetList.get(packetList.size()-1).getTime(), throughput));
         return downlinkSeries;
     }
     
     // MAIN MODELING METHOD
     // Loops through the packetList once and calculates:
     // -State chart -State transitions -Packet chart -Distribution pie chart
-    public XYChart.Series<Long, Integer> modelStates()
+    public XYChart.Series<Double, Integer> modelStates()
     {
         // Buffer control variables
         int bufferIDLEtoFACHuplink = 0, bufferIDLEtoFACHdownlink = 0,
@@ -178,21 +178,21 @@ public class Engine3G
             if (packetList.get(i).getUplink())
             {
                 uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTimeInMicros() ,0));
+                        packetList.get(i).getTime() ,0));
                 uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTimeInMicros() , packetList.get(i).getLength()));
+                        packetList.get(i).getTime() , packetList.get(i).getLength()));
                 uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTimeInMicros() ,0));
+                        packetList.get(i).getTime() ,0));
                 uplinkPacketCount++;
             }
             else
             {
                 downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTimeInMicros() ,0));
+                        packetList.get(i).getTime() ,0));
                 downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTimeInMicros() , packetList.get(i).getLength()));
+                        packetList.get(i).getTime() , packetList.get(i).getLength()));
                 downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTimeInMicros() ,0));
+                        packetList.get(i).getTime() ,0));
             }
             
             // Update deltas and previous times (uplink and downlink seperately
@@ -462,9 +462,8 @@ public class Engine3G
     
     private void drawState(Long time, int state)
     {
-        //Long tempTime = time.longValue();
-        stateSeries.getData().add(new XYChart.Data(time, state));
-        
+        Double tempTime = time.doubleValue()/1000000;
+        stateSeries.getData().add(new XYChart.Data(tempTime, state));        
     }
     
     public void getPower()
@@ -473,7 +472,7 @@ public class Engine3G
         int timeInIDLE = 0, timeInFACH = 0, timeInDCH = 0;
         for (int i = 1; i < stateSeries.getData().size(); i++)
         {
-            double timeDifference = (stateSeries.getData().get(i).getXValue() - stateSeries.getData().get(i-1).getXValue()) * 0.000001;
+            double timeDifference = (stateSeries.getData().get(i).getXValue() - stateSeries.getData().get(i-1).getXValue());
             switch(stateSeries.getData().get(i-1).getYValue())
             {
                 case 0:
@@ -507,7 +506,7 @@ public class Engine3G
     // State transition drawing methods to seperate state series
     private void dchToFach(Double time)
     {
-        //time = time / 1000000;
+        time = time / 1000000;
         dchSeries.getData().add(new XYChart.Data(time, State.DCH.getValue()));
         dchSeries.getData().add(new XYChart.Data(time, 0));
         
@@ -517,28 +516,28 @@ public class Engine3G
     
     private void fachToIdle(Double time)
     {
-        //time = time / 1000000;
+        time = time / 1000000;
         fachSeries.getData().add(new XYChart.Data(time, State.FACH.getValue()));
         fachSeries.getData().add(new XYChart.Data(time, 0));
     }
     
     private void idleToFach(Double time)
     {
-        //time = time / 1000000;
+        time = time / 1000000;
         fachSeries.getData().add(new XYChart.Data(time, 0));
         fachSeries.getData().add(new XYChart.Data(time, State.FACH.getValue()));
     }
     
     private void idleToDch(Double time)
     {
-        //time = time / 1000000;
+        time = time / 1000000;
         dchSeries.getData().add(new XYChart.Data(time, 0));
         dchSeries.getData().add(new XYChart.Data(time, State.DCH.getValue()));
     }
     
     private void fachToDch(Double time)
     {
-        //time = time / 1000000;
+        time = time / 1000000;
         fachSeries.getData().add(new XYChart.Data(time, State.FACH.getValue()));
         fachSeries.getData().add(new XYChart.Data(time, 0));
         
@@ -553,7 +552,7 @@ public class Engine3G
     // GETTERS
     public XYChart.Series<Long, Integer> getUplinkPackets(){ return uplinkPacketSeries; }
     public XYChart.Series<Long, Integer> getDownlinkPackets(){ return downlinkPacketSeries; }
-    public XYChart.Series<Long, Integer> getStates(){ return stateSeries; }
+    public XYChart.Series<Double, Integer> getStates(){ return stateSeries; }
     public XYChart.Series<Long, Integer> getFACH(){ return fachSeries; }
     public XYChart.Series<Long, Integer> getDCH(){ return dchSeries; }
     public ObservableList<PieChart.Data> getLinkDistroData() { return linkDistrData; }

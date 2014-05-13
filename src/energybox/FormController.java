@@ -29,6 +29,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javax.swing.JOptionPane;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
@@ -38,6 +39,7 @@ import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.tcpip.Http;
 import org.jnetpcap.protocol.tcpip.Tcp;
 import org.jnetpcap.protocol.tcpip.Udp;
+import org.jnetpcap.winpcap.WinPcap;
 /**
  * @author Rihards Polis
  * Linkoping University
@@ -76,7 +78,53 @@ public class FormController implements Initializable
     
     @Override
     public void initialize(URL url, ResourceBundle rb)
-    {/*
+    {
+        
+        String os = OSTools.getOS();
+        //System.out.println(System.getProperty("java.library.path"));
+        switch(os)
+        {
+            case "Windows":
+            {
+                String location = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+                String decodedLocation = "";
+                try { decodedLocation = URLDecoder.decode(location, "UTF-8"); }
+                catch (UnsupportedEncodingException e){ e.printStackTrace(); }
+                StringBuilder relativePath = new StringBuilder();
+                relativePath.append(new File(decodedLocation).getParent());
+                relativePath.append(File.separator);
+                try { OSTools.addDirectory(relativePath.toString()); }
+                catch (IOException e)
+                {
+                    JOptionPane.showMessageDialog(null, e.getMessage());
+                }
+            }
+            break;
+                
+            case "Linux":
+            {
+                String location = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+                String decodedLocation = "";
+                try { decodedLocation = URLDecoder.decode(location, "UTF-8"); }
+                catch (UnsupportedEncodingException e){ e.printStackTrace(); }
+                StringBuilder relativePath = new StringBuilder();
+                relativePath.append(new File(decodedLocation).getParent());
+                relativePath.append(File.separator);
+                try { OSTools.addDirectory(relativePath.toString()); }
+                catch (IOException e)
+                {
+                    JOptionPane.showMessageDialog(null, e.getMessage());
+                }
+                try { WinPcap.isSupported(); }
+                catch (UnsatisfiedLinkError e)
+                {
+                    JOptionPane.showMessageDialog(null, "Libpcap-dev not installed!");
+                }
+            }
+            break;
+        }
+        //System.out.println(System.getProperty("java.library.path"));
+        /*
         // Default 3G values for testing
         tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
         textField.setText("test1UL.pcap");
