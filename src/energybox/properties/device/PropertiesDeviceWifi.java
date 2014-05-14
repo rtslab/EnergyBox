@@ -7,7 +7,7 @@ import javafx.beans.property.SimpleDoubleProperty;
  * @author Rihards Polis
  * Linkoping University
  */
-public class PropertiesDeviceWifi implements Device
+public class PropertiesDeviceWifi extends Device
 {
     SimpleDoubleProperty POWER_IN_PSM = new SimpleDoubleProperty(30.0);
     SimpleDoubleProperty POWER_IN_CAM = new SimpleDoubleProperty(250.0);

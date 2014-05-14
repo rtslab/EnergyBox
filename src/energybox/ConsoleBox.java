@@ -1,5 +1,7 @@
 package energybox;
 
+import energybox.engines.EngineWifi;
+import energybox.engines.Engine3G;
 import energybox.properties.device.Device;
 import energybox.properties.device.PropertiesDevice3G;
 import energybox.properties.device.PropertiesDeviceWifi;
@@ -14,8 +16,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -291,7 +291,7 @@ public class ConsoleBox
                     engine.getPower();
                     System.out.println("Network model: 3G");
                     System.out.println("Detected recorder device IP: " + sourceIP);
-                    System.out.println("Total power in Joules: " + engine.statisticsList.get(0).getValue());
+                    System.out.println("Total power in Joules: " + engine.getStatisticsList().get(0).getValue());
                 }
                 break;
 
@@ -307,7 +307,7 @@ public class ConsoleBox
                     engine.getPower();
                     System.out.println("Network model: 3G");
                     System.out.println("Detected recorder device IP: " + sourceIP);
-                    System.out.println("Total power in Joules: " + engine.statisticsList.get(0).getValue());
+                    System.out.println("Total power in Joules: " + engine.getStatisticsList().get(0).getValue());
                 }
             }
         }
@@ -330,15 +330,11 @@ public class ConsoleBox
         }
         else
         {
-            String location = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-            String decodedLocation = "";
-
-            try { decodedLocation = URLDecoder.decode(location, "UTF-8"); }
-            catch (UnsupportedEncodingException e){ e.printStackTrace(); }
-            if (new File(decodedLocation).exists())
+            String location = OSTools.getJarLocation();
+            if (new File(location).exists())
             {
                 StringBuilder relativePath = new StringBuilder();
-                relativePath.append(new File(decodedLocation).getParent());
+                relativePath.append(new File(location).getParent());
                 relativePath.append(File.separator);
                 relativePath.append(path);
                 File f = new File(relativePath.toString());

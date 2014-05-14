@@ -1,10 +1,9 @@
-package energybox;
+package energybox.engines;
 
+import energybox.Packet;
+import energybox.StatisticsEntry;
 import energybox.properties.device.PropertiesDevice3G;
 import energybox.properties.network.Properties3G;
-import java.util.ArrayList;
-import java.util.List;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
@@ -12,7 +11,7 @@ import javafx.scene.chart.XYChart;
  * @author Rihards Polis
  * Linkoping University
  */
-public class Engine3G
+public class Engine3G extends Engine
 {
     enum State 
     { 
@@ -22,38 +21,13 @@ public class Engine3G
         public int getValue() { return this.value; }
     }
     
-    // used for a list of transitions for the total power used
-    private class TransitionPair
-    {
-        private double time;
-        private String state;
-        private TransitionPair(double time, String state)
-        {
-            this.time = time;
-            this.state = state;
-        }
-    }
-    
     // VARIABLES TAKEN FROM THE CONSTRUCTOR
-    String sourceIP;
-    ObservableList<Packet> packetList;
     Properties3G networkProperties; 
     PropertiesDevice3G deviceProperties;
     
     // CHART VARIABLES
-    XYChart.Series<Double, Integer> stateSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> fachSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> dchSeries = new XYChart.Series();
-    XYChart.Series<Long, Integer> uplinkPacketSeries = new XYChart.Series();
-    XYChart.Series<Long, Integer> downlinkPacketSeries = new XYChart.Series();
-    ObservableList<PieChart.Data> linkDistrData = 
-            FXCollections.observableArrayList(new ArrayList());
-    int uplinkPacketCount = 0;
-    ObservableList<PieChart.Data> stateTimeData = 
-            FXCollections.observableArrayList(new ArrayList());
-    List<TransitionPair> transitions = new ArrayList();
-    ObservableList<StatisticsEntry> statisticsList = FXCollections.observableList(new ArrayList());
-    ObservableList<StatisticsEntry> distrStatisticsList = FXCollections.observableList(new ArrayList());
     
     // MAIN CONSTRUCTOR
     public Engine3G(ObservableList<Packet> packetList,
@@ -68,96 +42,12 @@ public class Engine3G
         this.sourceIP = sourceIP;
     }
     
-    // PACKET SORTING METHOD
-    private ObservableList<Packet> sortUplinkDownlink(ObservableList<Packet> packetList, String sourceIP)
-    {
-        for (int i = 0; i < packetList.size(); i++) 
-        {
-            if (packetList.get(i).getSource().equals(sourceIP))
-                packetList.get(i).setUplink(Boolean.TRUE);
-        }
-        return packetList;
-    }
-    
-    // TODO: integrate into modelStates() so that you wouldn't have to loop
-    // through the lacketList twice
-    public XYChart.Series<Long, Long> getUplinkThroughput(double chunkSize)
-    {
-        XYChart.Series<Long, Long> uplinkSeries = new XYChart.Series();
-        uplinkSeries.setName("Uplink");
-        long throughput = 0;
-                //chunkSize = packetList.get(packetList.size()-1).getTime()/50, 
-        double currentChunk = chunkSize;
-        
-        uplinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTime(), 0));
-        int i = 0;
-        while ((currentChunk < packetList.get(packetList.size()-1).getTime()) && (i<packetList.size()))
-        {
-            if (packetList.get(i).getUplink())
-            {
-                if (packetList.get(i).getTime() < currentChunk)
-                {
-                    throughput += packetList.get(i).getLength();
-                    i++;
-                }
-                else
-                {
-                    uplinkSeries.getData().add(new XYChart.Data(currentChunk, throughput)); 
-                    throughput = 0;
-                    currentChunk += chunkSize;
-                }
-            }
-            else i++;
-        }
-        uplinkSeries.getData().add(new XYChart.Data(packetList.get(packetList.size()-1).getTime(), throughput));
-        return uplinkSeries;
-    }
-    
-    public XYChart.Series<Long, Long> getDownlinkThroughput(double chunkSize)
-    {
-        XYChart.Series<Long, Long> downlinkSeries = new XYChart.Series();
-        downlinkSeries.setName("Downlink");
-        downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTime(), 0));
-        long throughput = 0;
-                //chunkSize = packetList.get(packetList.size()-1).getTime()/50, 
-        double currentChunk = chunkSize;
-        
-        downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTime(), 0));
-        int i = 0;
-        while ((currentChunk < packetList.get(packetList.size()-1).getTime()) && (i<packetList.size()))
-        {
-            if (!packetList.get(i).getUplink())
-            {
-                if (packetList.get(i).getTime() < currentChunk)
-                {
-                    throughput += packetList.get(i).getLength();
-                    i++;
-                }
-                else
-                {
-                    downlinkSeries.getData().add(new XYChart.Data(currentChunk, throughput)); 
-                    throughput = 0;
-                    currentChunk += chunkSize;
-                }
-            }
-            else i++;
-        }
-        downlinkSeries.getData().add(new XYChart.Data(packetList.get(packetList.size()-1).getTime(), throughput));
-        return downlinkSeries;
-    }
-    
-    // MAIN MODELING METHOD
-    // Loops through the packetList once and calculates:
-    // -State chart -State transitions -Packet chart -Distribution pie chart
+    @Override
     public XYChart.Series<Double, Integer> modelStates()
     {
         // Buffer control variables
         int bufferIDLEtoFACHuplink = 0, bufferIDLEtoFACHdownlink = 0,
             bufferFACHtoDCHuplink = 0, bufferFACHtoDCHdownlink = 0;
-        // If set to true, implements original EnergyBox graph point calculation
-        // using microsecond deviations between some transition points to create
-        // a continuous function graph
-        boolean oldEB = false;
         // Timer variables
         long deltaDownlink = 0, 
                 deltaUplink = 0, 
@@ -168,32 +58,11 @@ public class Engine3G
                 timeToEmptyUplink = 0;
                 // timeToEmptyDownlink = networkProperties.getDOWNLINK_BUFFER_EMPTY_TIME;
         State state = State.IDLE; // State enumeration
-         
-        // Start off in IDLE at time 0
-        transitions.add(new TransitionPair(0, state.toString()));
         // Packet list points
         for (int i = 0; i < packetList.size(); i++) 
         {
             // Populating the packetChart series
-            if (packetList.get(i).getUplink())
-            {
-                uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));
-                uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() , packetList.get(i).getLength()));
-                uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));
-                uplinkPacketCount++;
-            }
-            else
-            {
-                downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));
-                downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() , packetList.get(i).getLength()));
-                downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packetList.get(i).getTime() ,0));
-            }
+            packetChartEntry(packetList.get(i));
             
             // Update deltas and previous times (uplink and downlink seperately
             // for buffer calculations)
@@ -215,11 +84,7 @@ public class Engine3G
                         fachToIdle(previousTime + networkProperties.getFACH_IDLE_INACTIVITY_TIME());
                         drawState(previousTime + (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
                         state = State.IDLE;
-                        transitions.add(new TransitionPair(previousTime + networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.toString()));
-                        if (oldEB)
-                            drawState(previousTime + (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME()+1, state.getValue());
-                        else
-                            drawState(previousTime + (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
+                        drawState(previousTime + (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
                     }
                 }
                 break;
@@ -237,27 +102,14 @@ public class Engine3G
                                 networkProperties.getFACH_IDLE_INACTIVITY_TIME());
                         drawState(previousTime + (long)networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
                         state = State.FACH;
-                        transitions.add(new TransitionPair(previousTime + networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.toString()));
-                        if (oldEB)
-                            drawState(previousTime + (long)networkProperties.getDCH_FACH_INACTIVITY_TIME()+1, state.getValue());
-                        else
-                            drawState(previousTime + (long)networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
-                        
+                        drawState(previousTime + (long)networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
                         drawState(previousTime + 
                                 (long)networkProperties.getDCH_FACH_INACTIVITY_TIME() +
                                 (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
                         state = State.IDLE;
-                        transitions.add(new TransitionPair(previousTime + 
-                                networkProperties.getDCH_FACH_INACTIVITY_TIME() +
-                                networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.toString()));
-                        if (oldEB)
-                            drawState(previousTime + 
-                                    (long)networkProperties.getDCH_FACH_INACTIVITY_TIME() +
-                                    (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME()+1, state.getValue());
-                        else
-                            drawState(previousTime + 
-                                    (long)networkProperties.getDCH_FACH_INACTIVITY_TIME() +
-                                    (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
+                        drawState(previousTime + 
+                                (long)networkProperties.getDCH_FACH_INACTIVITY_TIME() +
+                                (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
                         break; // so that it wouldn't demote to FACH twice
                     }
                     // DCH to FACH
@@ -266,11 +118,7 @@ public class Engine3G
                         dchToFach(previousTime + networkProperties.getDCH_FACH_INACTIVITY_TIME());
                         drawState(previousTime + (long)networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
                         state = State.FACH;
-                        transitions.add(new TransitionPair(previousTime + networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.toString()));
-                        if (oldEB)
-                            drawState(previousTime + (long)networkProperties.getDCH_FACH_INACTIVITY_TIME()+1, state.getValue());
-                        else
-                            drawState(previousTime + (long)networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
+                        drawState(previousTime + (long)networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
                     }
                 }
                 break;
@@ -287,26 +135,15 @@ public class Engine3G
                         if (packetList.get(i).getLength() > networkProperties.getUPLINK_BUFFER_IDLE_TO_FACH_OR_DCH())
                         {
                             idleToDch(packetList.get(i).getTimeInMicros() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME());
-                            if (oldEB)
-                                drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME()-1, state.getValue());
-                            else
-                                drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
-                            
+                            drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());                            
                             state = State.DCH;
-                            transitions.add(new TransitionPair(packetList.get(i).getTimeInMicros() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.toString()));
                             drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
                         }
                         else
                         {
                             idleToFach((double)packetList.get(i).getTimeInMicros());
-                            // 
-                            if (oldEB)
-                                drawState(packetList.get(i).getTimeInMicros()-1, state.getValue());
-                            else
-                                drawState(packetList.get(i).getTimeInMicros(), state.getValue());
-                            //drawState(packetList.get(i).getTime() + networkProperties.getIDLE_TO_FACH_TRANSITION_TIME(), state.getValue());
+                            drawState(packetList.get(i).getTimeInMicros(), state.getValue());
                             state = State.FACH;
-                            transitions.add(new TransitionPair(packetList.get(i).getTimeInMicros(), state.toString()));
                             drawState(packetList.get(i).getTimeInMicros(), state.getValue());
                             bufferIDLEtoFACHuplink += packetList.get(i).getLength();
                         }
@@ -317,25 +154,15 @@ public class Engine3G
                         if (packetList.get(i).getLength() > networkProperties.getDOWNLINK_BUFFER_IDLE_TO_FACH_OR_DCH())
                         {
                             idleToDch(packetList.get(i).getTimeInMicros() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME());
-                            if (oldEB)
-                                drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME()-1, state.getValue());
-                            else
-                                drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
+                            drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
                             state = State.DCH;
-                            //transitions.add(new TransitionPair(packetList.get(i).getTimeInMicros() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.toString()));
-                            transitions.add(new TransitionPair(packetList.get(i).getTimeInMicros() + 1, state.toString()));
                             drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
                         }
                         else
                         {
                             idleToFach((double)packetList.get(i).getTimeInMicros());
-                            
-                            if (oldEB)
-                                drawState(packetList.get(i).getTimeInMicros()-1, state.getValue());
-                            else
-                                drawState(packetList.get(i).getTimeInMicros(), state.getValue());
+                            drawState(packetList.get(i).getTimeInMicros(), state.getValue());
                             state = State.FACH;
-                            transitions.add(new TransitionPair(packetList.get(i).getTimeInMicros(), state.toString()));
                             drawState(packetList.get(i).getTimeInMicros(), state.getValue());
                             bufferIDLEtoFACHdownlink += packetList.get(i).getLength();
                         }
@@ -358,16 +185,12 @@ public class Engine3G
                     // Uplink packets
                     if (packetList.get(i).getUplink())
                     {
-                        if (oldEB)
-                            drawState(packetList.get(i).getTimeInMicros()-1, state.getValue());
-                        else
-                            drawState(packetList.get(i).getTimeInMicros(), state.getValue());
+                        drawState(packetList.get(i).getTimeInMicros(), state.getValue());
                         bufferFACHtoDCHuplink += packetList.get(i).getLength();
                         if (bufferFACHtoDCHuplink > networkProperties.getUPLINK_BUFFER_FACH_TO_DCH())
                         {
                             fachToDch((double)packetList.get(i).getTimeInMicros());
                             state = State.DCH;
-                            transitions.add(new TransitionPair((double)packetList.get(i).getTimeInMicros(), state.toString()));
                             bufferFACHtoDCHuplink = 0;
                         }
                         drawState(packetList.get(i).getTimeInMicros(), state.getValue());
@@ -375,16 +198,12 @@ public class Engine3G
                     // Downlink packets
                     else
                     {                        
-                        if (oldEB)
-                            drawState(packetList.get(i).getTimeInMicros()-1, state.getValue());
-                        else
-                            drawState(packetList.get(i).getTimeInMicros(), state.getValue());
+                        drawState(packetList.get(i).getTimeInMicros(), state.getValue());
                         bufferFACHtoDCHdownlink += packetList.get(i).getLength();
                         if (bufferFACHtoDCHdownlink > networkProperties.getDOWNLINK_BUFFER_FACH_TO_DCH())
                         {
                             fachToDch((double)packetList.get(i).getTimeInMicros());
                             state = State.DCH;
-                            transitions.add(new TransitionPair((double)packetList.get(i).getTimeInMicros(), state.toString()));
                             bufferFACHtoDCHdownlink = 0;
                         }
                         drawState(packetList.get(i).getTimeInMicros(), state.getValue());
@@ -419,51 +238,28 @@ public class Engine3G
                     networkProperties.getFACH_IDLE_INACTIVITY_TIME());
             drawState(previousTime + (long)networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
             state = State.FACH;
-            transitions.add(new TransitionPair(previousTime + networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.toString()));
-            if (oldEB)
-                drawState(previousTime + (long)networkProperties.getDCH_FACH_INACTIVITY_TIME()+1, state.getValue());
-            else
-                drawState(previousTime + (long)networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
+            drawState(previousTime + (long)networkProperties.getDCH_FACH_INACTIVITY_TIME(), state.getValue());
 
             drawState(previousTime + 
                     (long)networkProperties.getDCH_FACH_INACTIVITY_TIME() +
                     (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
             state = State.IDLE;
-            transitions.add(new TransitionPair(previousTime + 
-                    networkProperties.getDCH_FACH_INACTIVITY_TIME() +
-                    networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.toString()));
-            if (oldEB)
-                drawState(previousTime + 
-                        (long)networkProperties.getDCH_FACH_INACTIVITY_TIME() +
-                        (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME()+1, state.getValue());
-            else
-                drawState(previousTime + 
-                        (long)networkProperties.getDCH_FACH_INACTIVITY_TIME() +
-                        (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
+            drawState(previousTime + 
+                    (long)networkProperties.getDCH_FACH_INACTIVITY_TIME() +
+                    (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
         }
         else if (state == State.FACH)
         {
             fachToIdle(previousTime + networkProperties.getFACH_IDLE_INACTIVITY_TIME());
             drawState(previousTime + (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
             state = State.IDLE;
-            transitions.add(new TransitionPair(previousTime + networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.toString()));
-            if (oldEB)
-                drawState(previousTime + (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME()+1, state.getValue());
-            else
-                drawState(previousTime + (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
+            drawState(previousTime + (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
         }
         linkDistrData.add(new PieChart.Data("Uplink", uplinkPacketCount));
         linkDistrData.add(new PieChart.Data("Downlink", packetList.size()-uplinkPacketCount));
         distrStatisticsList.add(new StatisticsEntry("Nr of UL packets",uplinkPacketCount));
         distrStatisticsList.add(new StatisticsEntry("Nr of DL packets",packetList.size()-uplinkPacketCount));
-        transitions.add(new TransitionPair((double)packetList.get(packetList.size()-1).getTimeInMicros(), state.toString()));
         return stateSeries;
-    }
-    
-    private void drawState(Long time, int state)
-    {
-        Double tempTime = time.doubleValue()/1000000;
-        stateSeries.getData().add(new XYChart.Data(tempTime, state));        
     }
     
     public void getPower()
@@ -550,11 +346,6 @@ public class Engine3G
     public long timeToEmptyUplink(int buffer) { return (long)networkProperties.getUPLINK_BUFFER_EMPTY_TIME() * buffer + 10; }
     
     // GETTERS
-    public XYChart.Series<Long, Integer> getUplinkPackets(){ return uplinkPacketSeries; }
-    public XYChart.Series<Long, Integer> getDownlinkPackets(){ return downlinkPacketSeries; }
-    public XYChart.Series<Double, Integer> getStates(){ return stateSeries; }
     public XYChart.Series<Long, Integer> getFACH(){ return fachSeries; }
     public XYChart.Series<Long, Integer> getDCH(){ return dchSeries; }
-    public ObservableList<PieChart.Data> getLinkDistroData() { return linkDistrData; }
-    public ObservableList<PieChart.Data> getStateTimeData() { return stateTimeData; }
 }

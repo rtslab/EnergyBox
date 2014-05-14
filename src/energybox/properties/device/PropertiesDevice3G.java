@@ -7,7 +7,7 @@ import javafx.beans.property.SimpleDoubleProperty;
  * @author Rihards Polis
  * Linkoping University
  */
-public class PropertiesDevice3G implements Device
+public class PropertiesDevice3G extends Device
 {
     SimpleDoubleProperty POWER_IN_IDLE = new SimpleDoubleProperty(0.2);
     SimpleDoubleProperty POWER_IN_FACH = new SimpleDoubleProperty(0.5);

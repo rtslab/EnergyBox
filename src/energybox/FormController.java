@@ -1,5 +1,6 @@
 package energybox;
 
+import energybox.engines.*;
 import energybox.properties.device.*;
 import energybox.properties.network.*;
 import java.io.File;
@@ -24,7 +25,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
@@ -49,21 +49,13 @@ public class FormController implements Initializable
     @FXML
     private Label errorText;
     @FXML
-    private Button button;
-    @FXML
     private TextField textField;
     @FXML
     private TextField deviceField;
     @FXML
     private TextField networkField;
     @FXML
-    private Button deviceButton;
-    @FXML
-    private Button networkButton;
-    @FXML
     private TextField ipField;
-    @FXML
-    private Button traceButton;
     
     Network networkProperties = null;
     Device deviceProperties = null;
@@ -124,7 +116,7 @@ public class FormController implements Initializable
             break;
         }
         //System.out.println(System.getProperty("java.library.path"));
-        /*
+        
         // Default 3G values for testing
         tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
         textField.setText("test1UL.pcap");
@@ -134,7 +126,7 @@ public class FormController implements Initializable
         deviceProperties = new PropertiesDevice3G(properties);
         properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
         networkProperties = new Properties3G(properties);
-        
+        /*
         // Default Wifi values for testing
             tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2.pcap";
             textField.setText("round2.pcap");
@@ -358,12 +350,8 @@ public class FormController implements Initializable
     {
         Stage stage = new Stage();
         FileChooser fileChooser = new FileChooser();
-        String path = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String decodedPath = "";
-        
-        try { decodedPath = URLDecoder.decode(path, "UTF-8"); }
-        catch (UnsupportedEncodingException e){ e.printStackTrace(); }
-        fileChooser.setInitialDirectory((new File(decodedPath)).getParentFile().getParentFile());
+        String path = OSTools.getJarLocation();
+        fileChooser.setInitialDirectory((new File(path)).getParentFile().getParentFile());
         fileChooser.setTitle("Open Device Configuration File");
         File file = fileChooser.showOpenDialog(stage);
         Properties properties = fileToProperties(file);
@@ -385,12 +373,8 @@ public class FormController implements Initializable
     {
         Stage stage = new Stage();
         FileChooser fileChooser = new FileChooser();
-        String path = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String decodedPath = "";
-        
-        try { decodedPath = URLDecoder.decode(path, "UTF-8"); }
-        catch (UnsupportedEncodingException e){ e.printStackTrace(); }
-        fileChooser.setInitialDirectory((new File(decodedPath)).getParentFile().getParentFile());
+        String path = OSTools.getJarLocation();
+        fileChooser.setInitialDirectory((new File(path)).getParentFile().getParentFile());
         fileChooser.setTitle("Open Network Configuration File");
         File file = fileChooser.showOpenDialog(stage);
         Properties properties = fileToProperties(file);
@@ -413,12 +397,8 @@ public class FormController implements Initializable
     {
         Stage stage = new Stage();
         FileChooser fileChooser = new FileChooser();
-        String path = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String decodedPath = "";
-        
-        try { decodedPath = URLDecoder.decode(path, "UTF-8"); }
-        catch (UnsupportedEncodingException e){ e.printStackTrace(); }
-        fileChooser.setInitialDirectory((new File(decodedPath)).getParentFile().getParentFile());
+        String path = OSTools.getJarLocation();
+        fileChooser.setInitialDirectory((new File(path)).getParentFile().getParentFile());
         fileChooser.setTitle("Open Network Configuration File");
         File file = fileChooser.showOpenDialog(stage);
         

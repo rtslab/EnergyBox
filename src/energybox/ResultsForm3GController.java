@@ -1,5 +1,6 @@
 package energybox;
 
+import energybox.engines.Engine3G;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
@@ -103,7 +103,7 @@ public class ResultsForm3GController implements Initializable
         axisList.add(powerXAxis);
         axisList.add(stateXAxis2);
         axisList.add(packetXAxis3);
-        descriptionField.setText(engine.sourceIP);
+        descriptionField.setText(engine.getSourceIP());
         engine.modelStates();
         engine.getPower();
         stateChart.getXAxis().setLabel("Time(s)");
@@ -126,9 +126,9 @@ public class ResultsForm3GController implements Initializable
         throughputChart.getXAxis().setLabel("Time(s)");
         throughputChart.getYAxis().setLabel("Bytes/s");
         throughputChart.getData().add(engine.getUplinkThroughput(
-                engine.packetList.get(engine.packetList.size()-1).getTime()/50));
+                engine.getPacketList().get(engine.getPacketList().size()-1).getTime()/50));
         throughputChart.getData().add(engine.getDownlinkThroughput(
-                engine.packetList.get(engine.packetList.size()-1).getTime()/50));
+                engine.getPacketList().get(engine.getPacketList().size()-1).getTime()/50));
         
         packetChart.getXAxis().setLabel("Time(s)");
         packetChart.getYAxis().setLabel("Size(bytes)");
@@ -145,9 +145,9 @@ public class ResultsForm3GController implements Initializable
         packetChart3.getData().add(new XYChart.Series("Uplink", engine.getUplinkPackets().getData()));
         packetChart3.getData().add(new XYChart.Series("Downlink", engine.getDownlinkPackets().getData()));
         
-        packetTable.getItems().setAll(engine.packetList);
-        statsTable.getItems().setAll(engine.statisticsList);
-        linkDistroTable.getItems().setAll(engine.distrStatisticsList);
+        packetTable.getItems().setAll(engine.getPacketList());
+        statsTable.getItems().setAll(engine.getStatisticsList());
+        linkDistroTable.getItems().setAll(engine.getDistrStatisticsList());
         // TODO: put Property Factories in control instead of FXML
         /*
         timeCol.setCellFactory(new PropertyValueFactory<Packet, Long>("time"));
@@ -162,12 +162,8 @@ public class ResultsForm3GController implements Initializable
     {
         Stage stage = new Stage();
         FileChooser fileChooser = new FileChooser();
-        String path = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String decodedPath = "";
-        
-        try { decodedPath = URLDecoder.decode(path, "UTF-8"); }
-        catch (UnsupportedEncodingException e){ e.printStackTrace(); }
-        fileChooser.setInitialDirectory((new File(decodedPath)).getParentFile().getParentFile());
+        String path = OSTools.getJarLocation();
+        fileChooser.setInitialDirectory((new File(path)).getParentFile().getParentFile());
         fileChooser.setTitle("Save CSV File");
         File file = fileChooser.showSaveDialog(stage);
 
@@ -244,7 +240,7 @@ public class ResultsForm3GController implements Initializable
         }
         else
         {
-            double newToTime = Double.valueOf(engine.packetList.get(engine.packetList.size()-1).getTime());
+            double newToTime = Double.valueOf(engine.getPacketList().get(engine.getPacketList().size()-1).getTime());
             for (NumberAxis axis : axisList)
             {
                 axis.setAutoRanging(false);
@@ -275,7 +271,7 @@ public class ResultsForm3GController implements Initializable
         }
         else
         {
-            long newChunkValue = engine.packetList.get(engine.packetList.size()-1).getTimeInMicros()/50;
+            long newChunkValue = engine.getPacketList().get(engine.getPacketList().size()-1).getTimeInMicros()/50;
             throughputChart.getData().clear();
             throughputChart.getData().add(engine.getUplinkThroughput(newChunkValue));
             throughputChart.getData().add(engine.getDownlinkThroughput(newChunkValue));
