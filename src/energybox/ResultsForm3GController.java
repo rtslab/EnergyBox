@@ -4,9 +4,7 @@ import energybox.engines.Engine3G;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -19,6 +17,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Dialogs;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -202,8 +201,7 @@ public class ResultsForm3GController implements Initializable
             }
             catch (NumberFormatException e)
             {
-                // TODO: Replace with the ControlFX third party error dialogues
-                JOptionPane.showMessageDialog(null, "Not a number!\nPlease input a number with decimal seperator '.'");
+                Dialogs.showErrorDialog(null, "Not a number! Please input a number with decimal seperator '.'");
             }
         }
         else
@@ -234,8 +232,7 @@ public class ResultsForm3GController implements Initializable
             }
             catch (NumberFormatException e)
             {
-                // TODO: Replace with the ControlFX third party error dialogues
-                JOptionPane.showMessageDialog(null, "Not a number!\nPlease input a number with decimal seperator '.'");
+                Dialogs.showErrorDialog(null, "Not a number! Please input a number with decimal seperator '.'");
             }
         }
         else
@@ -265,8 +262,7 @@ public class ResultsForm3GController implements Initializable
             }
             catch (NumberFormatException e)
             {
-                // TODO: Replace with the ControlFX third party error dialogues
-                JOptionPane.showMessageDialog(null, "Not a number!\nPlease input a number with decimal seperator '.'");
+                Dialogs.showErrorDialog(null, "Not a number! Please input a number with decimal seperator '.'");
             }
         }
         else

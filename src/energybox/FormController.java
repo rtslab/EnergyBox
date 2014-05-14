@@ -25,6 +25,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Dialogs;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
@@ -71,7 +72,6 @@ public class FormController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-        
         String os = OSTools.getOS();
         //System.out.println(System.getProperty("java.library.path"));
         switch(os)
@@ -88,7 +88,7 @@ public class FormController implements Initializable
                 try { OSTools.addDirectory(relativePath.toString()); }
                 catch (IOException e)
                 {
-                    JOptionPane.showMessageDialog(null, e.getMessage());
+                    Dialogs.showErrorDialog(null, e.getMessage());
                 }
             }
             break;
@@ -110,13 +110,13 @@ public class FormController implements Initializable
                 try { WinPcap.isSupported(); }
                 catch (UnsatisfiedLinkError e)
                 {
-                    JOptionPane.showMessageDialog(null, "Libpcap-dev not installed!");
+                    Dialogs.showErrorDialog(null, "Libpcap-dev not installed!");
                 }
             }
             break;
         }
         //System.out.println(System.getProperty("java.library.path"));
-        
+        /*
         // Default 3G values for testing
         tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
         textField.setText("test1UL.pcap");
