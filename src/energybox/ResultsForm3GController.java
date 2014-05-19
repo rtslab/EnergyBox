@@ -24,7 +24,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javax.swing.JOptionPane;
 /**
  * @author Rihards Polis
  * Linkoping University
@@ -191,7 +190,6 @@ public class ResultsForm3GController implements Initializable
             {
                 double newFromTime = Double.parseDouble(fromTimeField.getText());
                 NumberAxis something = new NumberAxis();
-                //something.setRange();
                 for (NumberAxis axis : axisList)
                 {
                     axis.setAutoRanging(false);

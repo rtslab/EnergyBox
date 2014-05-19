@@ -115,7 +115,7 @@ public class EngineWifi extends Engine
     
     public void getPower()
     {
-        Double power = Double.valueOf(0);
+        //Double power = Double.valueOf(0);
         int timeInPSM = 0, timeInCAM = 0, timeInCAMH = 0;
         for (int i = 1; i < stateSeries.getData().size(); i++)
         {

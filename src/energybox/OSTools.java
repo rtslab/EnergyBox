@@ -10,6 +10,9 @@ import java.net.URLDecoder;
  * @author Rihards Polis
  * Linkoping University
  */
+
+// All the methods for this class are static, thus there's no need to instance
+// it. It's only used for grouping the utility methods.
 public class OSTools
 {
     private static String OS = System.getProperty("os.name").toLowerCase();

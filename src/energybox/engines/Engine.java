@@ -18,7 +18,7 @@ public abstract class Engine
     protected String sourceIP;
     protected ObservableList<Packet> packetList;
     
-    // CHART VARIABLES
+    // RESULTS VARIABLES
     protected XYChart.Series<Double, Integer> stateSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> uplinkPacketSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> downlinkPacketSeries = new XYChart.Series();
@@ -29,6 +29,7 @@ public abstract class Engine
             FXCollections.observableArrayList(new ArrayList());
     protected ObservableList<StatisticsEntry> statisticsList = FXCollections.observableList(new ArrayList());
     protected ObservableList<StatisticsEntry> distrStatisticsList = FXCollections.observableList(new ArrayList());
+    protected Double power = Double.valueOf(0);
     
     // PACKET SORTING
     public ObservableList<Packet> sortUplinkDownlink(ObservableList<Packet> packetList, String sourceIP)
@@ -153,4 +154,5 @@ public abstract class Engine
     public ObservableList<Packet> getPacketList() {return packetList; }
     public ObservableList<StatisticsEntry> getStatisticsList() {return statisticsList; }
     public ObservableList<StatisticsEntry> getDistrStatisticsList() {return distrStatisticsList; }
+    public Double getPowerValue() { return power; }
 }

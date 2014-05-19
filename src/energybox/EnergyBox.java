@@ -35,6 +35,11 @@ public class EnergyBox extends Application
         {
             ConsoleBox consoleBox = new ConsoleBox(flags.get("t"), flags.get("n"), flags.get("d"));
             consoleBox.printResults();
+            if (flags.containsKey("f"))
+            {
+                consoleBox.outputToFile(flags.get("f"));
+                System.out.println("States saved in file '" + flags.get("f") + "'");
+            }
             Platform.exit();
             this.stop();
         }
@@ -44,6 +49,8 @@ public class EnergyBox extends Application
             System.out.println("--t=<trace file path>");
             System.out.println("--n=<network configuration file path>");
             System.out.println("--d=<device configuration file path>");
+            System.out.println("Optional flags:");
+            System.out.println("--f=<path to output file>");
             Platform.exit();
             this.stop();
         }

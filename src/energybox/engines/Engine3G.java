@@ -264,7 +264,7 @@ public class Engine3G extends Engine
     
     public void getPower()
     {
-        Double power = Double.valueOf(0);
+        //Double power = Double.valueOf(0);
         int timeInIDLE = 0, timeInFACH = 0, timeInDCH = 0;
         for (int i = 1; i < stateSeries.getData().size(); i++)
         {

@@ -10,6 +10,7 @@ import energybox.properties.network.Properties3G;
 import energybox.properties.network.PropertiesWifi;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Properties;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.chart.XYChart;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
@@ -41,6 +43,10 @@ public class ConsoleBox
     private final String tracePath, 
             networkPath, 
             devicePath;
+    
+    // populated within printResults() to be printed by outputToFile()
+    private XYChart.Series<Double, Integer> printStates;
+    private Double power;
     
     public ConsoleBox(String tracePath, 
             String networkPath, 
@@ -289,6 +295,8 @@ public class ConsoleBox
                             ((PropertiesDevice3G)deviceProperties));
                     engine.modelStates();
                     engine.getPower();
+                    printStates = engine.getStates(); // so that the states could be accesed for outputToFile
+                    power = engine.getPowerValue();
                     System.out.println("Network model: 3G");
                     System.out.println("Detected recorder device IP: " + sourceIP);
                     System.out.println("Total power in Joules: " + engine.getStatisticsList().get(0).getValue());
@@ -305,6 +313,8 @@ public class ConsoleBox
                             ((PropertiesDeviceWifi)deviceProperties));
                     engine.modelStates();
                     engine.getPower();
+                    printStates = engine.getStates(); // so that the states could be accesed for outputToFile
+                    power = engine.getPowerValue();
                     System.out.println("Network model: 3G");
                     System.out.println("Detected recorder device IP: " + sourceIP);
                     System.out.println("Total power in Joules: " + engine.getStatisticsList().get(0).getValue());
@@ -343,5 +353,26 @@ public class ConsoleBox
             }
             return properties;
         }
+    }
+    
+    public void outputToFile(String path)
+    {
+        File file = new File(path);
+        try
+        {
+            FileWriter writer = new FileWriter(file.getAbsolutePath());
+            writer.append(power.toString());
+            writer.append("\n");
+            for (int i = 0; i < printStates.getData().size(); i++)
+            {
+                writer.append(printStates.getData().get(i).getYValue().toString());
+                writer.append(",");
+                writer.append(Double.valueOf(printStates.getData().get(i).getXValue().doubleValue()).toString());
+                writer.append("\n");
+            }
+            writer.flush();
+	    writer.close();
+        }
+        catch(IOException e){ e.printStackTrace();}
     }
 }
