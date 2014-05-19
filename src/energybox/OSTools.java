@@ -61,7 +61,7 @@ public class OSTools
     }
     public static String getJarLocation()
     {
-        String path = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String path = MainFormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         String decodedPath = "";
         try { decodedPath = URLDecoder.decode(path, "UTF-8"); }
         catch (UnsupportedEncodingException e){ e.printStackTrace(); }

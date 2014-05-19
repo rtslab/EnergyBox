@@ -45,7 +45,7 @@ import org.jnetpcap.winpcap.WinPcap;
  * @author Rihards Polis
  * Linkoping University
  */
-public class FormController implements Initializable
+public class MainFormController implements Initializable
 {
     @FXML
     private Label errorText;
@@ -78,7 +78,7 @@ public class FormController implements Initializable
         {
             case "Windows":
             {
-                String location = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+                String location = MainFormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
                 String decodedLocation = "";
                 try { decodedLocation = URLDecoder.decode(location, "UTF-8"); }
                 catch (UnsupportedEncodingException e){ e.printStackTrace(); }
@@ -95,7 +95,7 @@ public class FormController implements Initializable
                 
             case "Linux":
             {
-                String location = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+                String location = MainFormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
                 String decodedLocation = "";
                 try { decodedLocation = URLDecoder.decode(location, "UTF-8"); }
                 catch (UnsupportedEncodingException e){ e.printStackTrace(); }

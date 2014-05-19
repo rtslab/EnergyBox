@@ -73,7 +73,7 @@ public class ConsoleBox
         
         if (!new File(tracePath).exists())
         {
-            String location = FormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            String location = MainFormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
             String decodedLocation = "";
             
             try { decodedLocation = URLDecoder.decode(location, "UTF-8"); }

@@ -6,7 +6,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane id="AnchorPane" maxHeight="215.0" maxWidth="341.0" minHeight="215.0" minWidth="341.0" prefHeight="215.0" prefWidth="341.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="energybox.FormController">
+<AnchorPane id="AnchorPane" maxHeight="215.0" maxWidth="341.0" minHeight="215.0" minWidth="341.0" prefHeight="215.0" prefWidth="341.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="energybox.MainFormController">
     <children>
         <Button layoutX="264.0" layoutY="72.0" onAction="#handleButtonAction" prefHeight="45.0" prefWidth="72.0" text="Energy Box" textAlignment="CENTER" wrapText="true">
 <font>
