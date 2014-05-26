@@ -111,9 +111,13 @@ public abstract class Engine
     
     // MAIN MODELING METHOD
     // Loops through the packetList once and calculates:
-    // -State chart -State transitions -Packet chart -Distribution pie chart.
+    // -State chart -Packet chart -Distribution pie chart.
     // Implemented in every Engine type seperately.
     abstract XYChart.Series<Double, Integer> modelStates();
+    
+    // Calculates power based on the power graph.
+    // Implemented in every Engine type seperately.
+    abstract void calculatePower();
     
     public void packetChartEntry(Packet packet)
     {
@@ -147,7 +151,7 @@ public abstract class Engine
     // GETTERS
     public XYChart.Series<Long, Integer> getUplinkPackets(){ return uplinkPacketSeries; }
     public XYChart.Series<Long, Integer> getDownlinkPackets(){ return downlinkPacketSeries; }
-    public XYChart.Series<Double, Integer> getStates(){ return stateSeries; }
+    public XYChart.Series<Double, Integer> getPower(){ return stateSeries; }
     public ObservableList<PieChart.Data> getLinkDistroData() { return linkDistrData; }
     public ObservableList<PieChart.Data> getStateTimeData() { return stateTimeData; }
     public String getSourceIP() {return sourceIP;}

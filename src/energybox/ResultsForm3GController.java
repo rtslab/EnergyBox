@@ -91,8 +91,7 @@ public class ResultsForm3GController implements Initializable
     
     void initData(Engine3G engine)
     {
-        this.engine = engine;
-        states = engine.getStates();
+        this.engine = engine; 
 
         axisList.add(throughputXAxis);
         axisList.add(packetXAxis);
@@ -103,7 +102,8 @@ public class ResultsForm3GController implements Initializable
         axisList.add(packetXAxis3);
         descriptionField.setText(engine.getSourceIP());
         engine.modelStates();
-        engine.getPower();
+        engine.calculatePower();
+        states = engine.getPower();
         stateChart.getXAxis().setLabel("Time(s)");
         stateChart.getYAxis().setLabel("States");
         stateChart.getData().add(new XYChart.Series("FACH", engine.getFACH().getData()));
@@ -116,7 +116,7 @@ public class ResultsForm3GController implements Initializable
         
         powerChart.getXAxis().setLabel("Time(s)");
         powerChart.getYAxis().setLabel("Power(J)");
-        powerChart.getData().add(engine.getStates());
+        powerChart.getData().add(engine.getPower());
         
         linkDistroPieChart.getData().addAll(engine.getLinkDistroData());
         stateTimePieChart.getData().addAll(engine.getStateTimeData());

@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
+import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +48,7 @@ public class ConsoleBox
     // populated within printResults() to be printed by outputToFile()
     private XYChart.Series<Double, Integer> printStates;
     private Double power;
+    String sourceIP = "";
     
     public ConsoleBox(String tracePath, 
             String networkPath, 
@@ -63,11 +65,9 @@ public class ConsoleBox
         Device deviceProperties = null;
         final HashMap<String, String> criteria = new HashMap();
         final HashMap<String, Integer> addressOccurrence = new HashMap();
-        String sourceIP = "";
         StringBuilder errbuf = new StringBuilder();
         // Wrapped lists in JavaFX ObservableList for the table view
         final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList());    
-        
         // READING THE PACKET TRACE
         Pcap pcap = null;
         
@@ -226,6 +226,17 @@ public class ConsoleBox
                     }
                 }
                 catch(UnknownHostException e){ e.printStackTrace(); }
+                // If the packet is unfinished the ByteBuffer will throw the
+                // BufferUnderflowException, which would break the loop if not cought.
+                catch(BufferUnderflowException e) 
+                {
+                    packetList.add(new Packet(
+                            packet.getCaptureHeader().timestampInMicros() - startTime,
+                            packet.getPacketWirelen(),
+                            "N/A",
+                            "N/A",
+                            "Broken Packet"));
+                }
             }  
         };
         try {  pcap.loop(pcap.LOOP_INFINATE, jpacketHandler, "") ; }
@@ -294,8 +305,8 @@ public class ConsoleBox
                             // deviceProperties instanced as PropertiesDevice3G
                             ((PropertiesDevice3G)deviceProperties));
                     engine.modelStates();
-                    engine.getPower();
-                    printStates = engine.getStates(); // so that the states could be accesed for outputToFile
+                    engine.calculatePower();
+                    printStates = engine.getPower(); // so that the states could be accesed for outputToFile
                     power = engine.getPowerValue();
                     System.out.println("Network model: 3G");
                     System.out.println("Detected recorder device IP: " + sourceIP);
@@ -312,8 +323,8 @@ public class ConsoleBox
                             // deviceProperties instanced as PropertiesDevice3G
                             ((PropertiesDeviceWifi)deviceProperties));
                     engine.modelStates();
-                    engine.getPower();
-                    printStates = engine.getStates(); // so that the states could be accesed for outputToFile
+                    engine.calculatePower();
+                    printStates = engine.getPower(); // so that the states could be accesed for outputToFile
                     power = engine.getPowerValue();
                     System.out.println("Network model: 3G");
                     System.out.println("Detected recorder device IP: " + sourceIP);
@@ -361,6 +372,8 @@ public class ConsoleBox
         try
         {
             FileWriter writer = new FileWriter(file.getAbsolutePath());
+            writer.append(sourceIP);
+            writer.append("\n");
             writer.append(power.toString());
             writer.append("\n");
             for (int i = 0; i < printStates.getData().size(); i++)

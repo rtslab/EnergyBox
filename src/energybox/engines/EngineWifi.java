@@ -113,7 +113,8 @@ public class EngineWifi extends Engine
         return stateSeries;
     }
     
-    public void getPower()
+    @Override
+    public void calculatePower()
     {
         //Double power = Double.valueOf(0);
         int timeInPSM = 0, timeInCAM = 0, timeInCAMH = 0;

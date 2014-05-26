@@ -22,7 +22,7 @@ public class EnergyBox extends Application
         // graphical interface.
         if (this.getParameters().getRaw().isEmpty())
         {
-            Parent root = FXMLLoader.load(getClass().getResource("Forms.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("MainForm.fxml"));
 
             Scene scene = new Scene(root);
 

@@ -12,6 +12,7 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
+import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +38,7 @@ import org.jnetpcap.packet.PcapPacketHandler;
 import org.jnetpcap.protocol.lan.Ethernet;
 import org.jnetpcap.protocol.network.Arp;
 import org.jnetpcap.protocol.network.Ip4;
+import org.jnetpcap.protocol.network.Ip6;
 import org.jnetpcap.protocol.tcpip.Http;
 import org.jnetpcap.protocol.tcpip.Tcp;
 import org.jnetpcap.protocol.tcpip.Udp;
@@ -116,10 +118,10 @@ public class MainFormController implements Initializable
             break;
         }
         //System.out.println(System.getProperty("java.library.path"));
-        /*
+        
         // Default 3G values for testing
-        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
-        textField.setText("test1UL.pcap");
+        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\youtube.pcap";
+        textField.setText("youtube.pcap");
         //ipField.setText("10.209.43.104");
         type = "3G";
         Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\device_3g.config");
@@ -171,13 +173,21 @@ public class MainFormController implements Initializable
                 if (first)
                 {
                     startTime = packet.getCaptureHeader().timestampInMicros();
-                    first = false;
                 }
                 // Adding required values to list of objects with property attributes.
                 // Property attributes are easier to display in a TableView and provide
                 // the ability to display changes in the table automatically using events.
                 try
-                {
+                {/*
+                    if (packetList.size() > 19190)
+                    {
+                        //System.out.println(packet.getHeader(new Ip4()).getHeaderLength());
+                        System.out.println("");
+                        System.out.println(packetList.size());
+                        System.out.println(packet.getCaptureHeader().caplen());
+                        System.out.println(packet.size());
+                    }*/
+                    
                     // PROTOCOL AND SOURCEIP DETECTION
                     // Marks packets with the appropriate protocol and adds an
                     // entry to the HashMap if there's a protocol related with
@@ -232,22 +242,67 @@ public class MainFormController implements Initializable
                     // LAYER 3+ PACKETS
                     if (packet.hasHeader(new Ip4()))
                     {
-                        // This terrible spaghetti code extracts source and
-                        // destination IP addresses as strings
-                        String source = InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress(),
-                                destination = InetAddress.getByAddress(packet.getHeader(new Ip4()).destination()).getHostAddress();
-                        
-                        // IP ADDRESS COUNTER for SOURCE
-                        if (addressOccurrence.containsKey(source))
-                            addressOccurrence.put(source, addressOccurrence.get(source)+1);
+                        // The IP header needs to be at least 20 bytes long to
+                        // be read. If the length is lower the packet may be corrupted.
+                        if (packet.getHeader(new Ip4()).getHeaderLength() >= 20)
+                        {
+                            // This terrible spaghetti code extracts source and
+                            // destination IP addresses as strings
+                            String source = InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress(),
+                                    destination = InetAddress.getByAddress(packet.getHeader(new Ip4()).destination()).getHostAddress();
+
+                            // IP ADDRESS COUNTER for SOURCE
+                            if (addressOccurrence.containsKey(source))
+                                addressOccurrence.put(source, addressOccurrence.get(source)+1);
+                            else
+                                addressOccurrence.put(source, 1);
+                            // ... and DESTINATION
+                            if (addressOccurrence.containsKey(destination))
+                                addressOccurrence.put(destination, addressOccurrence.get(destination)+1);
+                            else
+                                addressOccurrence.put(destination, 1);
+
+                            packetList.add(new Packet(
+                                // Time of packet's arrival relative to first packet
+                                packet.getCaptureHeader().timestampInMicros() - startTime,
+                                // Packet's full length (on the wire) could differ from
+                                // the captured length if the capture happens before sending
+                                //packetList.get(i).getCaptureHeader().caplen(), // CAPTURED LENGTH
+                                packet.getPacketWirelen(), // LENGTH ON THE WIRE
+                                source,
+                                destination,
+                                protocol));
+                        }
+                        // If the header is not at least 20 bytes long then reading
+                        // it would produce unwanted results, thus the source and
+                        // destination fields are filled with layer 2 information
                         else
-                            addressOccurrence.put(source, 1);
-                        // ... and DESTINATION
-                        if (addressOccurrence.containsKey(destination))
-                            addressOccurrence.put(destination, addressOccurrence.get(destination)+1);
-                        else
-                            addressOccurrence.put(destination, 1);
-                        
+                        {
+                            // Converts layer 2 addresses to String
+                            byte[] mac = packet.getHeader(new Ethernet()).source();
+                            StringBuilder sb = new StringBuilder();
+                            for (int i = 0; i < mac.length; i++) {
+                                    sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
+                            }
+                            String source = sb.toString();
+                            mac = packet.getHeader(new Ethernet()).destination();
+                            for (int i = 0; i < mac.length; i++) {
+                                    sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
+                            }
+                            String destination = sb.toString();
+                            
+                            packetList.add(new Packet(
+                            packet.getCaptureHeader().timestampInMicros() - startTime,
+                            packet.getPacketWirelen(),
+                            source,
+                            destination,
+                            "IPv4"));
+                        }
+                    }
+                    else if (packet.hasHeader(new Ip6()))
+                    {
+                        String source = InetAddress.getByAddress(packet.getHeader(new Ip6()).source()).getHostAddress(),
+                                destination = InetAddress.getByAddress(packet.getHeader(new Ip6()).destination()).getHostAddress();
                         packetList.add(new Packet(
                             // Time of packet's arrival relative to first packet
                             packet.getCaptureHeader().timestampInMicros() - startTime,
@@ -257,7 +312,7 @@ public class MainFormController implements Initializable
                             packet.getPacketWirelen(), // LENGTH ON THE WIRE
                             source,
                             destination,
-                            protocol));
+                            "IPv6"));
                     }
                     // LAYER 2 PACKETS
                     else
@@ -287,6 +342,17 @@ public class MainFormController implements Initializable
                     }
                 }
                 catch(UnknownHostException e){ e.printStackTrace(); }
+                // If the packet is unfinished the ByteBuffer will throw the
+                // BufferUnderflowException, which would break the loop if not cought.
+                catch(BufferUnderflowException e) 
+                {
+                    packetList.add(new Packet(
+                            packet.getCaptureHeader().timestampInMicros() - startTime,
+                            packet.getPacketWirelen(),
+                            "N/A",
+                            "N/A",
+                            "Broken Packet"));
+                }
             }  
         };
         try {  pcap.loop(pcap.LOOP_INFINATE, jpacketHandler, "") ; }
@@ -300,8 +366,8 @@ public class MainFormController implements Initializable
             // with the same occurrence, the one that was added first is chosen.
             Map.Entry<String, Integer> maxEntry = null;
             for (Map.Entry<String, Integer> entry : addressOccurrence.entrySet())
-            {
-                if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
+            { 
+               if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
                 {
                     maxEntry = entry;
                 }

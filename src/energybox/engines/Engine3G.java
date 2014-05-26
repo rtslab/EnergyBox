@@ -262,7 +262,8 @@ public class Engine3G extends Engine
         return stateSeries;
     }
     
-    public void getPower()
+    @Override
+    public void calculatePower()
     {
         //Double power = Double.valueOf(0);
         int timeInIDLE = 0, timeInFACH = 0, timeInDCH = 0;
@@ -344,6 +345,7 @@ public class Engine3G extends Engine
     // Formula for calculating buffer empty time depending on buffer occupancy
     // (Downlink is modeled with a constant occupancy - the value in networkProperties)
     public long timeToEmptyUplink(int buffer) { return (long)networkProperties.getUPLINK_BUFFER_EMPTY_TIME() * buffer + 10; }
+    
     
     // GETTERS
     public XYChart.Series<Long, Integer> getFACH(){ return fachSeries; }

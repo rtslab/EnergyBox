@@ -95,7 +95,7 @@ public class ResultsFormWifiController implements Initializable
     void initData(EngineWifi engine)
     {
         this.engine = engine;
-        states = engine.getStates();
+        states = engine.getPower();
 
         axisList.add(throughputXAxis);
         axisList.add(packetXAxis);
@@ -106,7 +106,7 @@ public class ResultsFormWifiController implements Initializable
         axisList.add(packetXAxis3);
         descriptionField.setText(engine.getSourceIP());
         engine.modelStates();
-        engine.getPower();
+        engine.calculatePower();
         stateChart.getXAxis().setLabel("Time(s)");
         stateChart.getYAxis().setLabel("States");
         stateChart.getData().add(new XYChart.Series("CAM", engine.getCAM().getData()));
@@ -117,7 +117,7 @@ public class ResultsFormWifiController implements Initializable
         
         powerChart.getXAxis().setLabel("Time(s)");
         powerChart.getYAxis().setLabel("Power(J)");
-        powerChart.getData().add(engine.getStates());
+        powerChart.getData().add(engine.getPower());
         
         linkDistroPieChart.getData().addAll(engine.getLinkDistroData());
         stateTimePieChart.getData().addAll(engine.getStateTimeData());
