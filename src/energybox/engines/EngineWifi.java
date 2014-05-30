@@ -35,6 +35,8 @@ public class EngineWifi extends Engine
         this.deviceProperties = deviceProperties;
         this.packetList = sortUplinkDownlink(packetList, sourceIP);
         this.sourceIP = sourceIP;
+        this.uplinkSeries = this.getUplinkThroughput(networkProperties.getCAM_TIME_WIMDOW()/1000000);
+        this.downlinkSeries = this.getDownlinkThroughput(networkProperties.getCAM_TIME_WIMDOW()/1000000);
     }
     
     @Override
@@ -43,7 +45,9 @@ public class EngineWifi extends Engine
         // Timer variables
         long deltaT = 0;
         long previousTime = packetList.get(0).getTimeInMicros();
-        
+        //System.out.println(getChunkThroughput(uplinkSeries, downlinkSeries, 1));
+        int chunk = 1; // starts with the end point of the first chunk
+        //long chunkEnd = getChunkEndTime(uplinkSeries, chunk);
         State state = State.PSM;
         
         for (int i = 0; i < packetList.size(); i++) 
@@ -91,6 +95,10 @@ public class EngineWifi extends Engine
                 case CAM:
                 {
                     drawState(packetList.get(i).getTimeInMicros(), state.getValue());
+                    //XYChart.Data temp = stateSeries.getData().get(1);
+                    //temp.setYValue(State.CAMH.getValue());
+                    //stateSeries.getData().set(1, new XYChart.Data(temp.getXValue(), 5));
+                    
                 }
                 break;
             }
@@ -149,6 +157,17 @@ public class EngineWifi extends Engine
         statisticsList.add(new StatisticsEntry("Total Power Used",((double) Math.round(power * 10000) / 10000)));
         stateTimeData.add(new PieChart.Data("DCH", timeInPSM));
         stateTimeData.add(new PieChart.Data("IDLE", timeInCAM));
+    }
+    
+    // Adds the throughput of both uplink and downlink for every chunk.
+    private long getChunkThroughput(XYChart.Series<Long, Long> uplinkSeries, XYChart.Series<Long, Long> downlinkSeries, int i)
+    {
+        return uplinkSeries.getData().get(i).getYValue() + downlinkSeries.getData().get(i).getYValue();
+    }
+    
+    private void getChunkEndTime(XYChart.Series<Long, Long> series, int i)
+    {
+        //return series.getData().get(i).getXValue();
     }
     
     private void psmToCam(Double time)

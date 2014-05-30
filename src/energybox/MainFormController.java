@@ -118,20 +118,20 @@ public class MainFormController implements Initializable
             break;
         }
         //System.out.println(System.getProperty("java.library.path"));
-        
+        /*
         // Default 3G values for testing
-        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\youtube.pcap";
-        textField.setText("youtube.pcap");
+        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
+        textField.setText("test1UL.pcap");
         //ipField.setText("10.209.43.104");
         type = "3G";
         Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\device_3g.config");
         deviceProperties = new PropertiesDevice3G(properties);
         properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
         networkProperties = new Properties3G(properties);
-        /*
+        
         // Default Wifi values for testing
-            tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2.pcap";
-            textField.setText("round2.pcap");
+            tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2good.pcap";
+            textField.setText("round2good.pcap");
             type = "Wifi";
             Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\samsungS2_wifi.config");
             deviceField.setText("samsungS2_wifi.config");
@@ -173,21 +173,13 @@ public class MainFormController implements Initializable
                 if (first)
                 {
                     startTime = packet.getCaptureHeader().timestampInMicros();
+                    first = false;
                 }
                 // Adding required values to list of objects with property attributes.
                 // Property attributes are easier to display in a TableView and provide
                 // the ability to display changes in the table automatically using events.
                 try
-                {/*
-                    if (packetList.size() > 19190)
-                    {
-                        //System.out.println(packet.getHeader(new Ip4()).getHeaderLength());
-                        System.out.println("");
-                        System.out.println(packetList.size());
-                        System.out.println(packet.getCaptureHeader().caplen());
-                        System.out.println(packet.size());
-                    }*/
-                    
+                {
                     // PROTOCOL AND SOURCEIP DETECTION
                     // Marks packets with the appropriate protocol and adds an
                     // entry to the HashMap if there's a protocol related with
@@ -261,7 +253,7 @@ public class MainFormController implements Initializable
                                 addressOccurrence.put(destination, addressOccurrence.get(destination)+1);
                             else
                                 addressOccurrence.put(destination, 1);
-
+                            
                             packetList.add(new Packet(
                                 // Time of packet's arrival relative to first packet
                                 packet.getCaptureHeader().timestampInMicros() - startTime,

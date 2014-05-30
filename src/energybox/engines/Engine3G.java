@@ -153,10 +153,10 @@ public class Engine3G extends Engine
                     {
                         if (packetList.get(i).getLength() > networkProperties.getDOWNLINK_BUFFER_IDLE_TO_FACH_OR_DCH())
                         {
-                            idleToDch(packetList.get(i).getTimeInMicros() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME());
-                            drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
+                            idleToDch((double)packetList.get(i).getTimeInMicros());// + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME());
+                            drawState(packetList.get(i).getTimeInMicros(), state.getValue());// + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
                             state = State.DCH;
-                            drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
+                            drawState(packetList.get(i).getTimeInMicros(), state.getValue());// + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
                         }
                         else
                         {
