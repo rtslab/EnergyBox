@@ -130,8 +130,10 @@ public class MainFormController implements Initializable
         networkProperties = new Properties3G(properties);
         
         // Default Wifi values for testing
-            tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2good.pcap";
-            textField.setText("round2good.pcap");
+            //tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2good.pcap";
+            //textField.setText("round2good.pcap");
+            tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\random31.pcap";
+            textField.setText("random31.pcap");
             type = "Wifi";
             Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\samsungS2_wifi.config");
             deviceField.setText("samsungS2_wifi.config");

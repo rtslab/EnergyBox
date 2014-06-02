@@ -1,13 +1,10 @@
 package energybox;
 
-import energybox.engines.Engine3G;
 import energybox.engines.EngineWifi;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -47,7 +44,7 @@ public class ResultsFormWifiController implements Initializable
     @FXML
     private TableView<Packet> packetTable;
     @FXML
-    private StackedAreaChart<Long, Long> throughputChart;
+    private StackedAreaChart<Double, Long> throughputChart;
     @FXML
     private AreaChart<Long, Integer> stateChart;
     @FXML

@@ -22,8 +22,8 @@ public abstract class Engine
     protected XYChart.Series<Double, Integer> stateSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> uplinkPacketSeries = new XYChart.Series();
     XYChart.Series<Long, Integer> downlinkPacketSeries = new XYChart.Series();
-    XYChart.Series<Long, Long> uplinkSeries = new XYChart.Series();
-    XYChart.Series<Long, Long> downlinkSeries = new XYChart.Series();
+    XYChart.Series<Double, Long> uplinkSeries = new XYChart.Series();
+    XYChart.Series<Double, Long> downlinkSeries = new XYChart.Series();
     protected ObservableList<PieChart.Data> linkDistrData = 
             FXCollections.observableArrayList(new ArrayList());
     protected int uplinkPacketCount = 0;
@@ -45,11 +45,10 @@ public abstract class Engine
     }
     
     // UPLINK THROUGHPUT CALCULATION
-    public XYChart.Series<Long, Long> getUplinkThroughput(double chunkSize)
+    public XYChart.Series<Double, Long> getUplinkThroughput(double chunkSize)
     {
         uplinkSeries.setName("Uplink");
-        Long throughput = Long.valueOf(0);
-                //chunkSize = packetList.get(packetList.size()-1).getTime()/50, 
+        Long throughput = Long.valueOf(0); 
         double currentChunk = chunkSize;
         
         uplinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTime(), Long.valueOf(0)));
@@ -70,22 +69,30 @@ public abstract class Engine
                     currentChunk += chunkSize;
                 }
             }
-            else i++;
+            else
+            {
+                if (packetList.get(i).getTime() < currentChunk) i++;
+                else 
+                {
+                    uplinkSeries.getData().add(new XYChart.Data(currentChunk, throughput));
+                    throughput = Long.valueOf(0);
+                    currentChunk += chunkSize;
+                }
+            }
         }
         uplinkSeries.getData().add(new XYChart.Data(packetList.get(packetList.size()-1).getTime(), throughput));
         return uplinkSeries;
     }
     
     // DOWNLOING THROUGHPUT CALCULATION
-    public XYChart.Series<Long, Long> getDownlinkThroughput(double chunkSize)
+    public XYChart.Series<Double, Long> getDownlinkThroughput(double chunkSize)
     {
         downlinkSeries.setName("Downlink");
         Long throughput = Long.valueOf(0);
-                //chunkSize = packetList.get(packetList.size()-1).getTime()/50, 
         double currentChunk = chunkSize;
         
         downlinkSeries.getData().add(new XYChart.Data(packetList.get(0).getTime(), Long.valueOf(0)));
-        int i = 0;
+        int i = 0;       
         while ((currentChunk < packetList.get(packetList.size()-1).getTime()) && (i<packetList.size()))
         {
             if (!packetList.get(i).getUplink())
@@ -102,7 +109,16 @@ public abstract class Engine
                     currentChunk += chunkSize;
                 }
             }
-            else i++;
+            else 
+            {
+                if (packetList.get(i).getTime() < currentChunk) i++;
+                else 
+                {
+                    downlinkSeries.getData().add(new XYChart.Data(currentChunk, throughput));
+                    throughput = Long.valueOf(0);
+                    currentChunk += chunkSize;
+                }
+            }
         }
         downlinkSeries.getData().add(new XYChart.Data(packetList.get(packetList.size()-1).getTime(), throughput));
         return downlinkSeries;

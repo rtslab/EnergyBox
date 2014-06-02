@@ -35,8 +35,6 @@ public class EngineWifi extends Engine
         this.deviceProperties = deviceProperties;
         this.packetList = sortUplinkDownlink(packetList, sourceIP);
         this.sourceIP = sourceIP;
-        this.uplinkSeries = this.getUplinkThroughput(networkProperties.getCAM_TIME_WIMDOW()/1000000);
-        this.downlinkSeries = this.getDownlinkThroughput(networkProperties.getCAM_TIME_WIMDOW()/1000000);
     }
     
     @Override
@@ -45,10 +43,10 @@ public class EngineWifi extends Engine
         // Timer variables
         long deltaT = 0;
         long previousTime = packetList.get(0).getTimeInMicros();
-        //System.out.println(getChunkThroughput(uplinkSeries, downlinkSeries, 1));
-        int chunk = 1; // starts with the end point of the first chunk
-        //long chunkEnd = getChunkEndTime(uplinkSeries, chunk);
         State state = State.PSM;
+        // For CAMH calculation
+        int dataSum = 0, firstSeriesIndex = 0;
+        double chunkStart = 0, chunkEnd = networkProperties.getCAM_TIME_WIMDOW();
         
         for (int i = 0; i < packetList.size(); i++) 
         {
@@ -74,7 +72,9 @@ public class EngineWifi extends Engine
                     
                 case CAMH:
                 {
-                    // TODO: Calculate 
+                    // CAMH has been implemented in the same way as in the origina
+                    // version - by altering the CAM points that are within CAMH
+                    // throughput chunks.
                 }
                 break;
             }
@@ -95,17 +95,74 @@ public class EngineWifi extends Engine
                 case CAM:
                 {
                     drawState(packetList.get(i).getTimeInMicros(), state.getValue());
-                    //XYChart.Data temp = stateSeries.getData().get(1);
-                    //temp.setYValue(State.CAMH.getValue());
-                    //stateSeries.getData().set(1, new XYChart.Data(temp.getXValue(), 5));
                     
+                    // CAMH CALCULCATION
+                    // If the packet is within the current chunk, add the packet's
+                    // length to the chunk's dataSum.
+                    if ((chunkStart <= packetList.get(i).getTimeInMicros()) && (packetList.get(i).getTimeInMicros() < chunkEnd))
+                    {
+                        dataSum = dataSum+packetList.get(i).getLength();
+                    }
+                    // If the packet is beyond chunkEnd and the dataSum exceeds
+                    // the data rate threshold, take all the packets in the previous
+                    // chunk and bump up the CAM points to CAMH.
+                    else
+                    {
+                        
+                        if (dataSum > networkProperties.getWINDOW_DATA_RATE_THRESHOLD())
+                        {
+                            int last = 0;
+                            boolean first = true;
+                            // Goes through the chart point series starting from
+                            // the begining of the last chunks end (to save on iterations)
+                            for (int j = firstSeriesIndex; j < stateSeries.getData().size(); j++)
+                            {
+                                // Checks for weather the point is between the 
+                                // chunk boundries and if it's CAM
+                                if ((stateSeries.getData().get(j).getYValue() == State.CAM.getValue()) &&
+                                        ((chunkStart/1000000) <= stateSeries.getData().get(j).getXValue()) &&
+                                        (stateSeries.getData().get(j).getXValue() < (chunkEnd/1000000)))
+                                {
+                                    // Inserts a new point if it's the start of a
+                                    // streak. Bumps up the point if it's in the
+                                    // middle of a streak.
+                                    if (first)
+                                    {
+                                        stateSeries.getData().add(j+1, new XYChart.Data(
+                                                stateSeries.getData().get(j).getXValue(), 
+                                                State.CAMH.getValue()));
+                                        first = false;
+                                    }
+                                    else
+                                        stateSeries.getData().get(j).setYValue(State.CAMH.getValue());
+                                    // saves the index of the last altered point
+                                    // for the final two points after the loop.
+                                    last = j;
+                                }
+                            }
+                            // Two final points following the original tool's implementation
+                            stateSeries.getData().add(last+1, new XYChart.Data(
+                                    (chunkEnd/1000000), 
+                                    State.CAM.getValue()));
+                            stateSeries.getData().add(last+1, new XYChart.Data(
+                                    (chunkEnd/1000000), 
+                                    State.CAMH.getValue()));
+                        }
+                        dataSum = 0;
+                        // The original implementation rounds the chunk start and
+                        // end values to one tenth of the window size.
+                        chunkStart = packetList.get(i).getTimeInMicros()-(packetList.get(i).getTimeInMicros() % (networkProperties.getCAM_TIME_WIMDOW()/10));
+                        chunkEnd = packetList.get(i).getTimeInMicros()-(packetList.get(i).getTimeInMicros() % (networkProperties.getCAM_TIME_WIMDOW()/10))+(networkProperties.getCAM_TIME_WIMDOW()/10);
+                        dataSum = packetList.get(i).getLength();
+                        firstSeriesIndex = stateSeries.getData().size()-1;
+                    }
                 }
                 break;
             }
             // Save timestamps for the next loop
             previousTime = packetList.get(i).getTimeInMicros();
         }
-        
+
         if (state != State.PSM)
         {
             // Needs camhToPsm if the end state is CAMH
@@ -157,17 +214,6 @@ public class EngineWifi extends Engine
         statisticsList.add(new StatisticsEntry("Total Power Used",((double) Math.round(power * 10000) / 10000)));
         stateTimeData.add(new PieChart.Data("DCH", timeInPSM));
         stateTimeData.add(new PieChart.Data("IDLE", timeInCAM));
-    }
-    
-    // Adds the throughput of both uplink and downlink for every chunk.
-    private long getChunkThroughput(XYChart.Series<Long, Long> uplinkSeries, XYChart.Series<Long, Long> downlinkSeries, int i)
-    {
-        return uplinkSeries.getData().get(i).getYValue() + downlinkSeries.getData().get(i).getYValue();
-    }
-    
-    private void getChunkEndTime(XYChart.Series<Long, Long> series, int i)
-    {
-        //return series.getData().get(i).getXValue();
     }
     
     private void psmToCam(Double time)

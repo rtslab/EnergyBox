@@ -44,7 +44,7 @@ public class ResultsForm3GController implements Initializable
     @FXML
     private TableView<Packet> packetTable;
     @FXML
-    private StackedAreaChart<Long, Long> throughputChart;
+    private StackedAreaChart<Double, Long> throughputChart;
     @FXML
     private AreaChart<Long, Integer> stateChart;
     @FXML
