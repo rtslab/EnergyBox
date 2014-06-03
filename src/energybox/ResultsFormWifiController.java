@@ -103,7 +103,7 @@ public class ResultsFormWifiController implements Initializable
         axisList.add(packetXAxis3);
         descriptionField.setText(engine.getSourceIP());
         engine.modelStates();
-        engine.calculatePower();
+        engine.calculatePower();/*
         stateChart.getXAxis().setLabel("Time(s)");
         stateChart.getYAxis().setLabel("States");
         stateChart.getData().add(new XYChart.Series("CAM", engine.getCAM().getData()));
@@ -140,7 +140,7 @@ public class ResultsFormWifiController implements Initializable
         packetChart3.getYAxis().setLabel("Size(bytes)");
         packetChart3.getData().add(new XYChart.Series("Uplink", engine.getUplinkPackets().getData()));
         packetChart3.getData().add(new XYChart.Series("Downlink", engine.getDownlinkPackets().getData()));
-        
+        */
         packetTable.getItems().setAll(engine.getPacketList());
         statsTable.getItems().setAll(engine.getStatisticsList());
         linkDistroTable.getItems().setAll(engine.getDistrStatisticsList());

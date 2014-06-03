@@ -326,7 +326,7 @@ public class ConsoleBox
                     engine.calculatePower();
                     printStates = engine.getPower(); // so that the states could be accesed for outputToFile
                     power = engine.getPowerValue();
-                    System.out.println("Network model: 3G");
+                    System.out.println("Network model: Wifi");
                     System.out.println("Detected recorder device IP: " + sourceIP);
                     System.out.println("Total power in Joules: " + engine.getStatisticsList().get(0).getValue());
                 }

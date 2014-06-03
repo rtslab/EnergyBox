@@ -101,7 +101,7 @@ public class EngineWifi extends Engine
                     // length to the chunk's dataSum.
                     if ((chunkStart <= packetList.get(i).getTimeInMicros()) && (packetList.get(i).getTimeInMicros() < chunkEnd))
                     {
-                        dataSum = dataSum+packetList.get(i).getLength();
+                        dataSum += packetList.get(i).getLength();
                     }
                     // If the packet is beyond chunkEnd and the dataSum exceeds
                     // the data rate threshold, take all the packets in the previous
@@ -115,7 +115,7 @@ public class EngineWifi extends Engine
                             boolean first = true;
                             // Goes through the chart point series starting from
                             // the begining of the last chunks end (to save on iterations)
-                            for (int j = firstSeriesIndex; j < stateSeries.getData().size(); j++)
+                            for (int j = firstSeriesIndex-1; j < stateSeries.getData().size(); j++)
                             {
                                 // Checks for weather the point is between the 
                                 // chunk boundries and if it's CAM
@@ -128,6 +128,13 @@ public class EngineWifi extends Engine
                                     // middle of a streak.
                                     if (first)
                                     {
+                                        // If the start of the current streak is
+                                        // the end of the previous chunk's streak
+                                        // promote the first CAM point as well to
+                                        // have a continuous streak.
+                                        if (stateSeries.getData().get(j-1).getYValue() == State.CAMH.getValue())
+                                            stateSeries.getData().get(j).setYValue(State.CAMH.getValue());
+                                        
                                         stateSeries.getData().add(j+1, new XYChart.Data(
                                                 stateSeries.getData().get(j).getXValue(), 
                                                 State.CAMH.getValue()));
@@ -148,6 +155,7 @@ public class EngineWifi extends Engine
                                     (chunkEnd/1000000), 
                                     State.CAMH.getValue()));
                         }
+                        //if ((chunkEnd/1000000 > 8) && (chunkEnd/1000000 < 10)) System.out.println(chunkStart + " | " + dataSum + " | " + chunkEnd);
                         dataSum = 0;
                         // The original implementation rounds the chunk start and
                         // end values to one tenth of the window size.
@@ -162,7 +170,7 @@ public class EngineWifi extends Engine
             // Save timestamps for the next loop
             previousTime = packetList.get(i).getTimeInMicros();
         }
-
+        
         if (state != State.PSM)
         {
             // Needs camhToPsm if the end state is CAMH

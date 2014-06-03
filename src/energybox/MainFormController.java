@@ -128,7 +128,7 @@ public class MainFormController implements Initializable
         deviceProperties = new PropertiesDevice3G(properties);
         properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
         networkProperties = new Properties3G(properties);
-        
+        */
         // Default Wifi values for testing
             //tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2good.pcap";
             //textField.setText("round2good.pcap");
@@ -140,7 +140,7 @@ public class MainFormController implements Initializable
             deviceProperties = new PropertiesDeviceWifi(properties);
             properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\wifi_general.config");
             networkField.setText("wifi_general.config");
-            networkProperties = new PropertiesWifi(properties);*/
+            networkProperties = new PropertiesWifi(properties);
     }
     
     @FXML
