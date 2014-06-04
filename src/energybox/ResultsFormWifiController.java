@@ -118,14 +118,14 @@ public class ResultsFormWifiController implements Initializable
         
         linkDistroPieChart.getData().addAll(engine.getLinkDistroData());
         stateTimePieChart.getData().addAll(engine.getStateTimeData());
-        
+        */
         throughputChart.getXAxis().setLabel("Time(s)");
         throughputChart.getYAxis().setLabel("Bytes/s");
         throughputChart.getData().add(engine.getUplinkThroughput(
                 engine.getPacketList().get(engine.getPacketList().size()-1).getTime()/50));
         throughputChart.getData().add(engine.getDownlinkThroughput(
                 engine.getPacketList().get(engine.getPacketList().size()-1).getTime()/50));
-        
+        /*
         packetChart.getXAxis().setLabel("Time(s)");
         packetChart.getYAxis().setLabel("Size(bytes)");
         packetChart.getData().add(new XYChart.Series("Uplink", engine.getUplinkPackets().getData()));

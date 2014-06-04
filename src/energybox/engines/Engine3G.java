@@ -55,8 +55,9 @@ public class Engine3G extends Engine
                 previousTimeUplink =  packetList.get(0).getTimeInMicros(), 
                 previousTimeDownlink = packetList.get(0).getTimeInMicros(), 
                 previousTime = packetList.get(0).getTimeInMicros(), // might wanna replace the variable with packetList.get(i-1).getTime()
-                timeToEmptyUplink = 0;
-                // timeToEmptyDownlink = networkProperties.getDOWNLINK_BUFFER_EMPTY_TIME;
+                timeToEmptyUplink = 0,
+                // timeToEmptyDownlink is a constant : networkProperties.getDOWNLINK_BUFFER_EMPTY_TIME; 
+                transitionPointTemp = 0; // temporary storage for the idle-dch transition point that has to be added at the appropriate time
         State state = State.IDLE; // State enumeration
         // Packet list points
         for (int i = 0; i < packetList.size(); i++) 

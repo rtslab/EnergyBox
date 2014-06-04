@@ -4,6 +4,9 @@ import energybox.Packet;
 import energybox.StatisticsEntry;
 import energybox.properties.device.PropertiesDeviceWifi;
 import energybox.properties.network.PropertiesWifi;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
@@ -35,6 +38,8 @@ public class EngineWifi extends Engine
         this.deviceProperties = deviceProperties;
         this.packetList = sortUplinkDownlink(packetList, sourceIP);
         this.sourceIP = sourceIP;
+        this.uplinkSeries = this.getUplinkThroughput(networkProperties.getCAM_TIME_WIMDOW()/1000000);
+        this.downlinkSeries = this.getDownlinkThroughput(networkProperties.getCAM_TIME_WIMDOW()/1000000);
     }
     
     @Override
@@ -43,10 +48,12 @@ public class EngineWifi extends Engine
         // Timer variables
         long deltaT = 0;
         long previousTime = packetList.get(0).getTimeInMicros();
+        //System.out.println(hasCAMH());
+        //testThroughput();
         State state = State.PSM;
         // For CAMH calculation
-        int dataSum = 0, firstSeriesIndex = 0;
-        double chunkStart = 0, chunkEnd = networkProperties.getCAM_TIME_WIMDOW();
+        //int dataSum = 0, firstSeriesIndex = 0;
+        //double chunkStart = 0, chunkEnd = networkProperties.getCAM_TIME_WIMDOW();
         
         for (int i = 0; i < packetList.size(); i++) 
         {
@@ -95,7 +102,7 @@ public class EngineWifi extends Engine
                 case CAM:
                 {
                     drawState(packetList.get(i).getTimeInMicros(), state.getValue());
-                    
+                    /*
                     // CAMH CALCULCATION
                     // If the packet is within the current chunk, add the packet's
                     // length to the chunk's dataSum.
@@ -164,11 +171,98 @@ public class EngineWifi extends Engine
                         dataSum = packetList.get(i).getLength();
                         firstSeriesIndex = stateSeries.getData().size()-1;
                     }
+                    */
                 }
                 break;
             }
             // Save timestamps for the next loop
             previousTime = packetList.get(i).getTimeInMicros();
+        }
+        
+        double chunkEnd = 0;
+        // Indexes for the stateSries and uplinkSeries entries. We can start with
+        // the second point because the first will always be (0,0) and it helps
+        // with the look-back when determening streaks.
+        int i = 1, chunk = 0, lastCAMH = 0;
+        // Cycles through both the state points and throughput chunks at the same
+        // time and promotes CAM to CAMH where needed.
+        while ((i < packetList.size()) && (chunk < uplinkSeries.getData().size()) )
+        {
+            // If the current chunk is CAMH
+            if (isHighChunk(chunk))
+            {
+                lastCAMH = chunk;
+                //If the current point is within the current chunk
+                if (stateSeries.getData().get(i).getXValue() < uplinkSeries.getData().get(chunk).getXValue())
+                {
+                    // If the current point is CAM, check if it's in the middle
+                    // of a streak. If it is then just bump up the state, if it
+                    // isn't then add the streak beginning.
+                    if (stateSeries.getData().get(i).getYValue() == State.CAM.getValue())
+                    {
+                        // Promote current point
+                        if (stateSeries.getData().get(i-1).getYValue() == State.CAMH.getValue())
+                            stateSeries.getData().get(i).setYValue(State.CAMH.getValue());
+                        
+                        // There is only one situation where the previous point
+                        // of a CAM point within a CAMH chunk would have a CAM 
+                        // point before it - previous chunk was non-CAMH and this
+                        // is the first point of the chunk, thus needs a promotion
+                        else if (stateSeries.getData().get(i-1).getYValue() == State.CAM.getValue())
+                        {
+                            stateSeries.getData().add(i,
+                                    new XYChart.Data(
+                                            uplinkSeries.getData().get(chunk-1).getXValue(), 
+                                            State.CAMH.getValue()));
+                            stateSeries.getData().add(i,
+                                    new XYChart.Data(
+                                            uplinkSeries.getData().get(chunk-1).getXValue(), 
+                                            State.CAM.getValue()));
+                        }
+                        // Add new point after current one
+                        else
+                        {
+                            stateSeries.getData().add(i+1, 
+                                    new XYChart.Data(
+                                            stateSeries.getData().get(i).getXValue(), 
+                                            State.CAMH.getValue()));
+                        }
+                        i++;
+                    }
+                    else i++;
+                }
+                // Try the next chunk with the same point.
+                else chunk++;
+            }
+            // If the current chunk is not CAMH
+            else
+            {
+                
+                //If the current point is within the current chunk
+                if (stateSeries.getData().get(i).getXValue() < uplinkSeries.getData().get(chunk).getXValue())
+                {
+                    // If the streak was still on when the chunk changed to non CAMH,
+                    // insert a demotion at the end of the chunk.
+                    if (stateSeries.getData().get(i-1).getYValue() == State.CAMH.getValue())
+                    {
+                        // Since there's a chance that the current chunk might be
+                        // more than one chunk after the previous CAMH chunk,
+                        // find the last CAMH chunk's end time
+                        stateSeries.getData().add(i,
+                                new XYChart.Data(
+                                        uplinkSeries.getData().get(lastCAMH).getXValue(), 
+                                        State.CAM.getValue()));
+                        
+                        stateSeries.getData().add(i,
+                                new XYChart.Data(
+                                        uplinkSeries.getData().get(lastCAMH).getXValue(), 
+                                        State.CAMH.getValue()));
+                        i++;
+                    }
+                    i++;
+                }
+                else chunk++;
+            }
         }
         
         if (state != State.PSM)
@@ -224,6 +318,25 @@ public class EngineWifi extends Engine
         stateTimeData.add(new PieChart.Data("IDLE", timeInCAM));
     }
     
+    private Long getChunkThroughput(int i)
+    {
+        return (uplinkSeries.getData().get(i).getYValue() + downlinkSeries.getData().get(i).getYValue());
+    }
+    
+    private boolean isHighChunk(int i)
+    {
+        return getChunkThroughput(i) > networkProperties.getWINDOW_DATA_RATE_THRESHOLD();
+    }
+    
+    private boolean hasCAMH()
+    {
+        for (int i = 0; i < uplinkSeries.getData().size(); i++)
+        {
+            if(isHighChunk(i)) return true;
+        }
+        return false;
+    }
+    
     private void psmToCam(Double time)
     {
         time = time / 1000000;
@@ -240,4 +353,44 @@ public class EngineWifi extends Engine
     
     // GETTERS
     public XYChart.Series<Long, Integer> getCAM(){ return camSeries; }
+    
+    
+    
+    private void testThroughput()
+    {
+        File file = new File("D:\\testUL.csv");
+
+        try
+        {
+            FileWriter writer = new FileWriter(file.getAbsolutePath());
+            for (int i = 0; i < uplinkSeries.getData().size(); i++)
+            {
+                writer.append(uplinkSeries.getData().get(i).getYValue().toString());
+                writer.append(",");
+                writer.append(Double.valueOf(uplinkSeries.getData().get(i).getXValue().doubleValue()).toString());
+                writer.append("\n");
+            }
+            writer.flush();
+	    writer.close();
+        }
+        catch(IOException e){ e.printStackTrace();}
+        
+        
+        File file2 = new File("D:\\testDL.csv");
+
+        try
+        {
+            FileWriter writer = new FileWriter(file2.getAbsolutePath());
+            for (int i = 0; i < downlinkSeries.getData().size(); i++)
+            {
+                writer.append(downlinkSeries.getData().get(i).getYValue().toString());
+                writer.append(",");
+                writer.append(Double.valueOf(downlinkSeries.getData().get(i).getXValue().doubleValue()).toString());
+                writer.append("\n");
+            }
+            writer.flush();
+	    writer.close();
+        }
+        catch(IOException e){ e.printStackTrace();}
+    }
 }
