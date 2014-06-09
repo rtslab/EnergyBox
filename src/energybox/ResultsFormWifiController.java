@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -103,8 +102,8 @@ public class ResultsFormWifiController implements Initializable
         axisList.add(stateXAxis2);
         axisList.add(packetXAxis3);
         descriptionField.setText(engine.getSourceIP());
-        engine.modelStates();
-        engine.calculatePower();/*
+        //engine.modelStates();
+        //engine.calculatePower();
         stateChart.getXAxis().setLabel("Time(s)");
         stateChart.getYAxis().setLabel("States");
         stateChart.getData().add(new XYChart.Series("CAM", engine.getCAM().getData()));
@@ -119,7 +118,7 @@ public class ResultsFormWifiController implements Initializable
         
         linkDistroPieChart.getData().addAll(engine.getLinkDistroData());
         stateTimePieChart.getData().addAll(engine.getStateTimeData());
-        */
+        
         throughputChart.getXAxis().setLabel("Time(s)");
         throughputChart.getYAxis().setLabel("Bytes/s");
         throughputChart.getData().add(engine.getUplinkThroughput(

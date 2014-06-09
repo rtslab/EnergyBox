@@ -101,8 +101,8 @@ public class ResultsForm3GController implements Initializable
         axisList.add(stateXAxis2);
         axisList.add(packetXAxis3);
         descriptionField.setText(engine.getSourceIP());
-        engine.modelStates();
-        engine.calculatePower();
+        //engine.modelStates();
+        //engine.calculatePower();
         states = engine.getPower();
         stateChart.getXAxis().setLabel("Time(s)");
         stateChart.getYAxis().setLabel("States");

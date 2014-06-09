@@ -3,19 +3,16 @@ package energybox;
 import energybox.engines.*;
 import energybox.properties.device.*;
 import energybox.properties.network.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.net.UnknownHostException;
-import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -26,31 +23,26 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Dialogs;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
-import org.jnetpcap.Pcap;
-import org.jnetpcap.packet.PcapPacket;
-import org.jnetpcap.packet.PcapPacketHandler;
-import org.jnetpcap.protocol.lan.Ethernet;
-import org.jnetpcap.protocol.network.Arp;
-import org.jnetpcap.protocol.network.Ip4;
-import org.jnetpcap.protocol.network.Ip6;
-import org.jnetpcap.protocol.tcpip.Http;
-import org.jnetpcap.protocol.tcpip.Tcp;
-import org.jnetpcap.protocol.tcpip.Udp;
 import org.jnetpcap.winpcap.WinPcap;
 /**
  * @author Rihards Polis
  * Linkoping University
  */
-public class MainFormController implements Initializable
+public class MainFormController implements Initializable, Runnable
 {
     @FXML
-    private Label errorText;
+    protected Label errorText;
     @FXML
     private TextField textField;
     @FXML
@@ -58,7 +50,9 @@ public class MainFormController implements Initializable
     @FXML
     private TextField networkField;
     @FXML
-    private TextField ipField;
+    protected TextField ipField;
+    @FXML
+    protected ProgressBar progressBar;
     
     Network networkProperties = null;
     Device deviceProperties = null;
@@ -70,12 +64,24 @@ public class MainFormController implements Initializable
     HashMap<String, String> criteria = new HashMap();
     String sourceIP = "";
     HashMap<String, Integer> addressOccurrence = new HashMap();
+    final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList());
+    @FXML
+    private Button modelButton;
+    @FXML
+    private Button deviceButton;
+    @FXML
+    private Button networkButton;
+    @FXML
+    private Button traceButton;
+    @FXML
+    private ImageView image;
     
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
+        // Load the icon for the Model button
+        image.setImage(new Image("/energybox/gears.png", true));
         String os = OSTools.getOS();
-        //System.out.println(System.getProperty("java.library.path"));
         switch(os)
         {
             case "Windows":
@@ -117,8 +123,7 @@ public class MainFormController implements Initializable
             }
             break;
         }
-        //System.out.println(System.getProperty("java.library.path"));
-        
+        /*
         // Default 3G values for testing
         tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
         textField.setText("test1UL.pcap");
@@ -128,7 +133,7 @@ public class MainFormController implements Initializable
         deviceProperties = new PropertiesDevice3G(properties);
         properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
         networkProperties = new Properties3G(properties);
-        /*
+        
         // Default Wifi values for testing
             //tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2good.pcap";
             //textField.setText("round2good.pcap");
@@ -141,250 +146,33 @@ public class MainFormController implements Initializable
             properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\wifi_general.config");
             networkField.setText("wifi_general.config");
             networkProperties = new PropertiesWifi(properties);*/
+        
     }
     
     @FXML
-    public void handleButtonAction(ActionEvent event)
+    private void handleButtonAction(ActionEvent event)
     {
-        // Clear variables in case the button was used before
-        sourceIP = "";
-        addressOccurrence.clear();
-        criteria.clear();
-        // Error buffer for file handling
-        StringBuilder errbuf = new StringBuilder();
-        // Wrapped lists in JavaFX ObservableList for the table view
-        final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList());
+        modelButton.setDisable(true);
+        networkButton.setDisable(true);
+        deviceButton.setDisable(true);
+        traceButton.setDisable(true);
         
-        errorText.setText("");
-        final Pcap pcap = Pcap.openOffline(tracePath, errbuf);
-        
-        if (pcap == null)
-        {
-            System.err.printf("Error while opening device for capture: " + errbuf.toString());
-            errorText.setText("Error: " + errbuf.toString());
-        }
-        
-        PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() 
-        {
-            boolean first = true;
-            long startTime = 0;
-            @Override
-            public void nextPacket(PcapPacket packet, String user) 
-            {
-                // Copies every packet in the loop to an ArrayList for later use
-                if (first)
-                {
-                    startTime = packet.getCaptureHeader().timestampInMicros();
-                    first = false;
-                }
-                // Adding required values to list of objects with property attributes.
-                // Property attributes are easier to display in a TableView and provide
-                // the ability to display changes in the table automatically using events.
-                try
-                {
-                    // PROTOCOL AND SOURCEIP DETECTION
-                    // Marks packets with the appropriate protocol and adds an
-                    // entry to the HashMap if there's a protocol related with
-                    // a criteria for sourceIP
-                    String protocol = "";  
-                    if (packet.hasHeader(new Http())) 
-                    {
-                        if ((packet.getHeader(new Tcp()).source() == 443) ||
-                            (packet.getHeader(new Tcp()).destination() == 443))
-                        protocol = "HTTPS";
-                        else 
-                        {
-                            protocol = "HTTP";
-                            // Source if it's a request, destination if response
-                            if (!criteria.containsKey("HTTP"))
-                            {
-                                if (!packet.getHeader(new Http()).isResponse())
-                                    criteria.put("HTTP", InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress());
-                                else 
-                                    criteria.put("HTTP", InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress());
-                            }
-                        }
-                    }
-                    else if (packet.hasHeader(new Tcp())) 
-                        protocol = "TCP";
-                    else if (packet.hasHeader(new Udp())) 
-                    {
-                        // if either of the ports for any UDP packet is 53, it's
-                        // a DNS packet
-                        if (packet.getHeader(new Udp()).source() == 53)
-                        {
-                            protocol = "DNS";
-                            if (!criteria.containsKey("DNS"))
-                            {
-                                criteria.put("DNS", InetAddress.getByAddress(packet.getHeader(new Ip4()).destination()).getHostAddress());
-                            }
-                        }
-                        if (packet.getHeader(new Udp()).destination() == 53)
-                        {
-                            if (!criteria.containsKey("DNS"))
-                            {
-                                criteria.put("DNS", InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress());
-                            }
-                            protocol = "DNS";
-                        }
-                        
-                        else protocol = "UDP";
-                    }
-                    else if (packet.hasHeader(new Arp())) 
-                        protocol = "ARP";
-                    
-                    // LAYER 3+ PACKETS
-                    if (packet.hasHeader(new Ip4()))
-                    {
-                        // The IP header needs to be at least 20 bytes long to
-                        // be read. If the length is lower the packet may be corrupted.
-                        if (packet.getHeader(new Ip4()).getHeaderLength() >= 20)
-                        {
-                            // This terrible spaghetti code extracts source and
-                            // destination IP addresses as strings
-                            String source = InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress(),
-                                    destination = InetAddress.getByAddress(packet.getHeader(new Ip4()).destination()).getHostAddress();
-
-                            // IP ADDRESS COUNTER for SOURCE
-                            if (addressOccurrence.containsKey(source))
-                                addressOccurrence.put(source, addressOccurrence.get(source)+1);
-                            else
-                                addressOccurrence.put(source, 1);
-                            // ... and DESTINATION
-                            if (addressOccurrence.containsKey(destination))
-                                addressOccurrence.put(destination, addressOccurrence.get(destination)+1);
-                            else
-                                addressOccurrence.put(destination, 1);
-                            
-                            packetList.add(new Packet(
-                                // Time of packet's arrival relative to first packet
-                                packet.getCaptureHeader().timestampInMicros() - startTime,
-                                // Packet's full length (on the wire) could differ from
-                                // the captured length if the capture happens before sending
-                                //packetList.get(i).getCaptureHeader().caplen(), // CAPTURED LENGTH
-                                packet.getPacketWirelen(), // LENGTH ON THE WIRE
-                                source,
-                                destination,
-                                protocol));
-                        }
-                        // If the header is not at least 20 bytes long then reading
-                        // it would produce unwanted results, thus the source and
-                        // destination fields are filled with layer 2 information
-                        else
-                        {
-                            // Converts layer 2 addresses to String
-                            byte[] mac = packet.getHeader(new Ethernet()).source();
-                            StringBuilder sb = new StringBuilder();
-                            for (int i = 0; i < mac.length; i++) {
-                                    sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
-                            }
-                            String source = sb.toString();
-                            mac = packet.getHeader(new Ethernet()).destination();
-                            for (int i = 0; i < mac.length; i++) {
-                                    sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
-                            }
-                            String destination = sb.toString();
-                            
-                            packetList.add(new Packet(
-                            packet.getCaptureHeader().timestampInMicros() - startTime,
-                            packet.getPacketWirelen(),
-                            source,
-                            destination,
-                            "IPv4"));
-                        }
-                    }
-                    else if (packet.hasHeader(new Ip6()))
-                    {
-                        String source = InetAddress.getByAddress(packet.getHeader(new Ip6()).source()).getHostAddress(),
-                                destination = InetAddress.getByAddress(packet.getHeader(new Ip6()).destination()).getHostAddress();
-                        packetList.add(new Packet(
-                            // Time of packet's arrival relative to first packet
-                            packet.getCaptureHeader().timestampInMicros() - startTime,
-                            // Packet's full length (on the wire) could differ from
-                            // the captured length if the capture happens before sending
-                            //packetList.get(i).getCaptureHeader().caplen(), // CAPTURED LENGTH
-                            packet.getPacketWirelen(), // LENGTH ON THE WIRE
-                            source,
-                            destination,
-                            "IPv6"));
-                    }
-                    // LAYER 2 PACKETS
-                    else
-                    {
-                        if (packet.hasHeader(new Ethernet()))
-                        {
-                            // Converts layers 2 addresses to String
-                            byte[] mac = packet.getHeader(new Ethernet()).source();
-                            StringBuilder sb = new StringBuilder();
-                            for (int i = 0; i < mac.length; i++) {
-                                    sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
-                            }
-                            String source = sb.toString();
-                            mac = packet.getHeader(new Ethernet()).destination();
-                            for (int i = 0; i < mac.length; i++) {
-                                    sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
-                            }
-                            String destination = sb.toString();
-                            
-                            packetList.add(new Packet(
-                            packet.getCaptureHeader().timestampInMicros() - startTime,
-                            packet.getPacketWirelen(),
-                            source,
-                            destination,
-                            protocol));
-                        }
-                    }
-                }
-                catch(UnknownHostException e){ e.printStackTrace(); }
-                // If the packet is unfinished the ByteBuffer will throw the
-                // BufferUnderflowException, which would break the loop if not cought.
-                catch(BufferUnderflowException e) 
-                {
-                    packetList.add(new Packet(
-                            packet.getCaptureHeader().timestampInMicros() - startTime,
-                            packet.getPacketWirelen(),
-                            "N/A",
-                            "N/A",
-                            "Broken Packet"));
-                }
-            }  
-        };
-        try {  pcap.loop(pcap.LOOP_INFINATE, jpacketHandler, "") ; }
-        
-        finally 
-        {
-            pcap.close();
-            
-            // Manual override, if there's anything written in the ipField
-            if (!ipField.getText().equals(""))
-            {
-                sourceIP = ipField.getText();
-            }
-            // Gets most used IP address and chooses sourceIP in the following order:
-            // DNS criteria, HTTP criteria and finally most frequent.
-            // If the first two criteria aren't available and there are two IPs
-            // with the same occurrence, the one that was added first is chosen.
-            else
-            {
-                Map.Entry<String, Integer> maxEntry = null;
-                for (Map.Entry<String, Integer> entry : addressOccurrence.entrySet())
-                { 
-                   if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
-                    {
-                        maxEntry = entry;
-                    }
-                }
-                if (criteria.containsKey("DNS"))
-                        sourceIP = criteria.get("DNS");
-                else if (criteria.containsKey("HTTP"))
-                    sourceIP = criteria.get("HTTP");
-                else
-                    sourceIP = maxEntry.getKey();
-            }
-        }
+        progressBar.visibleProperty().set(true);
+        errorText.setText("Loading trace...");
+        (new Thread(new ProcessTrace(this))).start();
+    }
+    
+    // Executes in the Event Dispatch Thread but is called from the ProcessTrace
+    // thread because the showResults methods perform Event Dispatch Thread
+    // specific tasks.
+    @Override
+    public void run()
+    {
+        errorText.setText("Modelling states...");
+        progressBar.setProgress(0.75);
         // Keeping the engine in the main FormController because the Engine object
         // would also contain all of the data that would have to be passed
-        // to instanciate the object in the ResultsFormController
+        // to instanciate the object in the ResultsFormController.
         switch (type)
         {
             case "3G":
@@ -395,11 +183,24 @@ public class MainFormController implements Initializable
                         ((Properties3G)networkProperties), 
                         // deviceProperties instanced as PropertiesDevice3G
                         ((PropertiesDevice3G)deviceProperties));
+                // Runs the modelling and calculates the total power
+                engine.modelStates();
+                engine.calculatePower();
+                errorText.setText("Opening...");
+                progressBar.setProgress(0.99);
                 // Opens a new ResultsForm window and passes appropriate engine
                 showResultsForm3G(engine);
+                
+                // Return the UI the it's original state
+                modelButton.setDisable(false);
+                networkButton.setDisable(false);
+                deviceButton.setDisable(false);
+                traceButton.setDisable(false);
+                progressBar.setVisible(false);
+                errorText.setText("");
             }
             break;
-            
+
             case "Wifi":
             {
                 EngineWifi engine = new EngineWifi(packetList, 
@@ -408,8 +209,21 @@ public class MainFormController implements Initializable
                         ((PropertiesWifi)networkProperties), 
                         // deviceProperties instanced as PropertiesDevice3G
                         ((PropertiesDeviceWifi)deviceProperties));
+                // Runs the modelling and calculates the total power
+                engine.modelStates();
+                engine.calculatePower();
+                errorText.setText("Opening...");
+                progressBar.setProgress(0.99);
                 // Opens a new ResultsForm window and passes appropriate engine
                 showResultsFormWifi(engine);
+                
+                // Return the UI the it's original state
+                modelButton.setDisable(false);
+                networkButton.setDisable(false);
+                deviceButton.setDisable(false);
+                traceButton.setDisable(false);
+                progressBar.setVisible(false);
+                errorText.setText("");
             }
         }
     }

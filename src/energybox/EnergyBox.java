@@ -28,6 +28,7 @@ public class EnergyBox extends Application
 
             stage.setScene(scene);
             stage.setTitle("EnergyBox");
+            stage.setResizable(false);
             stage.show();
         }
         // Otherwise it launches the terminal version
