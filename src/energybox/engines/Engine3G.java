@@ -55,9 +55,7 @@ public class Engine3G extends Engine
                 previousTimeUplink =  packetList.get(0).getTimeInMicros(), 
                 previousTimeDownlink = packetList.get(0).getTimeInMicros(), 
                 previousTime = packetList.get(0).getTimeInMicros(), // might wanna replace the variable with packetList.get(i-1).getTime()
-                timeToEmptyUplink = 0,
-                // timeToEmptyDownlink is a constant : networkProperties.getDOWNLINK_BUFFER_EMPTY_TIME; 
-                transitionPointTemp = 0; // temporary storage for the idle-dch transition point that has to be added at the appropriate time
+                timeToEmptyUplink = 0; // timeToEmptyDownlink is a constant : networkProperties.getDOWNLINK_BUFFER_EMPTY_TIME; 
         State state = State.IDLE; // State enumeration
         // Packet list points
         for (int i = 0; i < packetList.size(); i++) 
@@ -135,10 +133,26 @@ public class Engine3G extends Engine
                         // If the packet is larger than 
                         if (packetList.get(i).getLength() > networkProperties.getUPLINK_BUFFER_IDLE_TO_FACH_OR_DCH())
                         {
-                            idleToDch(packetList.get(i).getTimeInMicros() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME());
-                            drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());                            
-                            state = State.DCH;
-                            drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
+                            // Bug correction for when the trace is not realistic.
+                            // Ignores the the transition time if there are packets
+                            // before the transition is suppose to end.
+                            //if (packetList.get(i+1).getTimeInMicros() > packetList.get(i).getTimeInMicros() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME())
+                            if ((packetList.get(i).getTimeInMicros() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME()) < (double)packetList.get(i+1).getTimeInMicros())
+                            {
+                                System.out.println("Next packet at : " + (double)packetList.get(i+1).getTimeInMicros());
+                                System.out.println("Proomotion at: " + (packetList.get(i).getTimeInMicros() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME()));
+                                idleToDch(packetList.get(i).getTimeInMicros() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME());
+                                drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());                            
+                                state = State.DCH;
+                                drawState(packetList.get(i).getTimeInMicros() + (long)networkProperties.getIDLE_TO_DCH_TRANSITION_TIME(), state.getValue());
+                            }
+                            else
+                            {
+                                idleToDch((double)packetList.get(i).getTimeInMicros());
+                                drawState(packetList.get(i).getTimeInMicros(), state.getValue());                            
+                                state = State.DCH;
+                                drawState(packetList.get(i).getTimeInMicros(), state.getValue());
+                            }
                         }
                         else
                         {

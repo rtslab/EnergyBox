@@ -47,6 +47,7 @@ public abstract class Engine
     // UPLINK THROUGHPUT CALCULATION
     public XYChart.Series<Double, Long> getUplinkThroughput(double chunkSize)
     {
+        uplinkSeries.getData().clear();
         uplinkSeries.setName("Uplink");
         Long throughput = Long.valueOf(0); 
         double currentChunk = chunkSize;
@@ -87,6 +88,7 @@ public abstract class Engine
     // DOWNLOING THROUGHPUT CALCULATION
     public XYChart.Series<Double, Long> getDownlinkThroughput(double chunkSize)
     {
+        downlinkSeries.getData().clear();
         downlinkSeries.setName("Downlink");
         Long throughput = Long.valueOf(0);
         double currentChunk = chunkSize;

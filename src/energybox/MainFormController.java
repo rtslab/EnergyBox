@@ -118,7 +118,7 @@ public class MainFormController implements Initializable
             break;
         }
         //System.out.println(System.getProperty("java.library.path"));
-        /*
+        
         // Default 3G values for testing
         tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
         textField.setText("test1UL.pcap");
@@ -128,7 +128,7 @@ public class MainFormController implements Initializable
         deviceProperties = new PropertiesDevice3G(properties);
         properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
         networkProperties = new Properties3G(properties);
-        */
+        /*
         // Default Wifi values for testing
             //tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2good.pcap";
             //textField.setText("round2good.pcap");
@@ -140,7 +140,7 @@ public class MainFormController implements Initializable
             deviceProperties = new PropertiesDeviceWifi(properties);
             properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\wifi_general.config");
             networkField.setText("wifi_general.config");
-            networkProperties = new PropertiesWifi(properties);
+            networkProperties = new PropertiesWifi(properties);*/
     }
     
     @FXML
@@ -354,25 +354,34 @@ public class MainFormController implements Initializable
         finally 
         {
             pcap.close();
+            
+            // Manual override, if there's anything written in the ipField
+            if (!ipField.getText().equals(""))
+            {
+                sourceIP = ipField.getText();
+            }
             // Gets most used IP address and chooses sourceIP in the following order:
             // DNS criteria, HTTP criteria and finally most frequent.
             // If the first two criteria aren't available and there are two IPs
             // with the same occurrence, the one that was added first is chosen.
-            Map.Entry<String, Integer> maxEntry = null;
-            for (Map.Entry<String, Integer> entry : addressOccurrence.entrySet())
-            { 
-               if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
-                {
-                    maxEntry = entry;
-                }
-            }
-            if (criteria.containsKey("DNS"))
-                    sourceIP = criteria.get("DNS");
-            else if (criteria.containsKey("HTTP"))
-                sourceIP = criteria.get("HTTP");
             else
-                sourceIP = maxEntry.getKey();
-        }  
+            {
+                Map.Entry<String, Integer> maxEntry = null;
+                for (Map.Entry<String, Integer> entry : addressOccurrence.entrySet())
+                { 
+                   if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
+                    {
+                        maxEntry = entry;
+                    }
+                }
+                if (criteria.containsKey("DNS"))
+                        sourceIP = criteria.get("DNS");
+                else if (criteria.containsKey("HTTP"))
+                    sourceIP = criteria.get("HTTP");
+                else
+                    sourceIP = maxEntry.getKey();
+            }
+        }
         // Keeping the engine in the main FormController because the Engine object
         // would also contain all of the data that would have to be passed
         // to instanciate the object in the ResultsFormController
