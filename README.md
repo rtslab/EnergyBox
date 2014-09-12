@@ -22,7 +22,7 @@ The versatility and accuracy of EnergyBox was evaluated in a recent paper using 
 with different data patterns. A comparison with real power traces indicates that EnergyBox is a valuable tool
 for repeatable and convenient studies.
 
-EnergyBox is developed as part of the PhD of Ekhiotz Vergara.
+EnergyBox is developed as part of the licenciate thesis of Ekhiotz Vergara.
 The current implementation is performed as part of the bachelor thesis of Rihards Polis.
 
 Overview:
@@ -30,6 +30,9 @@ http://www.ida.liu.se/labs/rtslab/energy-efficient-networking/tools.html
 
 Original paper:
 http://www.sciencedirect.com/science/article/pii/S2210537914000195
+
+Licenciate thesis:
+http://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-98656
 
 Bachelor thesis:
 To appear
