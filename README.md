@@ -5,6 +5,9 @@ EnergyBox is a parametrised tool that enables accurate studies of communication 
 at the user end, using real traffic traces as input. Currently it focuses on the most
 widespread wireless technologies (3G and WiFi) and emulates application data communication
 energy footprint at the user device. EnergyBox performs trace based iterative packet-driven simulation.
+The following figure shows an overview of the EnergyBox:
+
+![EnergyBox](http://www.ida.liu.se/labs/rtslab/energy-efficient-networking/images/energybox.jpg)
 
 For a given packet trace and input configuration parameters, EnergyBox simulates the underlying states
 of operation in the wireless interfaces (device states). The configuration parameters relate to the cellular
