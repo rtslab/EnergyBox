@@ -3,7 +3,7 @@ package energybox;
 import energybox.engines.*;
 import energybox.properties.device.*;
 import energybox.properties.network.*;
-import java.awt.image.BufferedImage;
+import java.awt.Dialog;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,7 +32,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import org.jnetpcap.winpcap.WinPcap;
 /**
@@ -64,6 +63,8 @@ public class MainFormController implements Initializable, Runnable
     HashMap<String, String> criteria = new HashMap();
     String sourceIP = "";
     HashMap<String, Integer> addressOccurrence = new HashMap();
+    boolean error = false;
+    
     final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList());
     @FXML
     private Button modelButton;
@@ -81,6 +82,9 @@ public class MainFormController implements Initializable, Runnable
     {
         // Load the icon for the Model button
         image.setImage(new Image("/energybox/gears.png", true));
+        // Checks between the two supported operating systems and tries to add
+        // the directory where the JAR file is locted to the PATH or CLASSPATH
+        // variables in the JVM.
         String os = OSTools.getOS();
         switch(os)
         {
@@ -123,7 +127,7 @@ public class MainFormController implements Initializable, Runnable
             }
             break;
         }
-        /*
+        
         // Default 3G values for testing
         tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
         textField.setText("test1UL.pcap");
@@ -133,19 +137,19 @@ public class MainFormController implements Initializable, Runnable
         deviceProperties = new PropertiesDevice3G(properties);
         properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
         networkProperties = new Properties3G(properties);
-        
+        /*
         // Default Wifi values for testing
-            //tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2good.pcap";
-            //textField.setText("round2good.pcap");
-            tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\random31.pcap";
-            textField.setText("random31.pcap");
-            type = "Wifi";
-            Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\samsungS2_wifi.config");
-            deviceField.setText("samsungS2_wifi.config");
-            deviceProperties = new PropertiesDeviceWifi(properties);
-            properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\wifi_general.config");
-            networkField.setText("wifi_general.config");
-            networkProperties = new PropertiesWifi(properties);*/
+        //tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2good.pcap";
+        //textField.setText("round2good.pcap");
+        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\random31.pcap";
+        textField.setText("random31.pcap");
+        type = "Wifi";
+        Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\samsungS2_wifi.config");
+        deviceField.setText("samsungS2_wifi.config");
+        deviceProperties = new PropertiesDeviceWifi(properties);
+        properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\wifi_general.config");
+        networkField.setText("wifi_general.config");
+        networkProperties = new PropertiesWifi(properties);*/
         
     }
     
@@ -159,6 +163,7 @@ public class MainFormController implements Initializable, Runnable
         
         progressBar.visibleProperty().set(true);
         errorText.setText("Loading trace...");
+        error = false;
         (new Thread(new ProcessTrace(this))).start();
     }
     
@@ -168,6 +173,18 @@ public class MainFormController implements Initializable, Runnable
     @Override
     public void run()
     {
+        if (error)
+        {
+            // Return the UI the it's original state
+            modelButton.setDisable(false);
+            networkButton.setDisable(false);
+            deviceButton.setDisable(false);
+            traceButton.setDisable(false);
+            progressBar.setVisible(false);
+            errorText.setText("");
+            return;
+        }
+        
         errorText.setText("Modelling states...");
         progressBar.setProgress(0.75);
         // Keeping the engine in the main FormController because the Engine object
@@ -191,7 +208,7 @@ public class MainFormController implements Initializable, Runnable
                 // Opens a new ResultsForm window and passes appropriate engine
                 showResultsForm3G(engine);
                 
-                // Return the UI the it's original state
+                // Return the UI to it's original state
                 modelButton.setDisable(false);
                 networkButton.setDisable(false);
                 deviceButton.setDisable(false);

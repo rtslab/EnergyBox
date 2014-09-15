@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 import java.nio.BufferUnderflowException;
 import java.util.Map;
 import javafx.application.Platform;
-import javafx.scene.control.Dialogs;
+import javax.swing.JOptionPane;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
@@ -39,8 +39,8 @@ public class ProcessTrace implements Runnable
         // Clear variables in case the button was used before
         controller.sourceIP = "";
         controller.addressOccurrence.clear();
-        controller.criteria.clear();
-        // Error buffer for file handling
+        controller.criteria.clear(); 
+       // Error buffer for file handling
         StringBuilder errbuf = new StringBuilder();
         // Wrapped lists in JavaFX ObservableList for the table view
         
@@ -51,13 +51,29 @@ public class ProcessTrace implements Runnable
         totalBytes = (new File(controller.tracePath)).length();
         // Check weather the .dll file can be found
         try { pcap = Pcap.openOffline(controller.tracePath, errbuf); }
-        catch(UnsatisfiedLinkError e) { Dialogs.showErrorDialog(null, "jnetpcap.dll cannot be found!"); }
+        catch(UnsatisfiedLinkError e) 
+        { 
+            //Platform.runLater(new Runnable() 
+            //{
+                //@Override
+                //public void run() 
+                //{
+                    //Dialogs.showErrorDialog(null, "jnetpcap.dll cannot be found!");
+                    JOptionPane.showMessageDialog(null, "Libpcap not installed or jnetpcap.dll cannot be found!");
+                    Thread.dumpStack();
+                //}
+            //});
+            controller.error = true;
+            Platform.runLater(controller);
+            return;
+        }
         
         if (pcap == null)
         {
             System.err.printf("Error while opening device for capture: " + errbuf.toString());
             //controller.errorText.setText("Error: " + errbuf.toString());
         }
+        System.out.println(errbuf.toString());
         
         PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() 
         {
@@ -232,6 +248,17 @@ public class ProcessTrace implements Runnable
                                     sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
                             }
                             String destination = sb.toString();
+                            
+                            // NON-DOT-DECIMAL ADDRESS COUNTER for SOURCE
+                            if (controller.addressOccurrence.containsKey(source))
+                                controller.addressOccurrence.put(source, controller.addressOccurrence.get(source)+1);
+                            else
+                                controller.addressOccurrence.put(source, 1);
+                            // ... and DESTINATION
+                            if (controller.addressOccurrence.containsKey(destination))
+                                controller.addressOccurrence.put(destination, controller.addressOccurrence.get(destination)+1);
+                            else
+                                controller.addressOccurrence.put(destination, 1);
                             
                             controller.packetList.add(new Packet(
                             packet.getCaptureHeader().timestampInMicros() - startTime,

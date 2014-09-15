@@ -216,6 +216,17 @@ public class ConsoleBox
                             }
                             String destination = sb.toString();
                             
+                            // NON-DOT-DECIMAL ADDRESS COUNTER for SOURCE
+                            if (addressOccurrence.containsKey(source))
+                                addressOccurrence.put(source, addressOccurrence.get(source)+1);
+                            else
+                                addressOccurrence.put(source, 1);
+                            // ... and DESTINATION
+                            if (addressOccurrence.containsKey(destination))
+                                addressOccurrence.put(destination, addressOccurrence.get(destination)+1);
+                            else
+                                addressOccurrence.put(destination, 1);
+                            
                             packetList.add(new Packet(
                             packet.getCaptureHeader().timestampInMicros() - startTime,
                             packet.getPacketWirelen(),

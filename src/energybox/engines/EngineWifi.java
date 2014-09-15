@@ -188,7 +188,7 @@ public class EngineWifi extends Engine
         {
             // Cycles through both the state points and throughput chunks at the same
             // time and promotes CAM to CAMH where needed.
-            while ((i < packetList.size()) && (chunk < uplinkSeries.getData().size()) )
+            while ((i < stateSeries.getData().size()) && (chunk < uplinkSeries.getData().size()) )
             {
                 // If the current chunk is CAMH
                 if (isHighChunk(chunk))
@@ -252,12 +252,12 @@ public class EngineWifi extends Engine
                             // find the last CAMH chunk's end time
                             stateSeries.getData().add(i,
                                     new XYChart.Data(
-                                            uplinkSeries.getData().get(lastCAMH).getXValue(), 
+                                            uplinkSeries.getData().get(lastCAMH).getXValue()+Double.valueOf(0.001), 
                                             State.CAM.getValue()));
 
                             stateSeries.getData().add(i,
                                     new XYChart.Data(
-                                            uplinkSeries.getData().get(lastCAMH).getXValue(), 
+                                            uplinkSeries.getData().get(lastCAMH).getXValue()+Double.valueOf(0.001), 
                                             State.CAMH.getValue()));
                             i++;
                         }
@@ -271,9 +271,12 @@ public class EngineWifi extends Engine
         {
             // Needs camhToPsm if the end state is CAMH
             camToPsm(previousTime + networkProperties.getCAM_PSM_INACTIVITY_TIME());
+            //drawState(previousTime, state.getValue());// + (long)networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
             drawState(previousTime + (long)networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
             state = State.PSM;
+            //drawState(previousTime, state.getValue());// + (long)networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
             drawState(previousTime + (long)networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
+            //drawState(Long.valueOf(270046000L), state.getValue());
         }
         linkDistrData.add(new PieChart.Data("Uplink", uplinkPacketCount));
         linkDistrData.add(new PieChart.Data("Downlink", packetList.size()-uplinkPacketCount));
@@ -289,6 +292,8 @@ public class EngineWifi extends Engine
         int timeInPSM = 0, timeInCAM = 0, timeInCAMH = 0;
         for (int i = 1; i < stateSeries.getData().size(); i++)
         {
+            if (true)//(stateSeries.getData().get(i).getXValue() <= Double.valueOf(310.97))
+            {//////
             double timeDifference = (stateSeries.getData().get(i).getXValue() - stateSeries.getData().get(i-1).getXValue());
             switch(stateSeries.getData().get(i-1).getYValue())
             {
@@ -296,13 +301,15 @@ public class EngineWifi extends Engine
                 {
                     power += timeDifference * deviceProperties.getPOWER_IN_PSM();
                     timeInPSM += timeDifference;
+                    //System.out.println(stateSeries.getData().get(i).getXValue() + " : " + power);
                 }
                 break;
                     
                 case 2:
                 {
                     power += timeDifference * deviceProperties.getPOWER_IN_CAM();
-                    timeInCAM += timeDifference; 
+                    timeInCAM += timeDifference;
+                    //System.out.println(stateSeries.getData().get(i).getXValue() + " : " + power);
                }
                 break;
                     
@@ -310,8 +317,10 @@ public class EngineWifi extends Engine
                 {
                     power += timeDifference * deviceProperties.getPOWER_IN_CAMH();
                     timeInCAMH += timeDifference;
+                    //System.out.println(stateSeries.getData().get(i).getXValue() + " : " + power);
                 }
                 break;
+            }/////
             }
         }
         // Total power used rounded down to four decimal places
@@ -334,7 +343,11 @@ public class EngineWifi extends Engine
     {
         for (int i = 0; i < uplinkSeries.getData().size(); i++)
         {
-            if(isHighChunk(i)) return false;//true;
+            if(isHighChunk(i)) 
+            {
+                return true;
+                //return false;
+            }
         }
         return false;
     }
