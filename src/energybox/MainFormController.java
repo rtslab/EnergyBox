@@ -129,6 +129,7 @@ public class MainFormController implements Initializable, Runnable
         }
         
         // Default 3G values for testing
+        /*
         tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
         textField.setText("test1UL.pcap");
         //ipField.setText("10.209.43.104");
@@ -137,7 +138,7 @@ public class MainFormController implements Initializable, Runnable
         deviceProperties = new PropertiesDevice3G(properties);
         properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
         networkProperties = new Properties3G(properties);
-        /*
+        
         // Default Wifi values for testing
         //tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2good.pcap";
         //textField.setText("round2good.pcap");
