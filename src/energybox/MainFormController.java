@@ -81,7 +81,13 @@ public class MainFormController implements Initializable, Runnable
     public void initialize(URL url, ResourceBundle rb)
     {
         // Load the icon for the Model button
-        image.setImage(new Image("/energybox/gears.png", true));
+        try {
+            image.setImage(new Image("/energybox/img/gears.png", true));
+        } catch (Exception e) {
+            System.err.println("Gears image not found");
+        }
+        
+        
         // Checks between the two supported operating systems and tries to add
         // the directory where the JAR file is locted to the PATH or CLASSPATH
         // variables in the JVM.
@@ -126,6 +132,31 @@ public class MainFormController implements Initializable, Runnable
                 }
             }
             break;
+            
+            case "Mac":
+            {
+                //ToDo: Add support to OS X using tshark.
+                //ToDo: Add error dialog to say that OS X is not currently supported
+                //http://commons.apache.org/proper/commons-exec/tutorial.html
+                //http://www.coderanch.com/t/624006/java/java/tshark-giving-output
+                //Check that tshark is installed, otherwise show an error
+                /*try {
+                    String s = null;
+                    // using the Runtime exec method:
+                    Process p = Runtime.getRuntime().exec("which tshark");
+                    BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    // read the output from the command
+                    while ((s = stdInput.readLine()) != null) {
+                        System.out.println(s);
+                    }
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                    Dialogs.showErrorDialog(null, "Install the tshark application which is installed with Wireshark");
+                }*/
+           }
+           break;
+                
         }
         
         // Default 3G values for testing
