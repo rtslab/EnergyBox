@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="629.0" prefWidth="609.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="energybox.ResultsFormWifiController">
+<children><AnchorPane prefHeight="629.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<children><MenuBar prefHeight="629.0" prefWidth="500.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+  <menus>
+    <Menu mnemonicParsing="false" text="File">
+      <items><MenuItem fx:id="menuItemExportCSV" mnemonicParsing="false" onAction="#exportCSVAction" text="Export to CSV" />
+        <MenuItem mnemonicParsing="false" text="Close" />
+      </items>
+    </Menu>
+    <Menu mnemonicParsing="false" text="Edit">
+      <items>
+        <MenuItem mnemonicParsing="false" text="Delete" />
+      </items>
+    </Menu>
+    <Menu mnemonicParsing="false" text="Help">
+      <items>
+        <MenuItem mnemonicParsing="false" text="About" />
+      </items>
+    </Menu>
+  </menus>
+</MenuBar><GridPane prefHeight="15.0" prefWidth="609.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+<children><HBox prefHeight="15.0" prefWidth="200.0">
+<children><Label text="Chunk Size: " textFill="WHITE" /><TextField fx:id="chuckSizeField" onAction="#chunkSizeAction" prefHeight="15.0" prefWidth="50.0" />
+</children></HBox><HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+<children><Label prefHeight="15.0" text="From (s): " textFill="WHITE" /><TextField fx:id="fromTimeField" onAction="#fromTimeAction" prefHeight="15.0" prefWidth="50.0" /><Label prefHeight="15.0" text="To (s): " textFill="WHITE" /><TextField fx:id="toTimeField" onAction="#toTimeAction" prefHeight="15.0" prefWidth="50.0" />
+</children></HBox><TextField fx:id="descriptionField" alignment="CENTER_RIGHT" disable="true" editable="false" focusTraversable="false" text="8.8.8.8" GridPane.columnIndex="2" />
+</children>
+</GridPane><TabPane prefHeight="605.0" prefWidth="500.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+  <tabs>
+
+
+    <Tab text="Packet Trace">
+      <content>
+        <AnchorPane fx:id="ActionPane1" minHeight="0.0" minWidth="0.0" prefHeight="528.0" prefWidth="500.0">
+<children><GridPane prefHeight="600.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+<RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+  
+
+<children><StackedAreaChart fx:id="throughputChart" title="Throughput" GridPane.rowIndex="1">
+  <xAxis>
+    <NumberAxis fx:id="throughputXAxis" side="BOTTOM" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis side="LEFT" />
+  </yAxis>
+</StackedAreaChart>
+
+
+<!--
+<children><AreaChart fx:id="throughputChart" title="Throughput">
+  <xAxis>
+    <NumberAxis side="BOTTOM" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis side="LEFT" />
+  </yAxis>
+</AreaChart> 
+-->
+
+
+<LineChart fx:id="packetChart" layoutY="45.0" prefHeight="600.0" prefWidth="500.0" title="Packets over time" AnchorPane.bottomAnchor="450.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.rowIndex="2">
+  <xAxis>
+    <NumberAxis fx:id="packetXAxis" side="BOTTOM" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis side="LEFT" />
+  </yAxis>
+</LineChart><TableView fx:id="packetTable" layoutY="147.0" prefHeight="450.0" prefWidth="500.0" AnchorPane.bottomAnchor="300.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.rowIndex="3">
+<columns>
+<TableColumn prefWidth="131.0" text="Time">
+<cellValueFactory>
+<PropertyValueFactory property="time" />
+</cellValueFactory>
+</TableColumn>
+<TableColumn prefWidth="89.0" text="Length">
+<cellValueFactory>
+<PropertyValueFactory property="length" />
+</cellValueFactory>
+</TableColumn>
+<TableColumn prefWidth="112.0" text="Source">
+<cellValueFactory>
+<PropertyValueFactory property="source" />
+</cellValueFactory>
+</TableColumn>
+<TableColumn minWidth="0.0" prefWidth="101.0" text="Destination">
+<cellValueFactory>
+<PropertyValueFactory property="destination" />
+</cellValueFactory>
+</TableColumn>
+<TableColumn minWidth="0.0" prefWidth="65.0" text="Protocol">
+<cellValueFactory>
+<PropertyValueFactory property="protocol" />
+</cellValueFactory>
+</TableColumn>
+<TableColumn minWidth="0.0" prefWidth="110.0" text="Link">
+<cellValueFactory>
+<PropertyValueFactory property="link" />
+</cellValueFactory>
+</TableColumn>
+</columns>
+</TableView><SplitPane dividerPositions="0.6" focusTraversable="true" layoutX="102.0" layoutY="-24.0" prefHeight="160.0" prefWidth="200.0" GridPane.rowIndex="4">
+  <items>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+<children><PieChart fx:id="linkDistroPieChart" layoutY="411.0" legendSide="LEFT" prefHeight="148.0" prefWidth="145.0" title="UL/DL distribution" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+</children></AnchorPane>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+<children><TableView fx:id="linkDistroTable" prefHeight="148.0" prefWidth="246.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <columns>
+    <TableColumn prefWidth="130.0" text="Parameter">
+    <cellValueFactory>
+        <PropertyValueFactory property="parameter" />
+    </cellValueFactory>
+    </TableColumn>
+    <TableColumn prefWidth="109.0" text="Value">
+    <cellValueFactory>
+        <PropertyValueFactory property="value" />
+    </cellValueFactory>
+    </TableColumn>
+  </columns>
+</TableView>
+</children></AnchorPane>
+  </items>
+</SplitPane>
+</children>
+</GridPane>
+</children></AnchorPane>
+      </content>
+    </Tab>
+    <Tab text="States">
+<content><AnchorPane prefHeight="200.0" prefWidth="200.0">
+<children><GridPane prefHeight="600.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+<children><AreaChart fx:id="stateChart" title="States" verticalZeroLineVisible="false">
+  <xAxis>
+    <NumberAxis fx:id="stateXAxis" side="BOTTOM" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis side="LEFT" />
+  </yAxis>
+</AreaChart><LineChart fx:id="packetChart2" layoutY="45.0" prefHeight="600.0" prefWidth="500.0" title="Packets over time" GridPane.rowIndex="1">
+  <xAxis>
+    <NumberAxis fx:id="packetXAxis2" side="BOTTOM" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis side="LEFT" />
+  </yAxis>
+</LineChart><SplitPane dividerPositions="0.6" focusTraversable="true" prefHeight="160.0" prefWidth="200.0" GridPane.rowIndex="2">
+  <items>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+<children><PieChart fx:id="stateTimePieChart" legendSide="LEFT" prefHeight="148.0" prefWidth="248.0" title="Time per state distribution" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+</children></AnchorPane>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+  </items>
+</SplitPane>
+</children>
+</GridPane>
+</children></AnchorPane>
+</content>
+    </Tab><Tab text="Power">
+  <content>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+<children><GridPane prefHeight="600.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+<children><LineChart fx:id="powerChart" title="Power">
+  <xAxis>
+    <NumberAxis fx:id="powerXAxis" side="BOTTOM" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis side="LEFT" />
+  </yAxis>
+</LineChart><AreaChart fx:id="stateChart2" title="States" GridPane.rowIndex="1">
+  <xAxis>
+    <NumberAxis fx:id="stateXAxis2" side="BOTTOM" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis side="LEFT" />
+  </yAxis>
+</AreaChart><LineChart fx:id="packetChart3" title="Packets over time" GridPane.rowIndex="2">
+  <xAxis>
+    <NumberAxis fx:id="packetXAxis3" side="BOTTOM" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis side="LEFT" />
+  </yAxis>
+</LineChart><TableView fx:id="statsTable" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
+  <columns>
+    <TableColumn prefWidth="168.0" text="Parameter">
+    <cellValueFactory>
+        <PropertyValueFactory property="parameter" />
+    </cellValueFactory>
+    </TableColumn>
+    <TableColumn prefWidth="440.0" text="Value">
+    <cellValueFactory>
+        <PropertyValueFactory property="value" />
+    </cellValueFactory>
+    </TableColumn>
+  </columns>
+</TableView>
+</children>
+</GridPane>
+</children></AnchorPane>
+  </content>
+</Tab>
+  </tabs>
+</TabPane>
+</children></AnchorPane>
+</children></AnchorPane>
