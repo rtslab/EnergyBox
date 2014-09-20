@@ -53,16 +53,14 @@ public class ProcessTrace implements Runnable
         try { pcap = Pcap.openOffline(controller.tracePath, errbuf); }
         catch(UnsatisfiedLinkError e) 
         { 
-            //Platform.runLater(new Runnable() 
-            //{
-                //@Override
-                //public void run() 
-                //{
-                    //Dialogs.showErrorDialog(null, "jnetpcap.dll cannot be found!");
-                    JOptionPane.showMessageDialog(null, "Libpcap not installed or jnetpcap.dll cannot be found!");
-                    Thread.dumpStack();
-                //}
-            //});
+            Platform.runLater(new Runnable() 
+            {
+                @Override
+                public void run() 
+                {
+                    OSTools.showErrorDialog("Libpcap Error", "Libpcap not installed or jnetpcap.dll cannot be found!");
+                }
+            });
             controller.error = true;
             Platform.runLater(controller);
             return;

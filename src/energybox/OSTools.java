@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URLDecoder;
+import javax.swing.JOptionPane;
+import org.controlsfx.dialog.Dialogs;
 
 /**
  * @author Rihards Polis
@@ -66,5 +68,22 @@ public class OSTools
         try { decodedPath = URLDecoder.decode(path, "UTF-8"); }
         catch (UnsupportedEncodingException e){ e.printStackTrace(); }
         return decodedPath;
+    }
+    
+    public static void showErrorDialog(String title, String message)
+    {
+        try
+        {
+            Dialogs.create()
+                .owner(null)
+                .title("Error")
+                .masthead(title)
+                .message( message)
+                .showError();
+        }
+        catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, message);
+        }
     }
 }

@@ -16,12 +16,12 @@
 <graphic><ImageView fx:id="image" fitHeight="37.0" fitWidth="51.0" layoutX="104.0" layoutY="21.0" pickOnBounds="true" preserveRatio="true" />
 </graphic></Button>
         <Label layoutX="10.0" layoutY="73.0" minHeight="16" minWidth="69" text="Packet Trace:" />
-        <TextField fx:id="textField" editable="false" focusTraversable="false" layoutX="10.0" layoutY="92.0" prefHeight="25.0" prefWidth="92.0" text="random31.pcap" />
+        <TextField fx:id="textField" editable="false" focusTraversable="false" layoutX="10.0" layoutY="92.0" prefHeight="25.0" prefWidth="92.0" text="" />
         <Label fx:id="errorText" layoutX="10.0" layoutY="158.0" minHeight="16" minWidth="69" prefHeight="17.0" prefWidth="158.0" wrapText="true" />
         <Label layoutX="171.0" layoutY="14.0" minHeight="16" minWidth="69" text="Device Model:" />
-        <TextField fx:id="deviceField" editable="false" focusTraversable="false" layoutX="173.0" layoutY="36.0" prefHeight="25.0" prefWidth="92.0" text="device_3g.config" />
+        <TextField fx:id="deviceField" editable="false" focusTraversable="false" layoutX="173.0" layoutY="36.0" prefHeight="25.0" prefWidth="92.0" text="" />
         <Label layoutX="173.0" layoutY="139.0" minHeight="16" minWidth="69" text="Network Model:" />
-        <TextField fx:id="networkField" editable="false" focusTraversable="false" layoutX="173.0" layoutY="154.0" prefHeight="25.0" prefWidth="92.0" text="3g_teliasonera.config" />
+        <TextField fx:id="networkField" editable="false" focusTraversable="false" layoutX="173.0" layoutY="154.0" prefHeight="25.0" prefWidth="92.0" text="" />
         <Button fx:id="deviceButton" layoutX="266.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleDeviceButton" prefHeight="45.0" prefWidth="72.0" text="Device Model" textAlignment="CENTER" wrapText="true" />
         <Button fx:id="networkButton" layoutX="266.0" layoutY="134.0" mnemonicParsing="false" onAction="#handleNetworkButton" prefHeight="45.0" prefWidth="72.0" text="Network Model" textAlignment="CENTER" wrapText="true" />
         <TextField fx:id="ipField" focusTraversable="false" layoutX="14.0" layoutY="36.0" prefHeight="25.0" prefWidth="92.0" text="" />

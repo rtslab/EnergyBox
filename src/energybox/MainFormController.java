@@ -3,12 +3,12 @@ package energybox;
 import energybox.engines.*;
 import energybox.properties.device.*;
 import energybox.properties.network.*;
-import java.awt.Dialog;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -24,7 +24,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Dialogs;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
@@ -32,7 +31,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javax.swing.JOptionPane;
 import org.jnetpcap.winpcap.WinPcap;
 /**
  * @author Rihards Polis
@@ -55,6 +53,7 @@ public class MainFormController implements Initializable, Runnable
     
     Network networkProperties = null;
     Device deviceProperties = null;
+    String fieldError = "-fx-border-color: #FF3300; -fx-border-radius: 5; -fx-border-style: solid; -fx-border-width: 2;";
     String tracePath;
     String type; // for engine selection
     // Two possible criteria that can indicate the source IP:
@@ -82,11 +81,10 @@ public class MainFormController implements Initializable, Runnable
     {
         // Load the icon for the Model button
         try {
-            image.setImage(new Image("/energybox/img/gears2.png", true));
+            image.setImage(new Image("/energybox/img/gears.png", true));
         } catch (Exception e) {
             System.err.println("Gears image not found");
         }
-        
         
         // Checks between the two supported operating systems and tries to add
         // the directory where the JAR file is locted to the PATH or CLASSPATH
@@ -106,7 +104,7 @@ public class MainFormController implements Initializable, Runnable
                 try { OSTools.addDirectory(relativePath.toString()); }
                 catch (IOException e)
                 {
-                    Dialogs.showErrorDialog(null, e.getMessage());
+                    OSTools.showErrorDialog("JVM path error!", e.getMessage());
                 }
             }
             break;
@@ -123,12 +121,12 @@ public class MainFormController implements Initializable, Runnable
                 try { OSTools.addDirectory(relativePath.toString()); }
                 catch (IOException e)
                 {
-                    JOptionPane.showMessageDialog(null, e.getMessage());
+                    OSTools.showErrorDialog("JVM Path Error", e.getMessage());
                 }
                 try { WinPcap.isSupported(); }
                 catch (UnsatisfiedLinkError e)
                 {
-                    Dialogs.showErrorDialog(null, "Libpcap-dev not installed!");
+                    OSTools.showErrorDialog("Libpcap Error", "Libpcap-dev not installed!");
                 }
             }
             break;
@@ -161,25 +159,25 @@ public class MainFormController implements Initializable, Runnable
         
         // Default 3G values for testing
         /*
-        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\test1UL.pcap";
+        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\traces\\\\test1UL.pcap";
         textField.setText("test1UL.pcap");
         //ipField.setText("10.209.43.104");
         type = "3G";
-        Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\device_3g.config");
+        Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\config\\device_3g.config");
         deviceProperties = new PropertiesDevice3G(properties);
-        properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\3g_teliasonera.config");
+        properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\config\\3g_teliasonera.config");
         networkProperties = new Properties3G(properties);
         
         // Default Wifi values for testing
         //tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\round2good.pcap";
         //textField.setText("round2good.pcap");
-        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\test\\\\random31.pcap";
+        tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\traces\\\\random31.pcap";
         textField.setText("random31.pcap");
         type = "Wifi";
-        Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\samsungS2_wifi.config");
+        Properties properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\config\\samsungS2_wifi.config");
         deviceField.setText("samsungS2_wifi.config");
         deviceProperties = new PropertiesDeviceWifi(properties);
-        properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\test\\wifi_general.config");
+        properties = pathToProperties("D:\\Source\\NetBeansProjects\\EnergyBox\\config\\wifi_general.config");
         networkField.setText("wifi_general.config");
         networkProperties = new PropertiesWifi(properties);*/
         
@@ -188,6 +186,15 @@ public class MainFormController implements Initializable, Runnable
     @FXML
     private void handleButtonAction(ActionEvent event)
     {
+        checkFieldError(textField);
+        checkFieldError(deviceField);
+        checkFieldError(networkField);
+        if (error) 
+        {
+            run();
+            return;
+        }
+        
         modelButton.setDisable(true);
         networkButton.setDisable(true);
         deviceButton.setDisable(true);
@@ -286,18 +293,53 @@ public class MainFormController implements Initializable, Runnable
         fileChooser.setInitialDirectory((new File(path)).getParentFile().getParentFile());
         fileChooser.setTitle("Open Device Configuration File");
         File file = fileChooser.showOpenDialog(stage);
-        Properties properties = fileToProperties(file);
-        
-        // deviceProperties is initiated the same way as networkProperties
-        switch (properties.getProperty("TYPE"))
+        try
         {
-            case "Device3G": deviceProperties = new PropertiesDevice3G(properties);
-            break;
-                
-            case "DeviceWifi": deviceProperties = new PropertiesDeviceWifi(properties);
-            break;
+            Properties properties = fileToProperties(file);
+            deviceField.setStyle("-fx-border-width: 0;");
+            // deviceProperties is initiated the same way as networkProperties
+            if (properties.getProperty("TYPE") == null)
+            {
+                OSTools.showErrorDialog("Config File Error!", "Not a valid config file");
+                throw new NullPointerException();
+            }
+            switch (properties.getProperty("TYPE"))
+            {
+                case "Device3G": 
+                {
+                    String propError = validate(PropertiesDevice3G.class.getFields(), properties);
+                    if (!propError.equals(""))
+                    {
+                        OSTools.showErrorDialog("Config File Error!", propError);
+                        throw new NullPointerException();
+                    }
+                    deviceProperties = new PropertiesDevice3G(properties);
+                }
+                break;
+
+                case "DeviceWifi": 
+                {
+                    String propError = validate(PropertiesDeviceWifi.class.getFields(), properties);
+                    if (!propError.equals(""))
+                    {
+                        OSTools.showErrorDialog("Config File Error!", propError);
+                        throw new NullPointerException();
+                    }
+                    deviceProperties = new PropertiesDeviceWifi(properties);
+                }
+                break;
+                    
+                default:
+                {
+                    OSTools.showErrorDialog("Config File Error!", "Not a valid config type");
+                    // No idea why you can't just throw an exception
+                    if (true) throw new NullPointerException();
+                }
+                break;
+            }
+            deviceField.setText(file.getName());
         }
-        deviceField.setText(file.getName());
+        catch(NullPointerException e){ deviceField.setText(""); }
     }
     
     @FXML
@@ -309,19 +351,55 @@ public class MainFormController implements Initializable, Runnable
         fileChooser.setInitialDirectory((new File(path)).getParentFile().getParentFile());
         fileChooser.setTitle("Open Network Configuration File");
         File file = fileChooser.showOpenDialog(stage);
-        Properties properties = fileToProperties(file);
-        // networkProperties is initiated with the constructor of the appropriate
-        // class depending on the TYPE of the .config file
-        switch (properties.getProperty("TYPE"))
+        try
         {
-            case "3G": networkProperties = new Properties3G(properties);
-            break;
-                
-            case "Wifi": networkProperties = new PropertiesWifi(properties);
-            break;
+            Properties properties = fileToProperties(file);
+            networkField.setStyle("-fx-border-width: 0;");
+            // networkProperties is initiated with the constructor of the appropriate
+            // class depending on the TYPE of the .config file
+            if (properties.getProperty("TYPE") == null)
+            {
+                OSTools.showErrorDialog("Config File Error!", "Not a valid config file");
+                throw new NullPointerException();
+            }
+            switch (properties.getProperty("TYPE"))
+            {
+                case "3G": 
+                {
+                    String propError = validate(Properties3G.class.getFields(), properties);
+                    if (!propError.equals(""))
+                    {
+                        OSTools.showErrorDialog("Config File Error!", propError);
+                        throw new NullPointerException();
+                    }
+                    networkProperties = new Properties3G(properties);
+                }
+                break;
+
+                case "Wifi": 
+                {
+                    String propError = validate(PropertiesWifi.class.getFields(), properties);
+                    if (!propError.equals(""))
+                    {
+                        OSTools.showErrorDialog("Config File Error!", propError);
+                        throw new NullPointerException();
+                    }
+                    networkProperties = new PropertiesWifi(properties);
+                }
+                break;
+                    
+                default:
+                {
+                    OSTools.showErrorDialog("Config File Error!", "Not a valid config type");
+                    // No idea why you can't just throw an exception
+                    if (true) throw new NullPointerException();
+                }
+                break;
+            }
+            type = properties.getProperty("TYPE");
+            networkField.setText(file.getName());
         }
-        type = properties.getProperty("TYPE");
-        networkField.setText(file.getName());
+        catch(NullPointerException e){ networkField.setText(""); }
     }
     
     @FXML
@@ -332,10 +410,14 @@ public class MainFormController implements Initializable, Runnable
         String path = OSTools.getJarLocation();
         fileChooser.setInitialDirectory((new File(path)).getParentFile().getParentFile());
         fileChooser.setTitle("Open Network Configuration File");
-        File file = fileChooser.showOpenDialog(stage);
-        
-        tracePath = file.getAbsolutePath();
-        textField.setText(file.getName());
+        try
+        {
+            File file = fileChooser.showOpenDialog(stage);
+            tracePath = file.getAbsolutePath();
+            textField.setText(file.getName());
+            textField.setStyle("-fx-border-width: 0;");
+        }
+        catch(NullPointerException e){ textField.setText(""); }
     }
     
     // method to launch the ResultsFormController with the custom init method
@@ -348,6 +430,7 @@ public class MainFormController implements Initializable, Runnable
             Stage stage = new Stage();
             stage.setScene(new Scene((Parent)loader.load()));
             stage.setTitle(textField.getText());
+            stage.getIcons().add(new Image("/energybox/img/icon.png"));
 
             // Calls a method on the controller to initialize it with the required data values
             ResultsForm3GController controller = 
@@ -370,6 +453,7 @@ public class MainFormController implements Initializable, Runnable
             Stage stage = new Stage();
             stage.setScene(new Scene((Parent)loader.load()));
             stage.setTitle(textField.getText());
+            stage.getIcons().add(new Image("/energybox/img/icon.png"));
 
             // Calls a method on the controller to initialize it with the required data values
             ResultsFormWifiController controller = 
@@ -406,5 +490,34 @@ public class MainFormController implements Initializable, Runnable
         }
         catch (IOException e){ e.printStackTrace(); }
         return properties;
+    }
+    private void checkFieldError(TextField field)
+    {
+        if (field.getText().equals("")) 
+        {
+            field.setStyle(fieldError);
+            error = true;
+        }
+    }
+    
+    private String validate(Field[] fields, Properties properties)
+    {
+        String propError = "";
+        ArrayList<String> missingFields = new ArrayList();
+        for (Field field : fields)
+        {
+            if (properties.getProperty(field.getName()) == null)
+            {
+                missingFields.add(field.getName());
+            }
+        }
+
+        if (!missingFields.isEmpty())
+        {
+            propError += "Configuration of type '" + properties.getProperty("TYPE")
+                    + "' is missing properties: \n" + missingFields.toString();
+        }
+        
+        return propError;
     }
 }
