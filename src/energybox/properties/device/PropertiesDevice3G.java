@@ -9,9 +9,9 @@ import javafx.beans.property.SimpleDoubleProperty;
  */
 public class PropertiesDevice3G extends Device
 {
-    SimpleDoubleProperty POWER_IN_IDLE = new SimpleDoubleProperty(0.2);
-    SimpleDoubleProperty POWER_IN_FACH = new SimpleDoubleProperty(0.5);
-    SimpleDoubleProperty POWER_IN_DCH = new SimpleDoubleProperty(1.3);
+    public SimpleDoubleProperty POWER_IN_IDLE = new SimpleDoubleProperty(0.2);
+    public SimpleDoubleProperty POWER_IN_FACH = new SimpleDoubleProperty(0.5);
+    public SimpleDoubleProperty POWER_IN_DCH = new SimpleDoubleProperty(1.3);
     
     public PropertiesDevice3G(Properties properties)
     {

@@ -8,10 +8,10 @@ import javafx.beans.property.SimpleDoubleProperty;
  */
 public class PropertiesWifi extends Network
 {
-    SimpleDoubleProperty PSM_TO_CAM_THRESHOLD = new SimpleDoubleProperty(1.0);
-    SimpleDoubleProperty CAM_PSM_INACTIVITY_TIME = new SimpleDoubleProperty(200.0);
-    SimpleDoubleProperty CAM_TIME_WIMDOW = new SimpleDoubleProperty(50.0);
-    SimpleDoubleProperty WINDOW_DATA_RATE_THRESHOLD = new SimpleDoubleProperty(3000.0);
+    public SimpleDoubleProperty PSM_TO_CAM_THRESHOLD = new SimpleDoubleProperty(1.0);
+    public SimpleDoubleProperty CAM_PSM_INACTIVITY_TIME = new SimpleDoubleProperty(200.0);
+    public SimpleDoubleProperty CAM_TIME_WIMDOW = new SimpleDoubleProperty(50.0);
+    public SimpleDoubleProperty WINDOW_DATA_RATE_THRESHOLD = new SimpleDoubleProperty(3000.0);
     
     public PropertiesWifi(Properties properties)
     {
