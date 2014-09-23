@@ -40,6 +40,7 @@ public class ProcessTrace implements Runnable
         controller.sourceIP = "";
         controller.addressOccurrence.clear();
         controller.criteria.clear(); 
+        controller.packetList.clear();
        // Error buffer for file handling
         StringBuilder errbuf = new StringBuilder();
         // Wrapped lists in JavaFX ObservableList for the table view
@@ -124,7 +125,7 @@ public class ProcessTrace implements Runnable
                                 if (!packet.getHeader(new Http()).isResponse())
                                     controller.criteria.put("HTTP", InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress());
                                 else 
-                                    controller.criteria.put("HTTP", InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress());
+                                    controller.criteria.put("HTTP", InetAddress.getByAddress(packet.getHeader(new Ip4()).destination()).getHostAddress());
                             }
                         }
                     }

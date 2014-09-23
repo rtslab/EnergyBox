@@ -105,17 +105,17 @@ public class ResultsForm3GController implements Initializable
         //engine.calculatePower();
         states = engine.getPower();
         stateChart.getXAxis().setLabel("Time(s)");
-        stateChart.getYAxis().setLabel("States");
+        stateChart.getYAxis().setLabel("RRC States");
         stateChart.getData().add(new XYChart.Series("FACH", engine.getFACH().getData()));
         stateChart.getData().add(new XYChart.Series("DCH", engine.getDCH().getData()));
         
         stateChart2.getXAxis().setLabel("Time(s)");
-        stateChart2.getYAxis().setLabel("States");
+        stateChart2.getYAxis().setLabel("RRC States");
         stateChart2.getData().add(new XYChart.Series("FACH", engine.getFACH().getData()));
         stateChart2.getData().add(new XYChart.Series("DCH", engine.getDCH().getData()));
         
         powerChart.getXAxis().setLabel("Time(s)");
-        powerChart.getYAxis().setLabel("Power(J)");
+        powerChart.getYAxis().setLabel("Power(W)");
         powerChart.getData().add(engine.getPower());
         
         linkDistroPieChart.getData().addAll(engine.getLinkDistroData());

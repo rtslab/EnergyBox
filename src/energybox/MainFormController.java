@@ -4,6 +4,7 @@ import energybox.engines.*;
 import energybox.properties.device.*;
 import energybox.properties.network.*;
 import java.awt.Dialog;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -33,6 +36,12 @@ import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javax.swing.JOptionPane;
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.Executor;
+import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.jnetpcap.winpcap.WinPcap;
 /**
  * @author Rihards Polis
@@ -64,6 +73,7 @@ public class MainFormController implements Initializable, Runnable
     String sourceIP = "";
     HashMap<String, Integer> addressOccurrence = new HashMap();
     boolean error = false;
+    String os;
     
     final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList());
     @FXML
@@ -91,7 +101,8 @@ public class MainFormController implements Initializable, Runnable
         // Checks between the two supported operating systems and tries to add
         // the directory where the JAR file is locted to the PATH or CLASSPATH
         // variables in the JVM.
-        String os = OSTools.getOS();
+        // OS X uses tshark instead, so the process is different.
+        os = OSTools.getOS();
         switch(os)
         {
             case "Windows":
@@ -135,25 +146,39 @@ public class MainFormController implements Initializable, Runnable
             
             case "Mac":
             {
-                //ToDo: Add support to OS X using tshark.
-                //ToDo: Add error dialog to say that OS X is not currently supported
+                //The OS X version uses tshark as a temporary fix
+                //This code only checks whether tshark is installed and it can be executed,
+                //and shows an error otherwise. 
+                //Apache Commons Exec is used:
+                 //Good tutorial http://blog.sanaulla.info/2010/09/07/execute-external-process-from-within-jvm-using-apache-commons-exec-library/
+                String answer = null;
+                final CommandLine cmdLine = new CommandLine("which");
+                cmdLine.addArgument("tshark");
+                
+                DefaultExecutor executor = new DefaultExecutor();
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                //Handle the output of the program
+                PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
+                executor.setStreamHandler(streamHandler);
+                
+                try {
+                    int exitValue = executor.execute(cmdLine,EnvironmentUtils.getProcEnvironment());
+                    answer=outputStream.toString();
+                    //System.out.println("Exit value: "+exitValue);
+                    System.out.println(answer);
+                } catch (IOException ex) {
+                    Logger.getLogger(MainFormController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                if(answer==null){
+                    //Tshark is not installed, or its not in the path, report it
+                    System.err.println("Tshark is not installed or in the path");
+                    //ToDo: Add a dialog "Tshark is not installed or in the path"
+                    //JOptionPane.showMessageDialog(null, "Tshark is not installed or in the path");
+                } 
+                //It does not work if its launched from NetBeans, launch from the terminal
+     
                 //http://commons.apache.org/proper/commons-exec/tutorial.html
                 //http://www.coderanch.com/t/624006/java/java/tshark-giving-output
-                //Check that tshark is installed, otherwise show an error
-                /*try {
-                    String s = null;
-                    // using the Runtime exec method:
-                    Process p = Runtime.getRuntime().exec("which tshark");
-                    BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                    // read the output from the command
-                    while ((s = stdInput.readLine()) != null) {
-                        System.out.println(s);
-                    }
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                    Dialogs.showErrorDialog(null, "Install the tshark application which is installed with Wireshark");
-                }*/
            }
            break;
                 
@@ -196,7 +221,13 @@ public class MainFormController implements Initializable, Runnable
         progressBar.visibleProperty().set(true);
         errorText.setText("Loading trace...");
         error = false;
-        (new Thread(new ProcessTrace(this))).start();
+        if(os.equalsIgnoreCase("Mac")){
+            System.out.println("Running ProcessTraceOSX");
+            (new Thread(new ProcessTraceOSX(this))).start();
+        } else {
+            System.out.println("About to run ProcessTrace");
+            (new Thread(new ProcessTrace(this))).start();
+        }
     }
     
     // Executes in the Event Dispatch Thread but is called from the ProcessTrace
@@ -222,6 +253,7 @@ public class MainFormController implements Initializable, Runnable
         // Keeping the engine in the main FormController because the Engine object
         // would also contain all of the data that would have to be passed
         // to instanciate the object in the ResultsFormController.
+        System.out.println("MainFormController, Packets: "+packetList.size()+" IPsrc: "+sourceIP);
         switch (type)
         {
             case "3G":
