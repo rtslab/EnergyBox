@@ -1,0 +1,2 @@
+#Files to be ignored
+build/ #ignores all files in the build/ directory
