@@ -92,7 +92,7 @@ public class MainFormController implements Initializable, Runnable
     {
         // Load the icon for the Model button
         try {
-            image.setImage(new Image("/energybox/img/gears.png", true));
+            image.setImage(new Image("/energybox/img/gears2.png", true));
         } catch (Exception e) {
             System.err.println("Gears image not found");
         }
