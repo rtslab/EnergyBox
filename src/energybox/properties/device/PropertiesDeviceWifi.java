@@ -9,9 +9,9 @@ import javafx.beans.property.SimpleDoubleProperty;
  */
 public class PropertiesDeviceWifi extends Device
 {
-    SimpleDoubleProperty POWER_IN_PSM = new SimpleDoubleProperty(30.0);
-    SimpleDoubleProperty POWER_IN_CAM = new SimpleDoubleProperty(250.0);
-    SimpleDoubleProperty POWER_IN_CAMH = new SimpleDoubleProperty(500.0);
+    public SimpleDoubleProperty POWER_IN_PSM = new SimpleDoubleProperty(30.0);
+    public SimpleDoubleProperty POWER_IN_CAM = new SimpleDoubleProperty(250.0);
+    public SimpleDoubleProperty POWER_IN_CAMH = new SimpleDoubleProperty(500.0);
     
     public PropertiesDeviceWifi(Properties properties)
     {

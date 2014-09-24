@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 /**
  * @author Rihards Polis
@@ -29,6 +30,7 @@ public class EnergyBox extends Application
             stage.setScene(scene);
             stage.setTitle("EnergyBox");
             stage.setResizable(false);
+            stage.getIcons().add(new Image("/energybox/img/icon.png"));
             stage.show();
         }
         // Otherwise it launches the terminal version

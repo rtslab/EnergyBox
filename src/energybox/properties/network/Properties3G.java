@@ -9,23 +9,23 @@ import javafx.beans.property.SimpleDoubleProperty;
 public class Properties3G extends Network
 { 
     // The default values are taken from the TelianSonera configuration
-    SimpleDoubleProperty DCH_FACH_INACTIVITY_TIME = new SimpleDoubleProperty(4.1);
-    SimpleDoubleProperty FACH_IDLE_INACTIVITY_TIME = new SimpleDoubleProperty(5.6);
-    SimpleDoubleProperty DCH_LOW_ACTIVITY_TIME = new SimpleDoubleProperty(4);
-    SimpleDoubleProperty DATA_THRESHOLD = new SimpleDoubleProperty(1000);
+    public SimpleDoubleProperty DCH_FACH_INACTIVITY_TIME = new SimpleDoubleProperty(4.1);
+    public SimpleDoubleProperty FACH_IDLE_INACTIVITY_TIME = new SimpleDoubleProperty(5.6);
+    public SimpleDoubleProperty DCH_LOW_ACTIVITY_TIME = new SimpleDoubleProperty(4);
+    public SimpleDoubleProperty DATA_THRESHOLD = new SimpleDoubleProperty(1000);
 
-    SimpleDoubleProperty UPLINK_BUFFER_IDLE_TO_FACH_OR_DCH = new SimpleDoubleProperty(1000);
-    SimpleDoubleProperty DOWNLINK_BUFFER_IDLE_TO_FACH_OR_DCH = new SimpleDoubleProperty(515);
-    SimpleDoubleProperty UPLINK_BUFFER_FACH_TO_DCH = new SimpleDoubleProperty(294);
-    SimpleDoubleProperty DOWNLINK_BUFFER_FACH_TO_DCH = new SimpleDoubleProperty(515);
-    SimpleDoubleProperty UPLINK_BUFFER_EMPTY_TIME = new SimpleDoubleProperty(1.2);
-    SimpleDoubleProperty DOWNLINK_BUFFER_EMPTY_TIME = new SimpleDoubleProperty(10.0);
+    public SimpleDoubleProperty UPLINK_BUFFER_IDLE_TO_FACH_OR_DCH = new SimpleDoubleProperty(1000);
+    public SimpleDoubleProperty DOWNLINK_BUFFER_IDLE_TO_FACH_OR_DCH = new SimpleDoubleProperty(515);
+    public SimpleDoubleProperty UPLINK_BUFFER_FACH_TO_DCH = new SimpleDoubleProperty(294);
+    public SimpleDoubleProperty DOWNLINK_BUFFER_FACH_TO_DCH = new SimpleDoubleProperty(515);
+    public SimpleDoubleProperty UPLINK_BUFFER_EMPTY_TIME = new SimpleDoubleProperty(1.2);
+    public SimpleDoubleProperty DOWNLINK_BUFFER_EMPTY_TIME = new SimpleDoubleProperty(10.0);
 
-    SimpleDoubleProperty IDLE_TO_FACH_TRANSITION_TIME = new SimpleDoubleProperty(0.43);
-    SimpleDoubleProperty IDLE_TO_DCH_TRANSITION_TIME = new SimpleDoubleProperty(1.7);
-    SimpleDoubleProperty FACH_TO_DCH_TRANSITION_TIME = new SimpleDoubleProperty(0.65);
-    SimpleDoubleProperty DCH_TO_FACH_TRANSITION_TIME = new SimpleDoubleProperty(0.7);
-    SimpleDoubleProperty FACH_TO_IDLE_TRANSITION_TIME = new SimpleDoubleProperty(0.3);
+    public SimpleDoubleProperty IDLE_TO_FACH_TRANSITION_TIME = new SimpleDoubleProperty(0.43);
+    public SimpleDoubleProperty IDLE_TO_DCH_TRANSITION_TIME = new SimpleDoubleProperty(1.7);
+    public SimpleDoubleProperty FACH_TO_DCH_TRANSITION_TIME = new SimpleDoubleProperty(0.65);
+    public SimpleDoubleProperty DCH_TO_FACH_TRANSITION_TIME = new SimpleDoubleProperty(0.7);
+    public SimpleDoubleProperty FACH_TO_IDLE_TRANSITION_TIME = new SimpleDoubleProperty(0.3);
     
     public Properties3G(Properties properties)
     {
