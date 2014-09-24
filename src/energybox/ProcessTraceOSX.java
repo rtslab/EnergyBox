@@ -35,7 +35,8 @@ public class ProcessTraceOSX implements Runnable
     MainFormController controller;
     long recordsProcessed = 0, totalRecords = 0;
     int i = 0; // For the progress update.
-    private final boolean debug = true;
+    //ToDo: Remove debug code once it becomes stable
+    private final boolean debug = false;
     
     ProcessTraceOSX(MainFormController controller)
     {
@@ -45,34 +46,34 @@ public class ProcessTraceOSX implements Runnable
     @Override
     public void run() 
     {
-        // Clear variables in case the button was used before
+        //Clear variables in case the button was used before
         controller.sourceIP = "";
         controller.addressOccurrence.clear();
         controller.criteria.clear(); 
+        controller.packetList.clear();
         // Error buffer for file handling
         StringBuilder errbuf = new StringBuilder();
         // Wrapped lists in JavaFX ObservableList for the table view
-        
-        //controller.errorText.setText("");
-        controller.packetList.clear();
-        
+
         System.out.println(controller.tracePath);
-        
+
         //Run tshark to create the csv file that you will access using the StreamHandler
         //cannot execute > (output redirection)
         //http://darthanthony.wordpress.com/2009/06/19/running-a-command-line-executable-in-java-with-redirected-output/
-        
-        //tshark -r file.pcap -T fields -E separator=, -e frame.number 
-        //frame.time_relative frame.len ip.src  ip.dst  ip.version  ip.proto http.request dns.qry.name > packetrace.csv
+        //Main command:
+        //tshark -r http2.pcap -T fields -E separator=, -e frame.number -e frame.time_relative -e frame.len -e ip.src -e ip.dst -e ip.version 
+        //-e ip.proto -e http.request -e dns.qry.name -e dns.flags.response -e tcp.port -e tcp.port -e udp.port 
+        //-e udp.srcport -e _ws.col.Info -e _ws.col.Protocol
+        //Information about the fields:
         //https://www.wireshark.org/docs/dfref/i/ip.html
         //https://www.wireshark.org/docs/dfref/h/http.html
         //https://www.wireshark.org/docs/dfref/d/dns.html
         //DNS queries: http://www.netresec.com/?page=Blog&month=2012-06&post=Extracting-DNS-queries
         String csvFile = null; //it is just accessed in memory
+        //Build the command line incrementaly 
         final CommandLine cmdLine = new CommandLine("tshark");
         cmdLine.addArgument("-r");
         cmdLine.addArgument(controller.tracePath); //THIS COMES FROM THE CONTROLLER!!!
-        //Check that it does not contain spaces or similar
         cmdLine.addArgument("-T");
         cmdLine.addArgument("fields");
         cmdLine.addArgument("-E");
@@ -107,20 +108,17 @@ public class ProcessTraceOSX implements Runnable
         cmdLine.addArgument("udp.port"); //13
         cmdLine.addArgument("-e");
         cmdLine.addArgument("udp.srcport"); //14
+        //ToDo: Add the information column, watch out with ','
         //cmdLine.addArgument("-e");
         //cmdLine.addArgument("_ws.col.Info");
         
-        /*tshark -r http2.pcap -T fields -E separator=, -e frame.number -e frame.time_relative -e frame.len -e ip.src -e ip.dst -e ip.version 
-                -e ip.proto -e http.request -e dns.qry.name -e dns.flags.response -e tcp.port -e tcp.port -e udp.port 
-                        -e udp.srcport -e _ws.col.Info -e _ws.col.Protocol */
+        //The way to filter in tshark:
+        //cmdLine.addArgument("dns.qry.name");
+        //cmdLine.addArgument("-Y");
+        //cmdLine.addArgument("dns.flags.response eq 0",false);*/
         
-        /*cmdLine.addArgument("dns.qry.name");
-        cmdLine.addArgument("-Y");
-        cmdLine.addArgument("dns.flags.response eq 0",false);*/
-        System.out.println(cmdLine.toString());
-
-        //-e dns.qry.name -R "dns.flags.response eq 0"
-        //WHERE IS THIS BEING EXECUTED???? use pwd maybe
+        //Execute the command. First print the command to be executed
+        System.out.println("ProcessTraceOSX, Command: "+cmdLine.toString());
         DefaultExecutor executor = new DefaultExecutor();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         //Handle the output of the program
@@ -129,15 +127,17 @@ public class ProcessTraceOSX implements Runnable
         try {
             int exitValue = executor.execute(cmdLine,EnvironmentUtils.getProcEnvironment());
             csvFile=outputStream.toString();
-            System.out.println("Exit value: "+exitValue);
+            //System.out.println("Exit value: "+exitValue);
             //System.out.println(csvFile);
         } catch (IOException ex) {
             Logger.getLogger(MainFormController.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(csvFile);
+            //ToDo: add a dialog in case it fails.
+            controller.errorText.setText("Error reading the file.");
         }
         
         
-        //Read the csv file
+        //Read the csv data created by the command output
         if(csvFile!=null){
             try {
                 //Hashmaps used to count the number of HTTP requests of IPs
@@ -155,8 +155,8 @@ public class ProcessTraceOSX implements Runnable
                 for(CSVRecord record : records){
                     //[Number 0, Time 1, Length 2, Ip src 3, Ip dest 4, IPv 5, Ip proto 6, HTTPreq 7,DNSquery 8]
                     //[2489, 285.096593000, 56, 66.220.153.21, 95.194.8.196, 4, 6, , ]
-                    System.out.println(record.toString());
-                    //Packet(long time, int length, String source, String destination, String protocol)
+                    //System.out.println(record.toString());
+                    //Create the packet objects: Packet(long time, int length, String source, String destination, String protocol)
                     Double time=Double.parseDouble(record.get(1));
                     time=time * 1000000;
                     controller.packetList.add(new Packet(
@@ -168,7 +168,11 @@ public class ProcessTraceOSX implements Runnable
                         //ToDo: Add Port number and info             
                     
                     
-                    //IP DETECTION - Populate the hashmaps - ToDo: make it a method
+                    //IP DETECTION - Populate the hashmaps using different criteria
+                    //IP - Look at the most common IP, both source and destination
+                    //HTTP - Look at the HTTP request source IP
+                    //DNS - Look at the IP source of a DNS query with reponse flag to 0
+                    //ToDo: make it a method
                     //Source
                     if(IPlist.containsKey(record.get(3))){
                         //increase the value
@@ -231,7 +235,8 @@ public class ProcessTraceOSX implements Runnable
                 }
                 
                 //IP detection 
-                //Avoid calculating 
+                //Avoid calculating all, use first HTTP, then DNS and finally IP criteria
+                //ToDo: get the potential source IPs from each criteria and apply weights to the criteria
                 String criteria="none";
                 if(!HTTPrequest.isEmpty()){
                     criteria="HTTP request";
@@ -266,12 +271,9 @@ public class ProcessTraceOSX implements Runnable
                         }
                     }
                     controller.sourceIP=maxEntry.getKey();
-
                 }
                 System.out.println("ProcessTraceOSX, IPsource: "+controller.sourceIP+" Criteria: "+criteria);
                 
-                
-                                
                 // Run the method that opens the results forms
                 if (!controller.ipField.getText().equals(""))
                 {

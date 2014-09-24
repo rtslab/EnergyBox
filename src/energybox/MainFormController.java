@@ -92,7 +92,7 @@ public class MainFormController implements Initializable, Runnable
     {
         // Load the icon for the Model button
         try {
-            image.setImage(new Image("/energybox/img/gears2.png", true));
+            image.setImage(new Image("/energybox/img/gears.png", true));
         } catch (Exception e) {
             System.err.println("Gears image not found");
         }
@@ -165,7 +165,7 @@ public class MainFormController implements Initializable, Runnable
                     int exitValue = executor.execute(cmdLine,EnvironmentUtils.getProcEnvironment());
                     answer=outputStream.toString();
                     //System.out.println("Exit value: "+exitValue);
-                    System.out.println(answer);
+                    System.out.println("MainController, tshark found: "+answer);
                 } catch (IOException ex) {
                     Logger.getLogger(MainFormController.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -173,6 +173,7 @@ public class MainFormController implements Initializable, Runnable
                     //Tshark is not installed, or its not in the path, report it
                     System.err.println("Tshark is not installed or in the path");
                     //ToDo: Add a dialog "Tshark is not installed or in the path"
+                    errorText.setText("Tshark is not installed or in the path");
                     //JOptionPane.showMessageDialog(null, "Tshark is not installed or in the path");
                 } 
                 //It does not work if its launched from NetBeans, launch from the terminal
