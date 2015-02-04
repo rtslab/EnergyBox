@@ -315,6 +315,12 @@ public class Engine3G extends Engine
         stateTimeData.add(new PieChart.Data("DCH", timeInDCH));
         stateTimeData.add(new PieChart.Data("IDLE", timeInIDLE));
     }
+
+    @Override
+    public String getName() {
+        return "3G";
+    }
+
     // State transition drawing methods to seperate state series
     private void dchToFach(Double time)
     {

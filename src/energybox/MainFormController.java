@@ -48,8 +48,7 @@ import org.jnetpcap.winpcap.WinPcap;
  * @author Rihards Polis
  * Linkoping University
  */
-public class MainFormController implements Initializable, Runnable
-{
+public class MainFormController implements Initializable, Runnable, ProgressObserver {
     @FXML
     protected Label errorText;
     @FXML
@@ -234,7 +233,11 @@ public class MainFormController implements Initializable, Runnable
         error = false;
         if(os.equalsIgnoreCase("Mac")){
             System.out.println("Running ProcessTraceOSX");
-            (new Thread(new ProcessTraceOSX(this))).start();
+//            (new Thread(new ProcessTraceOSX(this))).start();
+
+            final ProcessTraceOSX.ControllerUpdater controller = new ProcessTraceOSX.ControllerUpdater(this);
+            final ProcessTraceOSX traceOSX = new ProcessTraceOSX(tracePath, controller);
+            new Thread(traceOSX).start();
         } else {
             System.out.println("About to run ProcessTrace");
             (new Thread(new ProcessTrace(this))).start();
@@ -555,5 +558,10 @@ public class MainFormController implements Initializable, Runnable
         }
         
         return propError;
+    }
+
+    @Override
+    public void updateProgress(double progress) {
+        this.progressBar.setProgress(progress);
     }
 }

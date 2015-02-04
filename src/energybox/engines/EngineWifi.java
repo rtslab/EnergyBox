@@ -328,7 +328,12 @@ public class EngineWifi extends Engine
         stateTimeData.add(new PieChart.Data("DCH", timeInPSM));
         stateTimeData.add(new PieChart.Data("IDLE", timeInCAM));
     }
-    
+
+    @Override
+    public String getName() {
+        return "Wifi";
+    }
+
     private Long getChunkThroughput(int i)
     {
         return (uplinkSeries.getData().get(i).getYValue() + downlinkSeries.getData().get(i).getYValue());

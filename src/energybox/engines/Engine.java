@@ -130,11 +130,11 @@ public abstract class Engine
     // Loops through the packetList once and calculates:
     // -State chart -Packet chart -Distribution pie chart.
     // Implemented in every Engine type seperately.
-    abstract XYChart.Series<Double, Integer> modelStates();
+    public abstract XYChart.Series<Double, Integer> modelStates();
     
     // Calculates power based on the power graph.
     // Implemented in every Engine type seperately.
-    abstract void calculatePower();
+    public abstract void calculatePower();
     
     public void packetChartEntry(Packet packet)
     {
@@ -176,4 +176,6 @@ public abstract class Engine
     public ObservableList<StatisticsEntry> getStatisticsList() {return statisticsList; }
     public ObservableList<StatisticsEntry> getDistrStatisticsList() {return distrStatisticsList; }
     public Double getPowerValue() { return power; }
+    // Name: "3G" or "Wifi"
+    abstract public String getName();
 }

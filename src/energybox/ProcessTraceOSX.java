@@ -1,28 +1,20 @@
 package energybox;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.BufferUnderflowException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javax.swing.JOptionPane;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 
@@ -30,32 +22,45 @@ import org.apache.commons.exec.environment.EnvironmentUtils;
  * @author Ekhiotz Vergara
  * Linkoping University
  */
+@SuppressWarnings("ALL")
 public class ProcessTraceOSX implements Runnable
 {
-    MainFormController controller;
     long recordsProcessed = 0, totalRecords = 0;
     int i = 0; // For the progress update.
     //ToDo: Remove debug code once it becomes stable
     private final boolean debug = false;
-    
-    ProcessTraceOSX(MainFormController controller)
+
+    private String sourceIP = "";
+    private HashMap<String, Integer> addressOccurrence = new HashMap<>();
+    private String criteria = "none";
+    private final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList());
+
+    private double progress = 0;
+    private List<ProgressObserver> observers = new ArrayList<>();
+    private String tracePath = "";
+    private List<String> errors = new ArrayList<>();
+    private UpdatesController postExec;
+
+    ProcessTraceOSX(String tracePath, UpdatesController postExec)
     {
-        this.controller = controller;
+        this.tracePath = tracePath;
+        this.postExec = postExec;
     }
-    
+
+
+
     @Override
     public void run() 
     {
         //Clear variables in case the button was used before
-        controller.sourceIP = "";
-        controller.addressOccurrence.clear();
-        controller.criteria.clear(); 
-        controller.packetList.clear();
+        sourceIP = "";
+        addressOccurrence.clear();
+        packetList.clear();
         // Error buffer for file handling
         StringBuilder errbuf = new StringBuilder();
         // Wrapped lists in JavaFX ObservableList for the table view
 
-        System.out.println(controller.tracePath);
+//        System.out.println(tracePath);
 
         //Run tshark to create the csv file that you will access using the StreamHandler
         //cannot execute > (output redirection)
@@ -73,7 +78,7 @@ public class ProcessTraceOSX implements Runnable
         //Build the command line incrementaly 
         final CommandLine cmdLine = new CommandLine("tshark");
         cmdLine.addArgument("-r");
-        cmdLine.addArgument(controller.tracePath); //THIS COMES FROM THE CONTROLLER!!!
+        cmdLine.addArgument(tracePath);
         cmdLine.addArgument("-T");
         cmdLine.addArgument("fields");
         cmdLine.addArgument("-E");
@@ -125,7 +130,7 @@ public class ProcessTraceOSX implements Runnable
         PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
         executor.setStreamHandler(streamHandler);
         try {
-            int exitValue = executor.execute(cmdLine,EnvironmentUtils.getProcEnvironment());
+            int exitValue = executor.execute(cmdLine, EnvironmentUtils.getProcEnvironment());
             csvFile=outputStream.toString();
             //System.out.println("Exit value: "+exitValue);
             //System.out.println(csvFile);
@@ -133,7 +138,8 @@ public class ProcessTraceOSX implements Runnable
             Logger.getLogger(MainFormController.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(csvFile);
             //ToDo: add a dialog in case it fails.
-            controller.errorText.setText("Error reading the file.");
+            //controller.errorText.setText("Error reading the file.");
+            errors.add("Error reading the file.");
         }
         
         
@@ -150,7 +156,7 @@ public class ProcessTraceOSX implements Runnable
                 List<CSVRecord> records = CSVParser.parse(csvFile, CSVFormat.DEFAULT).getRecords();
                 recordsProcessed=0;
                 totalRecords=records.size();
-                System.out.println(totalRecords);
+                System.out.println("Total packets: " + totalRecords);
                 //IP detection needs to be done here
                 for(CSVRecord record : records){
                     //[Number 0, Time 1, Length 2, Ip src 3, Ip dest 4, IPv 5, Ip proto 6, HTTPreq 7,DNSquery 8]
@@ -159,7 +165,7 @@ public class ProcessTraceOSX implements Runnable
                     //Create the packet objects: Packet(long time, int length, String source, String destination, String protocol)
                     Double time=Double.parseDouble(record.get(1));
                     time=time * 1000000;
-                    controller.packetList.add(new Packet(
+                    packetList.add(new Packet(
                         time.longValue(),
                         Integer.parseInt(record.get(2)),
                         record.get(3),
@@ -215,8 +221,9 @@ public class ProcessTraceOSX implements Runnable
                     //Update progress bar
                     recordsProcessed++;
                     //Reading the packet file is 50% of the progress, 25% is to model the states, and the rest to run the GUI
-                    final double progress = ((double)recordsProcessed / (double)totalRecords) / 2 ;
-                    controller.progressBar.setProgress(progress);
+                    this.progress = ((double)recordsProcessed / (double)totalRecords) / 2;
+                    notifyObservers();
+
                 }
                 
                 /*for(Packet p : controller.packetList){
@@ -233,54 +240,11 @@ public class ProcessTraceOSX implements Runnable
                         System.out.println("IP "+entry.getKey()+" "+entry.getValue());
                     }
                 }
-                
-                //IP detection 
-                //Avoid calculating all, use first HTTP, then DNS and finally IP criteria
-                //ToDo: get the potential source IPs from each criteria and apply weights to the criteria
-                String criteria="none";
-                if(!HTTPrequest.isEmpty()){
-                    criteria="HTTP request";
-                    Entry<String, Integer> maxEntry = null;
-                    for (Entry<String, Integer> entry : HTTPrequest.entrySet()) {  // Iterate through hashmap
-                        //System.out.println(entry.getKey()+" "+entry.getValue());
-                        if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
-                        {
-                            maxEntry = entry;
-                        }
-                    }
-                    controller.sourceIP=maxEntry.getKey();
-                } else if (!DNSquery.isEmpty()) {
-                    criteria="DNS query";
-                    Entry<String, Integer> maxEntry = null;
-                    for (Entry<String, Integer> entry : DNSquery.entrySet()) {  // Iterate through hashmap
-                        if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
-                        {
-                            maxEntry = entry;
-                        }
-                    }
-                    controller.sourceIP=maxEntry.getKey();
-                    //most common is the ip
-                } else {
-                    //Calculate the most common IP
-                    criteria="Common IP";
-                    Entry<String, Integer> maxEntry = null;
-                    for (Entry<String, Integer> entry : IPlist.entrySet()) {  // Iterate through hashmap
-                        if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
-                        {
-                            maxEntry = entry;
-                        }
-                    }
-                    controller.sourceIP=maxEntry.getKey();
-                }
-                System.out.println("ProcessTraceOSX, IPsource: "+controller.sourceIP+" Criteria: "+criteria);
-                
-                // Run the method that opens the results forms
-                if (!controller.ipField.getText().equals(""))
-                {
-                    controller.sourceIP = controller.ipField.getText();
-                }
-                Platform.runLater(controller);
-                
+
+                sourceIP = detectIP(HTTPrequest, DNSquery, IPlist);
+                postExec.invoke(sourceIP);
+
+
             } catch (IOException ex) {
                 Logger.getLogger(ProcessTraceOSX.class.getName()).log(Level.SEVERE, null, ex);
                 System.err.println("Error processing the trace");
@@ -290,4 +254,113 @@ public class ProcessTraceOSX implements Runnable
             System.err.println("Could not read packet trace");
         }
     }
+
+    private String detectIP(HashMap<String, Integer> HTTPrequest, HashMap<String, Integer> DNSquery, HashMap<String, Integer> IPlist) {
+        //IP detection
+        //Avoid calculating all, use first HTTP, then DNS and finally IP criteria
+        //ToDo: get the potential source IPs from each criteria and apply weights to the criteria
+        criteria = "none";
+        if(!HTTPrequest.isEmpty()){
+            criteria="HTTP request";
+            Entry<String, Integer> maxEntry = null;
+            for (Entry<String, Integer> entry : HTTPrequest.entrySet()) {  // Iterate through hashmap
+                //System.out.println(entry.getKey()+" "+entry.getValue());
+                if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
+                {
+                    maxEntry = entry;
+                }
+            }
+            return maxEntry.getKey();
+        } else if (!DNSquery.isEmpty()) {
+            criteria="DNS query";
+            Entry<String, Integer> maxEntry = null;
+            for (Entry<String, Integer> entry : DNSquery.entrySet()) {  // Iterate through hashmap
+                if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
+                {
+                    maxEntry = entry;
+                }
+            }
+            return maxEntry.getKey();
+            //most common is the ip
+        } else {
+            //Calculate the most common IP
+            criteria="Common IP";
+            Entry<String, Integer> maxEntry = null;
+            for (Entry<String, Integer> entry : IPlist.entrySet()) {  // Iterate through hashmap
+                if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
+                {
+                    maxEntry = entry;
+                }
+            }
+            return maxEntry.getKey();
+        }
+    }
+
+
+    public ObservableList<Packet> getPacketList() {
+        return packetList;
+    }
+
+    public String getCriteria() {
+        return criteria;
+    }
+
+    public HashMap<String, Integer> getAddressOccurrence() {
+        return addressOccurrence;
+    }
+
+    public String getSourceIP() {
+        return sourceIP;
+    }
+
+    private void notifyObservers() {
+        for (ProgressObserver obs : observers)
+            obs.updateProgress(this.progress);
+    }
+
+    public void addObserver(ProgressObserver observer) {
+        observers.add(observer);
+    }
+
+    public void removeObserver(ProgressObserver observer) {
+        observers.remove(observer);
+    }
+
+    public final static class NullUpdater implements UpdatesController {
+
+        @Override
+        public void invoke(String sourceIP) {
+            // do nothing
+        }
+    }
+
+    public final static class ControllerUpdater implements UpdatesController {
+        private final MainFormController controller;
+
+        public ControllerUpdater(MainFormController controller) {
+            this.controller = controller;
+        }
+
+        public void invoke(String sourceIP) {
+            controller.sourceIP = sourceIP; // TODO examine
+            System.out.println("ProcessTraceOSX, IPsource: " + sourceIP + " Criteria: "+ sourceIP);
+            // Run the method that opens the results forms
+            if (!controller.ipField.getText().equals(""))
+            {
+                controller.sourceIP = controller.ipField.getText();
+            }
+            Platform.runLater(controller);
+        }
+    }
+
+    public List<String> getErrorMessages() {
+        return errors;
+    }
+
+    public boolean hasErrors() {
+        return !errors.isEmpty();
+    }
+
+
+
 }
