@@ -22,7 +22,6 @@ import org.apache.commons.exec.environment.EnvironmentUtils;
  * @author Ekhiotz Vergara
  * Linkoping University
  */
-@SuppressWarnings("ALL")
 public class ProcessTraceOSX implements Runnable
 {
     long recordsProcessed = 0, totalRecords = 0;
@@ -33,7 +32,7 @@ public class ProcessTraceOSX implements Runnable
     private String sourceIP = "";
     private HashMap<String, Integer> addressOccurrence = new HashMap<>();
     private String criteria = "none";
-    private final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList());
+    private final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList<Packet>());
 
     private double progress = 0;
     private List<ProgressObserver> observers = new ArrayList<>();
@@ -56,6 +55,7 @@ public class ProcessTraceOSX implements Runnable
         sourceIP = "";
         addressOccurrence.clear();
         packetList.clear();
+        errors.clear();
         // Error buffer for file handling
         StringBuilder errbuf = new StringBuilder();
         // Wrapped lists in JavaFX ObservableList for the table view
@@ -242,7 +242,7 @@ public class ProcessTraceOSX implements Runnable
                 }
 
                 sourceIP = detectIP(HTTPrequest, DNSquery, IPlist);
-                postExec.invoke(sourceIP);
+                postExec.invoke(this);
 
 
             } catch (IOException ex) {
@@ -329,7 +329,7 @@ public class ProcessTraceOSX implements Runnable
     public final static class NullUpdater implements UpdatesController {
 
         @Override
-        public void invoke(String sourceIP) {
+        public void invoke(ProcessTraceOSX trace) {
             // do nothing
         }
     }
@@ -341,13 +341,27 @@ public class ProcessTraceOSX implements Runnable
             this.controller = controller;
         }
 
-        public void invoke(String sourceIP) {
-            controller.sourceIP = sourceIP; // TODO examine
-            System.out.println("ProcessTraceOSX, IPsource: " + sourceIP + " Criteria: "+ sourceIP);
+        public void invoke(ProcessTraceOSX trace) {
+            controller.sourceIP = trace.getSourceIP();
+            controller.addressOccurrence = trace.getAddressOccurrence();
+//            controller.criteria = trace.getCriteria();
+            controller.packetList.clear();
+            controller.packetList.addAll(trace.getPacketList());
+            System.out.println("ProcessTraceOSX, IPsource: " + controller.sourceIP + " Criteria: "+ trace.getCriteria());
             // Run the method that opens the results forms
             if (!controller.ipField.getText().equals(""))
             {
                 controller.sourceIP = controller.ipField.getText();
+            }
+
+            if (trace.hasErrors()) {
+                StringBuilder sb = new StringBuilder();
+                Iterator<String> iter = trace.getErrorMessages().iterator();
+                while (iter.hasNext()) {
+                    sb.append(iter.next());
+                    if(iter.hasNext()) sb.append("\n");
+                }
+                controller.errorText.setText(sb.toString());
             }
             Platform.runLater(controller);
         }

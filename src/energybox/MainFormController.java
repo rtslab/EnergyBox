@@ -70,7 +70,7 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
     // Two possible criteria that can indicate the source IP:
     // -> "HTTP" - a phone is usually not running a web server, so any GET requests are from the the recording device
     // -> "DNS" - a phone is usually not running a DNS server so any requests are from the the recording device 
-    HashMap<String, String> criteria = new HashMap();
+    //private HashMap<String, String> criteria = new HashMap();
     String sourceIP = "";
     HashMap<String, Integer> addressOccurrence = new HashMap();
     boolean error = false;
@@ -233,9 +233,7 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         error = false;
         if(os.equalsIgnoreCase("Mac")){
             System.out.println("Running ProcessTraceOSX");
-//            (new Thread(new ProcessTraceOSX(this))).start();
-
-            final ProcessTraceOSX.ControllerUpdater controller = new ProcessTraceOSX.ControllerUpdater(this);
+            final UpdatesController controller = new ProcessTraceOSX.ControllerUpdater(this);
             final ProcessTraceOSX traceOSX = new ProcessTraceOSX(tracePath, controller);
             new Thread(traceOSX).start();
         } else {
@@ -272,7 +270,7 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         {
             case "3G":
             {
-                Engine3G engine = new Engine3G(packetList, 
+                Engine3G engine = new Engine3G(packetList,
                         sourceIP,
                         //networkProperties instanced as Properties3G
                         ((Properties3G)networkProperties), 

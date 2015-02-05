@@ -3,8 +3,8 @@ package energybox;
 import java.util.HashMap;
 
 /**
- * Created by jens on 15-02-04.
+ * @author Jens Green Olander
  */
 public interface UpdatesController {
-    public void invoke(String sourceIP);
+    public void invoke(ProcessTraceOSX trace);
 }

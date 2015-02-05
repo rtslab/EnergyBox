@@ -4,9 +4,9 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.BufferUnderflowException;
+import java.util.HashMap;
 import java.util.Map;
 import javafx.application.Platform;
-import javax.swing.JOptionPane;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
@@ -27,6 +27,7 @@ public class ProcessTrace implements Runnable
     MainFormController controller;
     long bytesProcessed = 0, totalBytes = 0;
     int i = 0; // For the progress update.
+    HashMap<String, String> criteria = new HashMap<>();
     
     ProcessTrace(MainFormController controller)
     {
@@ -39,7 +40,7 @@ public class ProcessTrace implements Runnable
         // Clear variables in case the button was used before
         controller.sourceIP = "";
         controller.addressOccurrence.clear();
-        controller.criteria.clear(); 
+        criteria.clear();
         controller.packetList.clear();
        // Error buffer for file handling
         StringBuilder errbuf = new StringBuilder();
@@ -118,12 +119,12 @@ public class ProcessTrace implements Runnable
                         {
                             protocol = "HTTP";
                             // Source if it's a request, destination if response
-                            if (!controller.criteria.containsKey("HTTP"))
+                            if (!criteria.containsKey("HTTP"))
                             {
                                 if (!packet.getHeader(new Http()).isResponse())
-                                    controller.criteria.put("HTTP", InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress());
+                                    criteria.put("HTTP", InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress());
                                 else 
-                                    controller.criteria.put("HTTP", InetAddress.getByAddress(packet.getHeader(new Ip4()).destination()).getHostAddress());
+                                    criteria.put("HTTP", InetAddress.getByAddress(packet.getHeader(new Ip4()).destination()).getHostAddress());
                             }
                         }
                     }
@@ -136,16 +137,16 @@ public class ProcessTrace implements Runnable
                         if (packet.getHeader(new Udp()).source() == 53)
                         {
                             protocol = "DNS";
-                            if (!controller.criteria.containsKey("DNS"))
+                            if (!criteria.containsKey("DNS"))
                             {
-                                controller.criteria.put("DNS", InetAddress.getByAddress(packet.getHeader(new Ip4()).destination()).getHostAddress());
+                                criteria.put("DNS", InetAddress.getByAddress(packet.getHeader(new Ip4()).destination()).getHostAddress());
                             }
                         }
                         if (packet.getHeader(new Udp()).destination() == 53)
                         {
-                            if (!controller.criteria.containsKey("DNS"))
+                            if (!criteria.containsKey("DNS"))
                             {
-                                controller.criteria.put("DNS", InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress());
+                                criteria.put("DNS", InetAddress.getByAddress(packet.getHeader(new Ip4()).source()).getHostAddress());
                             }
                             protocol = "DNS";
                         }
@@ -308,10 +309,10 @@ public class ProcessTrace implements Runnable
                         maxEntry = entry;
                     }
                 }
-                if (controller.criteria.containsKey("DNS"))
-                        controller.sourceIP = controller.criteria.get("DNS");
-                else if (controller.criteria.containsKey("HTTP"))
-                    controller.sourceIP = controller.criteria.get("HTTP");
+                if (criteria.containsKey("DNS"))
+                        controller.sourceIP = criteria.get("DNS");
+                else if (criteria.containsKey("HTTP"))
+                    controller.sourceIP = criteria.get("HTTP");
                 else
                     controller.sourceIP = maxEntry.getKey();
             }

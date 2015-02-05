@@ -1,7 +1,7 @@
 package energybox;
 
 /**
- * Created by jens on 15-02-04.
+ * @author Jens Green Olander
  */
 public interface ProgressObserver {
     void updateProgress(double progress);
