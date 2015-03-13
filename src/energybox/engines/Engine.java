@@ -136,27 +136,29 @@ public abstract class Engine
     // Implemented in every Engine type seperately.
     public abstract void calculatePower();
     
+    private ArrayList<XYChart.Data<Long, Integer>> uplinkChartData = new ArrayList<>();
+    private ArrayList<XYChart.Data<Long, Integer>> downlinkChartData = new ArrayList<>();
+
     public void packetChartEntry(Packet packet)
     {
-        if (packet.getUplink())
-            {
-                uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packet.getTime() ,0));
-                uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packet.getTime() , packet.getLength()));
-                uplinkPacketSeries.getData().add(new XYChart.Data(
-                        packet.getTime() ,0));
-                uplinkPacketCount++;
-            }
-            else
-            {
-                downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packet.getTime() ,0));
-                downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packet.getTime() , packet.getLength()));
-                downlinkPacketSeries.getData().add(new XYChart.Data(
-                        packet.getTime() ,0));
-            }
+        ArrayList<XYChart.Data<Long, Integer>> target;
+        if (packet.getUplink()) {
+            uplinkPacketCount++;
+            target = uplinkChartData;
+        } else {
+            target = downlinkChartData;
+        }
+        
+        double time = packet.getTime();
+        
+        target.add(new XYChart.Data(time,0));
+        target.add(new XYChart.Data(time, packet.getLength()));
+        target.add(new XYChart.Data(time,0));
+    }
+    
+    public void updatePacketCharts() {
+        uplinkPacketSeries.getData().setAll(uplinkChartData);
+        downlinkPacketSeries.getData().setAll(downlinkChartData);
     }
     
     public void drawState(Long time, int state)

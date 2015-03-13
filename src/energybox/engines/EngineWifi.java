@@ -57,7 +57,12 @@ public class EngineWifi extends Engine
         
         for (int i = 0; i < packetList.size(); i++) 
         {
+            // to temporary data structure, so too many events are not sent
+            // to observers. Very bad for performance!
+            // Actually update the Chart data using updatePacketChart() later when 
+            // all packets have been added.
             packetChartEntry(packetList.get(i));
+            
             deltaT = packetList.get(i).getTimeInMicros() - previousTime;
             
             // DEMOTIONS
@@ -178,6 +183,9 @@ public class EngineWifi extends Engine
             // Save timestamps for the next loop
             previousTime = packetList.get(i).getTimeInMicros();
         }
+        
+        // Updata charts here for performance reasons
+        updatePacketCharts();
         
         double chunkEnd = 0;
         // Indexes for the stateSries and uplinkSeries entries. We can start with

@@ -61,7 +61,12 @@ public class Engine3G extends Engine
         for (int i = 0; i < packetList.size(); i++) 
         {
             // Populating the packetChart series
+            // to temporary data structure, so too many events are not sent
+            // to observers. Very bad for performance!
+            // Actually update the Chart data using updatePacketChart() later when 
+            // all packets have been added.
             packetChartEntry(packetList.get(i));
+            
             
             // Update deltas and previous times (uplink and downlink seperately
             // for buffer calculations)
@@ -243,6 +248,9 @@ public class Engine3G extends Engine
             else            
                 previousTimeDownlink = packetList.get(i).getTimeInMicros();
         }
+        
+        // update charts here for performance reasons
+        updatePacketCharts();
         
         // Finish the trace if the final state is FACH or DCH
         if (state == State.DCH)
