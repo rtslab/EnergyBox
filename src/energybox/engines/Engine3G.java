@@ -57,6 +57,9 @@ public class Engine3G extends Engine
                 previousTime = packetList.get(0).getTimeInMicros(), // might wanna replace the variable with packetList.get(i-1).getTime()
                 timeToEmptyUplink = 0; // timeToEmptyDownlink is a constant : networkProperties.getDOWNLINK_BUFFER_EMPTY_TIME; 
         State state = State.IDLE; // State enumeration
+
+        stateSeriesData.beforeChanges();
+
         // Packet list points
         for (int i = 0; i < packetList.size(); i++) 
         {
@@ -76,7 +79,7 @@ public class Engine3G extends Engine
                 deltaUplink = packetList.get(i).getTimeInMicros() - previousTimeUplink;
             else
                 deltaDownlink = packetList.get(i).getTimeInMicros() - previousTimeDownlink;
-            
+
             // DEMOTIONS
             switch (state)
             {   
@@ -278,6 +281,9 @@ public class Engine3G extends Engine
             state = State.IDLE;
             drawState(previousTime + (long)networkProperties.getFACH_IDLE_INACTIVITY_TIME(), state.getValue());
         }
+
+        stateSeriesData.afterChanges();
+
         linkDistrData.add(new PieChart.Data("Uplink", uplinkPacketCount));
         linkDistrData.add(new PieChart.Data("Downlink", packetList.size()-uplinkPacketCount));
         distrStatisticsList.add(new StatisticsEntry("Nr of UL packets",uplinkPacketCount));
