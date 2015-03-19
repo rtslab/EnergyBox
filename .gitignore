@@ -1,4 +1,7 @@
-#Files to be ignored
-build/ #ignores all files in the build/ directory
-nbproject/ #ignores the settings of NetBeans
-dist/ #ignore the dist directory
+build/
+nbproject/
+dist/
+out/
+.idea/
+.classpath
+.project
