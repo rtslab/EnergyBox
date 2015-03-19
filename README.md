@@ -35,7 +35,7 @@ Licenciate thesis:
 http://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-98656
 
 Bachelor thesis:
-To appear
+http://liu.diva-portal.org/smash/record.jsf?pid=diva2%3A783681
 
 
 
