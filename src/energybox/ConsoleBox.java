@@ -35,6 +35,7 @@ public class ConsoleBox
 
     public ConsoleBox(ProcessTraceOSX trace, String tracePath, String networkPath, String devicePath) {
         this.trace = trace;
+        this.sourceIP = trace.getSourceIP();
 
         this.networkPath = networkPath;
         this.devicePath = devicePath;
@@ -62,9 +63,17 @@ public class ConsoleBox
     public void printResults()
     {
         power = engine.getPowerValue();
-        System.out.println("Network model: " + engine.getName());
+        System.out.println("Network model: " + getModelName());
         System.out.println("Detected recorder device IP: " + trace.getSourceIP());
-        System.out.println("Total power in Joules: " + engine.getStatisticsList().get(0).getValue());
+        System.out.println("Total power in Joules: " + getTotalPower());
+    }
+
+    public String getModelName() {
+        return engine.getName();
+    }
+
+    public double getTotalPower() {
+        return engine.getStatisticsList().get(0).getValue();
     }
 
     private Network getNetworkProperties(Properties networkConfig) {

@@ -40,7 +40,7 @@ public class ProcessTraceOSX implements Runnable
     private List<String> errors = new ArrayList<>();
     private UpdatesController postExec;
 
-    ProcessTraceOSX(String tracePath, UpdatesController postExec)
+    public ProcessTraceOSX(String tracePath, UpdatesController postExec)
     {
         this.tracePath = tracePath;
         this.postExec = postExec;
