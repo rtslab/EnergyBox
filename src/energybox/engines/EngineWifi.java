@@ -184,7 +184,7 @@ public class EngineWifi extends Engine
             previousTime = packetList.get(i).getTimeInMicros();
         }
         
-        // Updata charts here for performance reasons
+        // Update charts here for performance reasons
         updatePacketCharts();
         
         double chunkEnd = 0;
@@ -194,6 +194,9 @@ public class EngineWifi extends Engine
         int i = 1, chunk = 0, lastCAMH = 0;
         if (hasCAMH())
         {
+
+            stateSeriesData.beforeChanges();
+
             // Cycles through both the state points and throughput chunks at the same
             // time and promotes CAM to CAMH where needed.
             while ((i < stateSeries.getData().size()) && (chunk < uplinkSeries.getData().size()) )
@@ -274,6 +277,8 @@ public class EngineWifi extends Engine
                     else chunk++;
                 }
             }
+            stateSeriesData.afterChanges();
+
         }
         if (state != State.PSM)
         {
