@@ -31,9 +31,9 @@ public class ConsoleBox
     private XYChart.Series<Double, Integer> printStates;
     private Double power;
     private String sourceIP = "";
-    private ProcessTraceOSX trace;
+    private ProcessTrace trace;
 
-    public ConsoleBox(ProcessTraceOSX trace, String tracePath, String networkPath, String devicePath) {
+    public ConsoleBox(ProcessTrace trace, String tracePath, String networkPath, String devicePath) {
         this.trace = trace;
         this.sourceIP = trace.getSourceIP();
 

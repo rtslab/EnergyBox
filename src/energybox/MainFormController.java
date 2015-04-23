@@ -3,7 +3,7 @@ package energybox;
 import energybox.engines.*;
 import energybox.properties.device.*;
 import energybox.properties.network.*;
-import java.awt.Dialog;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,11 +35,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javax.swing.JOptionPane;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 
@@ -69,8 +66,7 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
     String type; // for engine selection
     // Two possible criteria that can indicate the source IP:
     // -> "HTTP" - a phone is usually not running a web server, so any GET requests are from the the recording device
-    // -> "DNS" - a phone is usually not running a DNS server so any requests are from the the recording device 
-    //private HashMap<String, String> criteria = new HashMap();
+    // -> "DNS" - a phone is usually not running a DNS server so any requests are from the the recording device
     String sourceIP = "";
     HashMap<String, Integer> addressOccurrence = new HashMap();
     boolean error = false;
@@ -231,18 +227,18 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         progressBar.visibleProperty().set(true);
         errorText.setText("Loading trace...");
         error = false;
+        final UpdatesController controller = new ControllerUpdater(this);
         if(os.equalsIgnoreCase("Mac")){
             System.out.println("Running ProcessTraceOSX");
-            final UpdatesController controller = new ProcessTraceOSX.ControllerUpdater(this);
             final ProcessTraceOSX traceOSX = new ProcessTraceOSX(tracePath, controller);
             new Thread(traceOSX).start();
         } else {
-            System.out.println("About to run ProcessTrace");
-            (new Thread(new ProcessTrace(this))).start();
+            System.out.println("About to run ProcessTraceLibpcap");
+            (new Thread(new ProcessTraceLibpcap(tracePath, controller))).start();
         }
     }
     
-    // Executes in the Event Dispatch Thread but is called from the ProcessTrace
+    // Executes in the Event Dispatch Thread but is called from the ProcessTraceLibpcap
     // thread because the showResults methods perform Event Dispatch Thread
     // specific tasks.
     @Override
