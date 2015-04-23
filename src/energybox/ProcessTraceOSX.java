@@ -317,7 +317,8 @@ public class ProcessTraceOSX implements ProcessTrace
         return sourceIP;
     }
 
-    private void notifyObservers() {
+    @Override
+    public void notifyObservers() {
         for (ProgressObserver obs : observers)
             obs.updateProgress(this.progress);
     }

@@ -16,6 +16,8 @@ public interface ProcessTrace extends Runnable {
 
     String getSourceIP();
 
+    void notifyObservers();
+
     void addObserver(ProgressObserver observer);
 
     void removeObserver(ProgressObserver observer);

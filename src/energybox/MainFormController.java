@@ -228,14 +228,16 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         errorText.setText("Loading trace...");
         error = false;
         final UpdatesController controller = new ControllerUpdater(this);
+        final ProcessTrace trace;
         if(os.equalsIgnoreCase("Mac")){
             System.out.println("Running ProcessTraceOSX");
-            final ProcessTraceOSX traceOSX = new ProcessTraceOSX(tracePath, controller);
-            new Thread(traceOSX).start();
+            trace = new ProcessTraceOSX(tracePath, controller);
         } else {
-            System.out.println("About to run ProcessTraceLibpcap");
-            (new Thread(new ProcessTraceLibpcap(tracePath, controller))).start();
+            System.out.println("Running ProcessTraceLibpcap");
+            trace = new ProcessTraceLibpcap(tracePath, controller);
         }
+        trace.addObserver(this);
+        (new Thread(trace)).start();
     }
     
     // Executes in the Event Dispatch Thread but is called from the ProcessTraceLibpcap

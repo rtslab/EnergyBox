@@ -1,6 +1,7 @@
 package energybox;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.BufferUnderflowException;
@@ -33,11 +34,14 @@ public class ProcessTraceLibpcap implements ProcessTrace
     private String sourceIP = "";
     private HashMap<String, Integer> addressOccurrence = new HashMap<>();
     private HashMap<String, String> criteria = new HashMap<>();
+    private String usedCriteria = "";
     private final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList<Packet>());
     private String tracePath;
     private UpdatesController postExec;
     private boolean error;
     private List<String> errors = new ArrayList<>();
+    private double progress = 0;
+    private List<ProgressObserver> observers = new ArrayList<>();
 
     public ProcessTraceLibpcap(String tracePath, UpdatesController postExec) {
         this.tracePath = tracePath;
@@ -55,41 +59,29 @@ public class ProcessTraceLibpcap implements ProcessTrace
         errors.clear();
        // Error buffer for file handling
         StringBuilder errbuf = new StringBuilder();
-        // Wrapped lists in JavaFX ObservableList for the table view
-        
+
         Pcap pcap = null;
-        //controller.errorText.setText("");
-        
+
         // Get size of trace for progress display.
         totalBytes = (new File(tracePath)).length();
         // Check weather the .dll file can be found
         try { pcap = Pcap.openOffline(tracePath, errbuf); }
-        catch(UnsatisfiedLinkError e) 
-        { 
-//            Platform.runLater(new Runnable()
-//            {
-//                @Override
-//                public void run()
-//                {
-//                    String errorMsg = "Libpcap not installed or jnetpcap.dll cannot be found!";
-//                    errors.add(errorMsg);
-//                    OSTools.showErrorDialog("Libpcap Error", errorMsg);
-//                }
-//            });
-//            error = true;
-//            Platform.runLater(controller);
-//            return;
+        catch(UnsatisfiedLinkError e)
+        {
+            String errorMsg = "Libpcap not installed or jnetpcap.dll cannot be found!";
+            errors.add(errorMsg);
+            System.err.print(errorMsg);
+            throw new UnsatisfiedLinkError(errorMsg);
         }
-        
+
         if (pcap == null)
         {
             String errorMsg = "Error while opening device for capture: " + errbuf.toString();
             errors.add(errorMsg);
             System.err.printf(errorMsg);
-            //controller.errorText.setText("Error: " + errbuf.toString());
+            return;
         }
-        System.out.println(errbuf.toString());
-        
+
         PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() 
         {
             boolean first = true;
@@ -98,16 +90,8 @@ public class ProcessTraceLibpcap implements ProcessTrace
             public void nextPacket(PcapPacket packet, String user) 
             {
                 bytesProcessed += packet.getCaptureHeader().wirelen();
-                
-//                Platform.runLater(new Runnable()
-//                {
-//                    @Override
-//                    public void run()
-//                    {
-//                        final double progress = ((double)bytesProcessed / (double)totalBytes) / 2;
-//                        notifyObservers();
-//                    }
-//                });
+                progress = ((double)bytesProcessed / (double)totalBytes);
+                notifyObservers();
                 
                 // Copies every packet in the loop to an ArrayList for later use
                 if (first)
@@ -315,7 +299,7 @@ public class ProcessTraceLibpcap implements ProcessTrace
             // If the first two criteria aren't available and there are two IPs
             // with the same occurrence, the one that was added first is chosen.
             else*/
-            {
+                {
                 Map.Entry<String, Integer> maxEntry = null;
                 for (Map.Entry<String, Integer> entry : addressOccurrence.entrySet())
                 { 
@@ -324,21 +308,27 @@ public class ProcessTraceLibpcap implements ProcessTrace
                         maxEntry = entry;
                     }
                 }
-                if (criteria.containsKey("DNS"))
-                        sourceIP = criteria.get("DNS");
-                else if (criteria.containsKey("HTTP"))
+                if (criteria.containsKey("DNS")) {
+                    usedCriteria = "DNS query";
+                    sourceIP = criteria.get("DNS");
+                }
+                else if (criteria.containsKey("HTTP")) {
+                    usedCriteria = "HTTP request";
                     sourceIP = criteria.get("HTTP");
-                else
+                }
+                else {
+                    usedCriteria = "Common IP";
                     sourceIP = maxEntry.getKey();
+                }
             }
             postExec.invoke(this);
         }
-        // Run the method that opens the results forms
-//        Platform.runLater(controller);
     }
 
-    private void notifyObservers() {
-//        TODO
+    @Override
+    public void notifyObservers() {
+        for (ProgressObserver obs : observers)
+            obs.updateProgress(this.progress);
     }
 
     @Override
@@ -348,9 +338,7 @@ public class ProcessTraceLibpcap implements ProcessTrace
 
     @Override
     public String getCriteria() {
-//        return
-        // TODO
-        return "DNS query";
+        return usedCriteria;
     }
 
     @Override
@@ -365,12 +353,12 @@ public class ProcessTraceLibpcap implements ProcessTrace
 
     @Override
     public void addObserver(ProgressObserver observer) {
-
+        observers.add(observer);
     }
 
     @Override
     public void removeObserver(ProgressObserver observer) {
-
+        observers.remove(observer);
     }
 
     @Override

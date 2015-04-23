@@ -31,7 +31,15 @@ public final class ControllerUpdater implements UpdatesController {
                 sb.append(iter.next());
                 if(iter.hasNext()) sb.append("\n");
             }
-            controller.errorText.setText(sb.toString());
+            String errorMessage = sb.toString();
+            controller.errorText.setText(errorMessage);
+
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    OSTools.showErrorDialog("Error", errorMessage);
+                }
+            });
         }
         Platform.runLater(controller);
     }
