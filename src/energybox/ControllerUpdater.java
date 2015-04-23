@@ -18,11 +18,6 @@ public final class ControllerUpdater implements UpdatesController {
         controller.packetList.clear();
         controller.packetList.addAll(trace.getPacketList());
         System.out.println("ProcessTraceOSX, IPsource: " + controller.sourceIP + " Criteria: "+ trace.getCriteria());
-        // Run the method that opens the results forms
-        if (!controller.ipField.getText().equals(""))
-        {
-            controller.sourceIP = controller.ipField.getText();
-        }
 
         if (trace.hasErrors()) {
             StringBuilder sb = new StringBuilder();
@@ -31,7 +26,7 @@ public final class ControllerUpdater implements UpdatesController {
                 sb.append(iter.next());
                 if(iter.hasNext()) sb.append("\n");
             }
-            String errorMessage = sb.toString();
+            final String errorMessage = sb.toString();
             controller.errorText.setText(errorMessage);
 
             Platform.runLater(new Runnable() {
