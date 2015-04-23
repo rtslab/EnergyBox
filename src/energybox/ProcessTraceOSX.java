@@ -39,6 +39,7 @@ public class ProcessTraceOSX implements ProcessTrace
     private String tracePath = "";
     private List<String> errors = new ArrayList<>();
     private UpdatesController postExec;
+    private String overrideIp = ""; // manually set ip from GUI
 
     public ProcessTraceOSX(String tracePath, UpdatesController postExec)
     {
@@ -256,6 +257,8 @@ public class ProcessTraceOSX implements ProcessTrace
     }
 
     private String detectIP(HashMap<String, Integer> HTTPrequest, HashMap<String, Integer> DNSquery, HashMap<String, Integer> IPlist) {
+        if (!"".equals(overrideIp)) return overrideIp;
+
         //IP detection
         //Avoid calculating all, use first HTTP, then DNS and finally IP criteria
         //ToDo: get the potential source IPs from each criteria and apply weights to the criteria
@@ -343,6 +346,10 @@ public class ProcessTraceOSX implements ProcessTrace
         return !errors.isEmpty();
     }
 
+    @Override
+    public void setIp(String ip) {
+        this.overrideIp = ip;
+    }
 
 
 }

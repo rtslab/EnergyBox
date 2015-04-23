@@ -25,4 +25,6 @@ public interface ProcessTrace extends Runnable {
     List<String> getErrorMessages();
 
     boolean hasErrors();
+
+    void setIp(String ip);
 }

@@ -42,6 +42,7 @@ public class ProcessTraceLibpcap implements ProcessTrace
     private List<String> errors = new ArrayList<>();
     private double progress = 0;
     private List<ProgressObserver> observers = new ArrayList<>();
+    private String overrideIp = "";
 
     public ProcessTraceLibpcap(String tracePath, UpdatesController postExec) {
         this.tracePath = tracePath;
@@ -290,15 +291,15 @@ public class ProcessTraceLibpcap implements ProcessTrace
             pcap.close();
 
             // Manual override, if there's anything written in the ipField
-            /*if (!controller.ipField.getText().equals(""))
+            if (!"".equals(overrideIp))
             {
-                controller.sourceIP = controller.ipField.getText();
+                sourceIP = overrideIp;
             }
             // Gets most used IP address and chooses sourceIP in the following order:
             // DNS criteria, HTTP criteria and finally most frequent.
             // If the first two criteria aren't available and there are two IPs
             // with the same occurrence, the one that was added first is chosen.
-            else*/
+            else
                 {
                 Map.Entry<String, Integer> maxEntry = null;
                 for (Map.Entry<String, Integer> entry : addressOccurrence.entrySet())
@@ -369,5 +370,10 @@ public class ProcessTraceLibpcap implements ProcessTrace
     @Override
     public boolean hasErrors() {
         return !errors.isEmpty();
+    }
+
+    @Override
+    public void setIp(String ip) {
+        this.overrideIp = ip;
     }
 }

@@ -236,6 +236,9 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
             System.out.println("Running ProcessTraceLibpcap");
             trace = new ProcessTraceLibpcap(tracePath, controller);
         }
+
+        // override ip. if "", will be calculated in ProcessTrace
+        trace.setIp(ipField.getText());
         trace.addObserver(this);
         (new Thread(trace)).start();
     }
