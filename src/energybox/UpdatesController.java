@@ -1,10 +1,10 @@
 package energybox;
 
-import java.util.HashMap;
+import javafx.application.Platform;
 
-/**
- * @author Jens Green Olander
- */
+import java.util.HashMap;
+import java.util.Iterator;
+
 public interface UpdatesController {
-    public void invoke(ProcessTraceOSX trace);
+    public void invoke(ProcessTrace trace);
 }

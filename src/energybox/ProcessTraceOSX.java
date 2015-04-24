@@ -22,7 +22,7 @@ import org.apache.commons.exec.environment.EnvironmentUtils;
  * @author Ekhiotz Vergara
  * Linkoping University
  */
-public class ProcessTraceOSX implements Runnable
+public class ProcessTraceOSX implements ProcessTrace
 {
     long recordsProcessed = 0, totalRecords = 0;
     int i = 0; // For the progress update.
@@ -39,6 +39,7 @@ public class ProcessTraceOSX implements Runnable
     private String tracePath = "";
     private List<String> errors = new ArrayList<>();
     private UpdatesController postExec;
+    private String overrideIp = ""; // manually set ip from GUI
 
     public ProcessTraceOSX(String tracePath, UpdatesController postExec)
     {
@@ -256,6 +257,8 @@ public class ProcessTraceOSX implements Runnable
     }
 
     private String detectIP(HashMap<String, Integer> HTTPrequest, HashMap<String, Integer> DNSquery, HashMap<String, Integer> IPlist) {
+        if (!"".equals(overrideIp)) return overrideIp;
+
         //IP detection
         //Avoid calculating all, use first HTTP, then DNS and finally IP criteria
         //ToDo: get the potential source IPs from each criteria and apply weights to the criteria
@@ -297,84 +300,56 @@ public class ProcessTraceOSX implements Runnable
     }
 
 
+    @Override
     public ObservableList<Packet> getPacketList() {
         return packetList;
     }
 
+    @Override
     public String getCriteria() {
         return criteria;
     }
 
+    @Override
     public HashMap<String, Integer> getAddressOccurrence() {
         return addressOccurrence;
     }
 
+    @Override
     public String getSourceIP() {
         return sourceIP;
     }
 
-    private void notifyObservers() {
+    @Override
+    public void notifyObservers() {
         for (ProgressObserver obs : observers)
             obs.updateProgress(this.progress);
     }
 
+    @Override
     public void addObserver(ProgressObserver observer) {
         observers.add(observer);
     }
 
+    @Override
     public void removeObserver(ProgressObserver observer) {
         observers.remove(observer);
     }
 
-    public final static class NullUpdater implements UpdatesController {
-
-        @Override
-        public void invoke(ProcessTraceOSX trace) {
-            // do nothing
-        }
-    }
-
-    public final static class ControllerUpdater implements UpdatesController {
-        private final MainFormController controller;
-
-        public ControllerUpdater(MainFormController controller) {
-            this.controller = controller;
-        }
-
-        public void invoke(ProcessTraceOSX trace) {
-            controller.sourceIP = trace.getSourceIP();
-            controller.addressOccurrence = trace.getAddressOccurrence();
-//            controller.criteria = trace.getCriteria();
-            controller.packetList.clear();
-            controller.packetList.addAll(trace.getPacketList());
-            System.out.println("ProcessTraceOSX, IPsource: " + controller.sourceIP + " Criteria: "+ trace.getCriteria());
-            // Run the method that opens the results forms
-            if (!controller.ipField.getText().equals(""))
-            {
-                controller.sourceIP = controller.ipField.getText();
-            }
-
-            if (trace.hasErrors()) {
-                StringBuilder sb = new StringBuilder();
-                Iterator<String> iter = trace.getErrorMessages().iterator();
-                while (iter.hasNext()) {
-                    sb.append(iter.next());
-                    if(iter.hasNext()) sb.append("\n");
-                }
-                controller.errorText.setText(sb.toString());
-            }
-            Platform.runLater(controller);
-        }
-    }
-
+    @Override
     public List<String> getErrorMessages() {
         return errors;
     }
 
+    @Override
     public boolean hasErrors() {
         return !errors.isEmpty();
     }
 
+    @Override
+    public void setIp(String ip) {
+        this.overrideIp = ip;
+    }
 
 
 }

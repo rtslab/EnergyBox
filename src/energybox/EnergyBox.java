@@ -36,11 +36,13 @@ public class EnergyBox extends Application
         // Otherwise it launches the terminal version
         else if (flags.containsKey("t") && flags.containsKey("n") && flags.containsKey("d"))
         {
-//            ConsoleBox consoleBox = new ConsoleBox(flags.get("t"), flags.get("n"), flags.get("d"));
-            final UpdatesController updater = new ProcessTraceOSX.NullUpdater();
-            final ProcessTraceOSX traceOSX = new ProcessTraceOSX(flags.get("t"), updater);
-            traceOSX.run(); // block thread to avoid race conditions
-            ConsoleBox consoleBox = new ConsoleBox(traceOSX, flags.get("t"), flags.get("n"), flags.get("d"));
+            final UpdatesController updater = new NullUpdater();
+            final ProcessTrace trace = OSTools.isMac() ?
+                    new ProcessTraceOSX(flags.get("t"), updater) :
+                    new ProcessTraceLibpcap(flags.get("t"), updater);
+
+            trace.run(); // block thread to avoid race conditions
+            ConsoleBox consoleBox = new ConsoleBox(trace, flags.get("t"), flags.get("n"), flags.get("d"));
             consoleBox.printResults();
             if (flags.containsKey("f"))
             {
