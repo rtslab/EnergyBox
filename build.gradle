@@ -1,0 +1,122 @@
+description = """energybox"""
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+
+    group = 'se.liu.rtslab.energybox'
+    version = '2.0.0-SNAPSHOT'
+
+    sourceCompatibility = org.gradle.api.JavaVersion.VERSION_1_8
+    targetCompatibility = org.gradle.api.JavaVersion.VERSION_1_8
+
+    sourceSets {
+        main {
+            java {
+                srcDir 'src'
+                exclude 'se/liu/rtslab/energybox/test'
+            }
+            resources {
+                srcDir 'config'
+            }
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+
+    dependencies {
+        compile files('lib/jnetpcap-1.4.r1425/jnetpcap.jar')
+        compile 'org.apache.commons:commons-csv:1.1'
+        compile 'org.apache.commons:commons-exec:1.3'
+        compile 'commons-io:commons-io:2.4'
+        compile 'junit:junit:4.12'
+    }
+}
+
+jar {
+    manifest.attributes "Main-Class": "se.liu.rtslab.energybox.EnergyBox"
+
+    doFirst {
+        from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion '2.0'
+}
+
+task createPom << {
+    pom {
+        project {
+            groupId project.group
+            artifactId project.name
+            version project.version
+        }
+    }.writeTo("pom.xml")
+}
+
+buildscript {
+    dependencies {
+        try {
+            assert (jfxrtDir != null)
+        } catch (RuntimeException re) {
+            ext.jfxrtDir = "."
+        }
+
+        ext.searchFile = {Map<String, Closure> places, List<String> searchPaths, String searchID ->
+            File result = null;
+            places.each { k, v ->
+                if (result != null) return;
+                project.logger.debug("Looking for $searchID in $k")
+                def dir = v()
+                if (dir == null) {
+                    project.logger.debug("$k not set")
+                } else {
+                    project.logger.debug("$k is $dir")
+                    searchPaths.each { s ->
+                        if (result != null) return;
+                        File f = new File(dir, s);
+                        project.logger.debug("Trying $f.path")
+                        if (f.exists() && f.file) {
+                            project.logger.debug("found $searchID as $result")
+                            result = f;
+                        }
+                    }
+                }
+            }
+            if (!result?.file) {
+                throw new GradleException("Could not find $searchID, please set one of ${places.keySet()}");
+            } else {
+                project.logger.info("$searchID: ${result}")
+                return result
+            }
+        }
+        ext.findJFXJar = {
+            return searchFile([
+                    'jfxrtDir in Gradle Properties': {jfxrtDir},
+                    'JFXRT_HOME in System Environment': {System.env['JFXRT_HOME']},
+                    'JAVA_HOME in System Environment': {System.env['JAVA_HOME']},
+                    'java.home in JVM properties': {System.properties['java.home']}
+            ],
+                    ['jfxrt.jar', 'lib/jfxrt.jar', 'lib/ext/jfxrt.jar', 'jre/lib/jfxrt.jar', 'jre/lib/ext/jfxrt.jar'],
+                    'JavaFX Runtime Jar')
+        }
+
+        ext.findAntJavaFXJar = {
+            return searchFile([
+                    'jfxrtDir in Gradle Properties': {jfxrtDir},
+                    'JFXRT_HOME in System Environment': {System.env['JFXRT_HOME']},
+                    'JAVA_HOME in System Environment': {System.env['JAVA_HOME']},
+                    'java.home in JVM properties': {System.properties['java.home']}
+            ],
+                    ['ant-javafx.jar', 'lib/ant-javafx.jar', '../lib/ant-javafx.jar'],
+                    'JavaFX Packager Tools')
+        }
+
+        classpath project.files(findAntJavaFXJar())
+        classpath project.files(findJFXJar())
+    }
+}
