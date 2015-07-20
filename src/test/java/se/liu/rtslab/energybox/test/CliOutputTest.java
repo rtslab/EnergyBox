@@ -18,9 +18,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public abstract class CliOutputTest {
@@ -33,11 +31,10 @@ public abstract class CliOutputTest {
 
     @Before
     public void setUp() throws Exception {
-        URL resUrl = this.getClass().getResource("/test/resources/");
+        URL resUrl = this.getClass().getClassLoader().getResource("");
+        assertNotNull("Resource path was null. Did you run with gradle? (command is `gradle test`)", resUrl);
         this.resources = FileUtils.getFile(resUrl.getPath());
-
-        URL cfgUrl = this.getClass().getResource("/test/resources/config");
-        this.configs = FileUtils.getFile(cfgUrl.getPath());
+        this.configs = FileUtils.getFile(this.resources, "config");
     }
 
     @After

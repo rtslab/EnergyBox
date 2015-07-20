@@ -7,15 +7,11 @@ allprojects {
     group = 'se.liu.rtslab.energybox'
     version = '2.0.0-SNAPSHOT'
 
-    sourceCompatibility = org.gradle.api.JavaVersion.VERSION_1_8
-    targetCompatibility = org.gradle.api.JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 
     sourceSets {
         main {
-            java {
-                srcDir 'src'
-                exclude 'se/liu/rtslab/energybox/test'
-            }
             resources {
                 srcDir 'config'
             }
@@ -35,6 +31,12 @@ allprojects {
         compile 'junit:junit:4.12'
     }
 }
+
+task copyTestResources(type: Copy) {
+    from "${projectDir}/src/test/resources"
+    into "${buildDir}/classes/test"
+}
+processTestResources.dependsOn copyTestResources
 
 jar {
     manifest.attributes "Main-Class": "se.liu.rtslab.energybox.EnergyBox"

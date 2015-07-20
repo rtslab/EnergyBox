@@ -26,7 +26,7 @@ public class EngineWifi extends Engine
         private State(int value){this.value = value;}
         public int getValue() { return this.value; }
     }
-    XYChart.Series<Long, Integer> camSeries = new XYChart.Series();
+    XYChart.Series<Double, Integer> camSeries = new XYChart.Series<>();
     
     public EngineWifi(ObservableList<Packet> packetList,
             String sourceIP,
@@ -224,19 +224,17 @@ public class EngineWifi extends Engine
                             else if (stateSeries.getData().get(i-1).getYValue() == State.CAM.getValue())
                             {
                                 stateSeries.getData().add(i,
-                                        new XYChart.Data(
+                                        new XYChart.Data<>(
                                                 uplinkSeries.getData().get(chunk-1).getXValue(), 
                                                 State.CAMH.getValue()));
                                 stateSeries.getData().add(i,
-                                        new XYChart.Data(
-                                                uplinkSeries.getData().get(chunk-1).getXValue(), 
-                                                State.CAM.getValue()));
+                                        pointCam(uplinkSeries.getData().get(chunk-1).getXValue()));
                             }
                             // Add new point after current one
                             else
                             {
                                 stateSeries.getData().add(i+1, 
-                                        new XYChart.Data(
+                                        new XYChart.Data<>(
                                                 stateSeries.getData().get(i).getXValue(), 
                                                 State.CAMH.getValue()));
                             }
@@ -262,13 +260,11 @@ public class EngineWifi extends Engine
                             // more than one chunk after the previous CAMH chunk,
                             // find the last CAMH chunk's end time
                             stateSeries.getData().add(i,
-                                    new XYChart.Data(
-                                            uplinkSeries.getData().get(lastCAMH).getXValue()+Double.valueOf(0.001), 
-                                            State.CAM.getValue()));
+                                    pointCam(uplinkSeries.getData().get(lastCAMH).getXValue()+ 0.001));
 
                             stateSeries.getData().add(i,
-                                    new XYChart.Data(
-                                            uplinkSeries.getData().get(lastCAMH).getXValue()+Double.valueOf(0.001), 
+                                    new XYChart.Data<>(
+                                            uplinkSeries.getData().get(lastCAMH).getXValue()+ 0.001,
                                             State.CAMH.getValue()));
                             i++;
                         }
@@ -373,19 +369,27 @@ public class EngineWifi extends Engine
     private void psmToCam(Double time)
     {
         time = time / 1000000;
-        camSeries.getData().add(new XYChart.Data(time, 0));
-        camSeries.getData().add(new XYChart.Data(time, State.CAM.getValue()));
+        camSeries.getData().add(pointZero(time));
+        camSeries.getData().add(pointCam(time));
     }
-    
+
+    private XYChart.Data<Double, Integer> pointCam(Double time) {
+        return new XYChart.Data<Double, Integer>(time, State.CAM.getValue());
+    }
+
+    private XYChart.Data<Double, Integer> pointZero(Double time) {
+        return new XYChart.Data<Double, Integer>(time, 0);
+    }
+
     private void camToPsm(Double time)
     {
         time = time / 1000000;
-        camSeries.getData().add(new XYChart.Data(time, State.CAM.getValue()));
-        camSeries.getData().add(new XYChart.Data(time, 0));
+        camSeries.getData().add(pointCam(time));
+        camSeries.getData().add(pointZero(time));
     }
     
     // GETTERS
-    public XYChart.Series<Long, Integer> getCAM(){ return camSeries; }
+    public XYChart.Series<Double, Integer> getCAM(){ return camSeries; }
     
     
     

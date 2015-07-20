@@ -26,8 +26,8 @@ public class Engine3G extends Engine
     PropertiesDevice3G deviceProperties;
     
     // CHART VARIABLES
-    XYChart.Series<Long, Integer> fachSeries = new XYChart.Series();
-    XYChart.Series<Long, Integer> dchSeries = new XYChart.Series();
+    XYChart.Series<Double, Integer> fachSeries = new XYChart.Series<>();
+    XYChart.Series<Double, Integer> dchSeries = new XYChart.Series<>();
     
     // MAIN CONSTRUCTOR
     public Engine3G(ObservableList<Packet> packetList,
@@ -339,50 +339,64 @@ public class Engine3G extends Engine
     private void dchToFach(Double time)
     {
         time = time / 1000000;
-        dchSeries.getData().add(new XYChart.Data(time, State.DCH.getValue()));
-        dchSeries.getData().add(new XYChart.Data(time, 0));
+        dchSeries.getData().add(pointDch(time));
+        dchSeries.getData().add(pointZero(time));
         
-        fachSeries.getData().add(new XYChart.Data(time, 0));
-        fachSeries.getData().add(new XYChart.Data(time, State.FACH.getValue()));
+        fachSeries.getData().add(pointZero(time));
+        fachSeries.getData().add(pointFach(time));
     }
-    
+
     private void fachToIdle(Double time)
     {
         time = time / 1000000;
-        fachSeries.getData().add(new XYChart.Data(time, State.FACH.getValue()));
-        fachSeries.getData().add(new XYChart.Data(time, 0));
+        fachSeries.getData().add(pointFach(time));
+        fachSeries.getData().add(pointZero(time));
     }
     
     private void idleToFach(Double time)
     {
         time = time / 1000000;
-        fachSeries.getData().add(new XYChart.Data(time, 0));
-        fachSeries.getData().add(new XYChart.Data(time, State.FACH.getValue()));
+        fachSeries.getData().add(pointZero(time));
+        fachSeries.getData().add(pointFach(time));
     }
     
     private void idleToDch(Double time)
     {
         time = time / 1000000;
-        dchSeries.getData().add(new XYChart.Data(time, 0));
-        dchSeries.getData().add(new XYChart.Data(time, State.DCH.getValue()));
+        dchSeries.getData().add(pointZero(time));
+        dchSeries.getData().add(pointDch(time));
     }
     
     private void fachToDch(Double time)
     {
         time = time / 1000000;
-        fachSeries.getData().add(new XYChart.Data(time, State.FACH.getValue()));
-        fachSeries.getData().add(new XYChart.Data(time, 0));
+        fachSeries.getData().add(pointFach(time));
+        fachSeries.getData().add(pointZero(time));
         
-        dchSeries.getData().add(new XYChart.Data(time, 0));
-        dchSeries.getData().add(new XYChart.Data(time, State.DCH.getValue()));
+        dchSeries.getData().add(pointZero(time));
+        dchSeries.getData().add(pointDch(time));
     }
-    
+
     // Formula for calculating buffer empty time depending on buffer occupancy
     // (Downlink is modeled with a constant occupancy - the value in networkProperties)
     public long timeToEmptyUplink(int buffer) { return (long)networkProperties.getUPLINK_BUFFER_EMPTY_TIME() * buffer + 10; }
     
     
     // GETTERS
-    public XYChart.Series<Long, Integer> getFACH(){ return fachSeries; }
-    public XYChart.Series<Long, Integer> getDCH(){ return dchSeries; }
+    public XYChart.Series<Double, Integer> getFACH(){ return fachSeries; }
+    public XYChart.Series<Double, Integer> getDCH(){ return dchSeries; }
+
+
+
+    private XYChart.Data<Double, Integer> pointDch(Double time) {
+        return new XYChart.Data<Double, Integer>(time, State.DCH.getValue());
+    }
+
+    private XYChart.Data<Double, Integer> pointFach(Double time) {
+        return new XYChart.Data<Double, Integer>(time, State.FACH.getValue());
+    }
+
+    private XYChart.Data<Double, Integer> pointZero(Double time) {
+        return new XYChart.Data<Double, Integer>(time, 0);
+    }
 }

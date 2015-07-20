@@ -6,7 +6,7 @@ import se.liu.rtslab.energybox.UpdatesController;
 
 import java.util.Map;
 
-public class CliLibpcapOutputTest extends CliOutputTest {
+public class CliLibpcapOutputTest extends se.liu.rtslab.energybox.test.CliOutputTest {
     @Override
     public ProcessTrace getImplementation(Map<String, String> flags, UpdatesController updater) {
         return new ProcessTraceLibpcap(flags.get("t"), updater);
