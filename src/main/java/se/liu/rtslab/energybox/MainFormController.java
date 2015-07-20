@@ -94,7 +94,7 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
     {
         // Load the icon for the Model button
         try {
-            image.setImage(new Image("/se/liu/rtslab/energybox/img/gears.png", true));
+            image.setImage(new Image("img/gears.png", true));
         } catch (Exception e) {
             System.err.println("Gears image not found");
         }
@@ -469,11 +469,11 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         try
         {
             // Creates stage from loader which gets the scene from the fxml file
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("ResultsForm3G.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("ResultsForm3G.fxml"));
             Stage stage = new Stage();
             stage.setScene(new Scene((Parent)loader.load()));
             stage.setTitle(textField.getText());
-            stage.getIcons().add(new Image("/se/liu/rtslab/energybox/img/icon.png"));
+            stage.getIcons().add(new Image("img/icon.png"));
 
             // Calls a method on the controller to initialize it with the required data values
             ResultsForm3GController controller = 
@@ -492,11 +492,11 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         try
         {
             // Creates stage from loader which gets the scene from the fxml file
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("ResultsFormWifi.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("ResultsFormWifi.fxml"));
             Stage stage = new Stage();
             stage.setScene(new Scene((Parent)loader.load()));
             stage.setTitle(textField.getText());
-            stage.getIcons().add(new Image("/se/liu/rtslab/energybox/img/icon.png"));
+            stage.getIcons().add(new Image("img/icon.png"));
 
             // Calls a method on the controller to initialize it with the required data values
             ResultsFormWifiController controller = 

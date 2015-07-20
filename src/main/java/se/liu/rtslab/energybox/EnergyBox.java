@@ -23,14 +23,14 @@ public class EnergyBox extends Application
         // graphical interface.
         if (this.getParameters().getRaw().isEmpty())
         {
-            Parent root = FXMLLoader.load(getClass().getResource("MainForm.fxml"));
+            Parent root = FXMLLoader.load(this.getClass().getClassLoader().getResource("MainForm.fxml"));
 
             Scene scene = new Scene(root);
 
             stage.setScene(scene);
             stage.setTitle("EnergyBox");
             stage.setResizable(false);
-            stage.getIcons().add(new Image("/se/liu/rtslab/energybox/img/icon.png"));
+            stage.getIcons().add(new Image("img/icon.png"));
             stage.show();
         }
         // Otherwise it launches the terminal version
