@@ -39,7 +39,7 @@ task copyTestResources(type: Copy) {
 processTestResources.dependsOn copyTestResources
 
 jar {
-    manifest.attributes "Main-Class": "se.liu.rtslab.energybox.EnergyBox"
+    manifest.attributes "Main-Class": "se.liu.rtslab.energybox.Launcher"
 
     doFirst {
         from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
