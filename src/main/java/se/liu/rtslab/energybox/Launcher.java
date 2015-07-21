@@ -34,9 +34,7 @@ public class Launcher {
 
 
         final UpdatesController updater = new NullUpdater();
-        final ProcessTrace trace = OSTools.isMac() ?
-                new ProcessTraceOSX(flagT, updater) :
-                new ProcessTraceLibpcap(flagT, updater);
+        final ProcessTrace trace = ProcessTrace.Factory.getInstance(flagT, updater);
 
         trace.run(); // block thread to avoid race conditions
         ConsoleBox consoleBox = new ConsoleBox(trace, flagT, flagN, flagD);
@@ -61,18 +59,19 @@ public class Launcher {
     /**
      * Parses args array for CLI arguments matching '--key=value'.
      *
-     * @param pattern the key, e.g --d
+     * @param key the key, e.g "--d"
      * @param args the array of arguments
      * @throws IllegalArgumentException if key cannot be found
      * @return the value corresponding to the key
      */
-    private static String parseParam(String pattern, String[] args) {
+    private static String parseParam(String key, String[] args) {
+        String start = key + "=";
         for (String arg : args) {
-            if (arg.startsWith(pattern)) {
+            if (arg.startsWith(start)) {
                 return arg.substring(4);
             }
         }
-        throw new IllegalArgumentException(String.format("Parameter %s not set (usage: %s=value)", pattern, pattern));
+        throw new IllegalArgumentException(String.format("Parameter %s not set (usage: %s=value)", key, key));
     }
 
     private static void printCliUsage() {

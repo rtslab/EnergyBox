@@ -17,7 +17,7 @@ public final class ControllerUpdater implements UpdatesController {
 //            controller.criteria = trace.getCriteria();
         controller.packetList.clear();
         controller.packetList.addAll(trace.getPacketList());
-        System.out.println("ProcessTraceOSX, IPsource: " + controller.sourceIP + " Criteria: "+ trace.getCriteria());
+        System.out.println(trace.getClass().getSimpleName() + ", IPsource: " + controller.sourceIP + " Criteria: "+ trace.getCriteria());
 
         if (trace.hasErrors()) {
             StringBuilder sb = new StringBuilder();

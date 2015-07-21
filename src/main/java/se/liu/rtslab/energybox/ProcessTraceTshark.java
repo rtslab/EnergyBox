@@ -21,7 +21,7 @@ import org.apache.commons.exec.environment.EnvironmentUtils;
  * @author Ekhiotz Vergara
  * Linkoping University
  */
-public class ProcessTraceOSX implements ProcessTrace
+public class ProcessTraceTshark implements ProcessTrace
 {
     long recordsProcessed = 0, totalRecords = 0;
     int i = 0; // For the progress update.
@@ -40,7 +40,7 @@ public class ProcessTraceOSX implements ProcessTrace
     private UpdatesController postExec;
     private String overrideIp = ""; // manually set ip from GUI
 
-    public ProcessTraceOSX(String tracePath, UpdatesController postExec)
+    public ProcessTraceTshark(String tracePath, UpdatesController postExec)
     {
         this.tracePath = tracePath;
         this.postExec = postExec;
@@ -123,7 +123,7 @@ public class ProcessTraceOSX implements ProcessTrace
         //cmdLine.addArgument("dns.flags.response eq 0",false);*/
         
         //Execute the command. First print the command to be executed
-        System.out.println("ProcessTraceOSX, Command: "+cmdLine.toString());
+        System.out.println(this.getClass().getSimpleName() + ", Command: "+cmdLine.toString());
         DefaultExecutor executor = new DefaultExecutor();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         //Handle the output of the program
@@ -246,7 +246,7 @@ public class ProcessTraceOSX implements ProcessTrace
 
 
             } catch (IOException ex) {
-                Logger.getLogger(ProcessTraceOSX.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ProcessTraceTshark.class.getName()).log(Level.SEVERE, null, ex);
                 System.err.println("Error processing the trace");
             }
             

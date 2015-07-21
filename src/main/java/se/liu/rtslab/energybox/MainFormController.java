@@ -232,15 +232,10 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         progressBar.visibleProperty().set(true);
         errorText.setText("Loading trace...");
         error = false;
+
         final UpdatesController controller = new ControllerUpdater(this);
-        final ProcessTrace trace;
-        if(os.equalsIgnoreCase("Mac")){
-            System.out.println("Running ProcessTraceOSX");
-            trace = new ProcessTraceOSX(tracePath, controller);
-        } else {
-            System.out.println("Running ProcessTraceLibpcap");
-            trace = new ProcessTraceLibpcap(tracePath, controller);
-        }
+        final ProcessTrace trace = ProcessTrace.Factory.getInstance(tracePath, controller);
+        System.out.println("Running " + trace.getClass().getSimpleName());
 
         // override ip. if "", will be calculated in ProcessTrace
         trace.setIp(ipField.getText());
