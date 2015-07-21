@@ -1,5 +1,7 @@
 package se.liu.rtslab.energybox;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import se.liu.rtslab.energybox.engines.Engine3G;
 import java.io.File;
 import java.io.FileWriter;
@@ -117,10 +119,20 @@ public class ResultsForm3GController implements Initializable
         powerChart.getXAxis().setLabel("Time(s)");
         powerChart.getYAxis().setLabel("Power(W)");
         powerChart.getData().add(engine.getPower());
-        
-        linkDistroPieChart.getData().addAll(engine.getLinkDistroData());
-        stateTimePieChart.getData().addAll(engine.getStateTimeData());
-        
+
+        ObservableList<PieChart.Data> linkDistroPieData = FXCollections.observableArrayList(
+                new PieChart.Data("Uplink", engine.getUplinkPacketCount()),
+                new PieChart.Data("Downlink", engine.getDownlinkPacketCount())
+        );
+        linkDistroPieChart.getData().addAll(linkDistroPieData);
+
+        ObservableList<PieChart.Data> stateTimePieData = FXCollections.observableArrayList(
+                new PieChart.Data("FACH", engine.getTimeInFACH()),
+                new PieChart.Data("DCH", engine.getTimeInDCH()),
+                new PieChart.Data("IDLE", engine.getTimeInIDLE())
+        );
+        stateTimePieChart.getData().addAll(stateTimePieData);
+
         throughputChart.getXAxis().setLabel("Time(s)");
         throughputChart.getYAxis().setLabel("Bytes/s");
         throughputChart.getData().add(engine.getUplinkThroughput(

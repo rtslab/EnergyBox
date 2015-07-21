@@ -1,5 +1,7 @@
 package se.liu.rtslab.energybox;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import se.liu.rtslab.energybox.engines.EngineWifi;
 import java.io.File;
 import java.io.FileWriter;
@@ -114,17 +116,27 @@ public class ResultsFormWifiController implements Initializable
         powerChart.getXAxis().setLabel("Time(s)");
         powerChart.getYAxis().setLabel("Power(J)");
         powerChart.getData().add(engine.getPower());
-        
-        linkDistroPieChart.getData().addAll(engine.getLinkDistroData());
-        stateTimePieChart.getData().addAll(engine.getStateTimeData());
-        
+
+        ObservableList<PieChart.Data> linkDistroPieData = FXCollections.observableArrayList(
+                new PieChart.Data("Uplink", engine.getUplinkPacketCount()),
+                new PieChart.Data("Downlink", engine.getDownlinkPacketCount())
+        );
+        linkDistroPieChart.getData().addAll(linkDistroPieData);
+
+        ObservableList<PieChart.Data> stateTimePieData = FXCollections.observableArrayList(
+                new PieChart.Data("CAM", engine.getTimeInCAM()),
+                new PieChart.Data("CAMH", engine.getTimeInCAMH()),
+                new PieChart.Data("PSM", engine.getTimeInPSM())
+        );
+        stateTimePieChart.getData().addAll(stateTimePieData);
+
         throughputChart.getXAxis().setLabel("Time(s)");
         throughputChart.getYAxis().setLabel("Bytes/s");
         throughputChart.getData().add(engine.getUplinkThroughput(
                 engine.getPacketList().get(engine.getPacketList().size()-1).getTime()/50));
         throughputChart.getData().add(engine.getDownlinkThroughput(
                 engine.getPacketList().get(engine.getPacketList().size()-1).getTime()/50));
-        /*
+        
         packetChart.getXAxis().setLabel("Time(s)");
         packetChart.getYAxis().setLabel("Size(bytes)");
         packetChart.getData().add(new XYChart.Series("Uplink", engine.getUplinkPackets().getData()));
@@ -139,7 +151,7 @@ public class ResultsFormWifiController implements Initializable
         packetChart3.getYAxis().setLabel("Size(bytes)");
         packetChart3.getData().add(new XYChart.Series("Uplink", engine.getUplinkPackets().getData()));
         packetChart3.getData().add(new XYChart.Series("Downlink", engine.getDownlinkPackets().getData()));
-        */
+
         packetTable.getItems().setAll(engine.getPacketList());
         statsTable.getItems().setAll(engine.getStatisticsList());
         linkDistroTable.getItems().setAll(engine.getDistrStatisticsList());

@@ -5,7 +5,6 @@ import se.liu.rtslab.energybox.StatisticsEntry;
 import se.liu.rtslab.energybox.properties.device.PropertiesDevice3G;
 import se.liu.rtslab.energybox.properties.network.Properties3G;
 import javafx.collections.ObservableList;
-import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 /**
  * @author Rihards Polis
@@ -20,6 +19,11 @@ public class Engine3G extends Engine
         private State(int value){this.value = value;}
         public int getValue() { return this.value; }
     }
+
+    // Pie chart data
+    private double timeInFACH;
+    private double timeInIDLE;
+    private double timeInDCH;
     
     // VARIABLES TAKEN FROM THE CONSTRUCTOR
     Properties3G networkProperties; 
@@ -284,39 +288,32 @@ public class Engine3G extends Engine
 
         stateSeriesData.afterChanges();
 
-        linkDistrData.add(new PieChart.Data("Uplink", uplinkPacketCount));
-        linkDistrData.add(new PieChart.Data("Downlink", packetList.size()-uplinkPacketCount));
-        distrStatisticsList.add(new StatisticsEntry("Nr of UL packets",uplinkPacketCount));
-        distrStatisticsList.add(new StatisticsEntry("Nr of DL packets",packetList.size()-uplinkPacketCount));
+        distrStatisticsList.add(new StatisticsEntry("Nr of UL packets", getUplinkPacketCount()));
+        distrStatisticsList.add(new StatisticsEntry("Nr of DL packets", getDownlinkPacketCount()));
         return stateSeries;
     }
-    
+
     @Override
-    public void calculatePower()
-    {
-        //Double power = Double.valueOf(0);
-        int timeInIDLE = 0, timeInFACH = 0, timeInDCH = 0;
-        for (int i = 1; i < stateSeries.getData().size(); i++)
-        {
-            double timeDifference = (stateSeries.getData().get(i).getXValue() - stateSeries.getData().get(i-1).getXValue());
-            switch(stateSeries.getData().get(i-1).getYValue())
-            {
-                case 0:
-                {
+    public void calculatePower() {
+        timeInIDLE = 0.0;
+        timeInFACH = 0.0;
+        timeInDCH = 0.0;
+        for (int i = 1; i < stateSeries.getData().size(); i++) {
+            double timeDifference = (stateSeries.getData().get(i).getXValue() - stateSeries.getData().get(i - 1).getXValue());
+            switch (stateSeries.getData().get(i - 1).getYValue()) {
+                case 0: {
                     power += timeDifference * deviceProperties.getPOWER_IN_IDLE();
                     timeInIDLE += timeDifference;
                 }
                 break;
-                    
-                case 1:
-                {
+
+                case 1: {
                     power += timeDifference * deviceProperties.getPOWER_IN_FACH();
                     timeInFACH += timeDifference;
                 }
                 break;
-                    
-                case 3:
-                {
+
+                case 3: {
                     power += timeDifference * deviceProperties.getPOWER_IN_DCH();
                     timeInDCH += timeDifference;
                 }
@@ -324,10 +321,7 @@ public class Engine3G extends Engine
             }
         }
         // Total power used rounded down to four decimal places
-        statisticsList.add(new StatisticsEntry("Total Power Used",((double) Math.round(power * 10000) / 10000)));
-        stateTimeData.add(new PieChart.Data("FACH", timeInFACH));
-        stateTimeData.add(new PieChart.Data("DCH", timeInDCH));
-        stateTimeData.add(new PieChart.Data("IDLE", timeInIDLE));
+        statisticsList.add(new StatisticsEntry("Total Power Used", ((double) Math.round(power * 10000) / 10000)));
     }
 
     @Override
@@ -386,6 +380,9 @@ public class Engine3G extends Engine
     public XYChart.Series<Double, Integer> getFACH(){ return fachSeries; }
     public XYChart.Series<Double, Integer> getDCH(){ return dchSeries; }
 
+    public double getTimeInFACH() { return timeInFACH; }
+    public double getTimeInDCH() { return timeInDCH; }
+    public double getTimeInIDLE() { return timeInIDLE; }
 
 
     private XYChart.Data<Double, Integer> pointDch(Double time) {

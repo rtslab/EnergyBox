@@ -27,11 +27,7 @@ public abstract class Engine
     XYChart.Series<Double, Integer> downlinkPacketSeries = new XYChart.Series<>(new FastModifiableObservableList<XYChart.Data<Double, Integer>>());
     XYChart.Series<Double, Long> uplinkSeries = new XYChart.Series<>();
     XYChart.Series<Double, Long> downlinkSeries = new XYChart.Series<>();
-    protected ObservableList<PieChart.Data> linkDistrData = 
-            FXCollections.observableArrayList(new ArrayList<PieChart.Data>());
     protected int uplinkPacketCount = 0;
-    protected ObservableList<PieChart.Data> stateTimeData = 
-            FXCollections.observableArrayList(new ArrayList<PieChart.Data>());
     protected ObservableList<StatisticsEntry> statisticsList = FXCollections.observableList(new ArrayList<StatisticsEntry>());
     protected ObservableList<StatisticsEntry> distrStatisticsList = FXCollections.observableList(new ArrayList<StatisticsEntry>());
     protected Double power = 0.0;
@@ -174,14 +170,13 @@ public abstract class Engine
     public XYChart.Series<Double, Integer> getUplinkPackets(){ return uplinkPacketSeries; }
     public XYChart.Series<Double, Integer> getDownlinkPackets(){ return downlinkPacketSeries; }
     public XYChart.Series<Double, Integer> getPower(){ return stateSeries; }
-    public ObservableList<PieChart.Data> getLinkDistroData() { return linkDistrData; }
-    public ObservableList<PieChart.Data> getStateTimeData() { return stateTimeData; }
     public String getSourceIP() {return sourceIP;}
     public ObservableList<Packet> getPacketList() {return packetList; }
     public ObservableList<StatisticsEntry> getStatisticsList() {return statisticsList; }
     public ObservableList<StatisticsEntry> getDistrStatisticsList() {return distrStatisticsList; }
     public Double getPowerValue() { return power; }
+    public int getDownlinkPacketCount() { return packetList.size()-uplinkPacketCount; }
+    public int getUplinkPacketCount() { return uplinkPacketCount; }
     // Name: "3G" or "Wifi"
     abstract public String getName();
-
 }

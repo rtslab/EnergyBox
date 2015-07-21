@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import javafx.collections.ObservableList;
-import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 
 /**
@@ -19,7 +18,13 @@ public class EngineWifi extends Engine
 { 
     PropertiesWifi networkProperties; 
     PropertiesDeviceWifi deviceProperties;
-    enum State 
+
+    // Pie chart data
+    private double timeInCAM;
+    private double timeInCAMH;
+    private double timeInPSM;
+
+    enum State
     { 
         PSM(0), CAM(2), CAMH(3);
         private final int value;
@@ -287,18 +292,17 @@ public class EngineWifi extends Engine
             drawState(previousTime + (long)networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
             //drawState(Long.valueOf(270046000L), state.getValue());
         }
-        linkDistrData.add(new PieChart.Data("Uplink", uplinkPacketCount));
-        linkDistrData.add(new PieChart.Data("Downlink", packetList.size()-uplinkPacketCount));
-        distrStatisticsList.add(new StatisticsEntry("Nr of UL packets",uplinkPacketCount));
-        distrStatisticsList.add(new StatisticsEntry("Nr of DL packets",packetList.size()-uplinkPacketCount));
+        distrStatisticsList.add(new StatisticsEntry("Nr of UL packets", getUplinkPacketCount()));
+        distrStatisticsList.add(new StatisticsEntry("Nr of DL packets", getDownlinkPacketCount()));
         return stateSeries;
     }
     
     @Override
     public void calculatePower()
     {
-        //Double power = Double.valueOf(0);
-        int timeInPSM = 0, timeInCAM = 0, timeInCAMH = 0;
+        timeInPSM = 0.0;
+        timeInCAM = 0.0;
+        timeInCAMH = 0.0;
         for (int i = 1; i < stateSeries.getData().size(); i++)
         {
             if (true)//(stateSeries.getData().get(i).getXValue() <= Double.valueOf(310.97))
@@ -334,8 +338,6 @@ public class EngineWifi extends Engine
         }
         // Total power used rounded down to four decimal places
         statisticsList.add(new StatisticsEntry("Total Power Used",((double) Math.round(power * 10000) / 10000)));
-        stateTimeData.add(new PieChart.Data("DCH", timeInPSM));
-        stateTimeData.add(new PieChart.Data("IDLE", timeInCAM));
     }
 
     @Override
@@ -390,9 +392,10 @@ public class EngineWifi extends Engine
     
     // GETTERS
     public XYChart.Series<Double, Integer> getCAM(){ return camSeries; }
-    
-    
-    
+    public double getTimeInCAM() { return timeInCAM; }
+    public double getTimeInCAMH() { return timeInCAMH; }
+    public double getTimeInPSM() { return timeInPSM; }
+
     private void testThroughput()
     {
         File file = new File("D:\\testUL.csv");
