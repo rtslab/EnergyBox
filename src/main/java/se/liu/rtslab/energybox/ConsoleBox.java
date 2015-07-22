@@ -14,6 +14,8 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 import javafx.collections.ObservableList;
@@ -66,7 +68,7 @@ public class ConsoleBox
         Properties networkProperties = null;
         try {
             InputStream networkStream = ClassLoader.getSystemResourceAsStream(networkConfig);
-            networkProperties = pathToProperties(networkStream);
+            networkProperties = streamToProperties(networkStream);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -74,7 +76,7 @@ public class ConsoleBox
         Properties deviceProperties = null;
         try {
             InputStream deviceStream = ClassLoader.getSystemResourceAsStream(deviceConfig);
-            deviceProperties = pathToProperties(deviceStream);
+            deviceProperties = streamToProperties(deviceStream);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -137,30 +139,38 @@ public class ConsoleBox
 
     public Properties pathToProperties(String path) throws IOException
     {
-        if (new File(path).exists())
+        // try path...
+        File file = new File(path);
+        if (file.exists())
         {
-            File f = new File(path);
-            InputStream in = new FileInputStream (f);
-            return pathToProperties(in);
+            InputStream in = new FileInputStream(file);
+            return streamToProperties(in);
         }
-        else
+
+        // ...then try jar dir...
+        String jarLocation = OSTools.getJarLocation();
+        StringBuilder relativePath = new StringBuilder();
+        relativePath.append(new File(jarLocation).getParent());
+        relativePath.append(File.separator);
+        relativePath.append(path);
+        file = new File(relativePath.toString());
+        if (file.exists())
         {
-            String location = OSTools.getJarLocation();
-            if ((new File(location).exists()))
-            {
-                StringBuilder relativePath = new StringBuilder();
-                relativePath.append(new File(location).getParent());
-                relativePath.append(File.separator);
-                relativePath.append(path);
-                File f = new File(relativePath.toString());
-                InputStream in = new FileInputStream (f);
-                return pathToProperties(in);
-            }
+            InputStream in = new FileInputStream(file);
+            return streamToProperties(in);
         }
+
+        // ...then try bundled resources...
+        InputStream stream = ClassLoader.getSystemResourceAsStream(path);
+        if (stream != null) {
+            return streamToProperties(stream);
+        }
+
+        // ...finally: resource cannot be found! s
         throw new IllegalArgumentException("Could not parse file configuration file: " + path);
     }
 
-    public Properties pathToProperties(InputStream in) throws IOException
+    public Properties streamToProperties(InputStream in) throws IOException
     {
         Properties properties = new Properties();
         properties.load(in);
