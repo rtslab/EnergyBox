@@ -30,7 +30,7 @@ public interface ProcessTrace extends Runnable {
      * Convenience factory class for creating an instance of appropriate class, according to the host OS.
      */
     class Factory {
-        public static ProcessTrace getInstance(String tracePath, UpdatesController controllerUpdater) {
+        public static ProcessTrace build(String tracePath, UpdatesController controllerUpdater) {
             if (OSTools.isWindows()) {
                 return new ProcessTraceLibpcap(tracePath, controllerUpdater);
             }

@@ -34,7 +34,7 @@ public class Launcher {
 
 
         final UpdatesController updater = new NullUpdater();
-        final ProcessTrace trace = ProcessTrace.Factory.getInstance(flagT, updater);
+        final ProcessTrace trace = ProcessTrace.Factory.build(flagT, updater);
 
         trace.run(); // block thread to avoid race conditions
         ConsoleBox consoleBox = new ConsoleBox(trace, flagT, flagN, flagD);
