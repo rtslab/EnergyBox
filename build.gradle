@@ -2,6 +2,7 @@ description = """energybox"""
 
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'application'
 
 group = 'se.liu.rtslab.energybox'
 version = '2.0.0-SNAPSHOT'
@@ -9,10 +10,15 @@ version = '2.0.0-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
+mainClassName = "se.liu.rtslab.energybox.Launcher"
 tasks.withType(Jar) {
     manifest {
-        attributes("Main-Class": "se.liu.rtslab.energybox.Launcher")
+        attributes("Main-Class": mainClassName)
     }
+}
+tasks.withType(JavaExec) {
+    main = mainClassName
+    classpath = sourceSets.main.runtimeClasspath
 }
 
 
@@ -55,21 +61,40 @@ task copyTestResources(type: Copy) {
 processTestResources.dependsOn copyTestResources
 
 jar {
+    description = 'Build EnergyBox .jar *without* bundled jnetpcap library.'
+    group = 'build'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
 task jnetpcapJar(type: Jar) {
+    description = 'Build EnergyBox .jar *with* bundle jnetpcap library (Windows compatible).'
+    group = 'build'
     from sourceSets.main.allSource
-    sourceSets.main.allSource.each { File file -> println file.name }
     from { configurations.jnetpcap.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
 
+task runCli(type: JavaExec, dependsOn: jar) {
+    description = 'Run EnergyBox CLI with prefined parameters.'
+    group = 'application'
+    // run with args --> run CLI
+    args = ["--d=nexus_one_3g.config", "--n=3g_teliasonera.config", "--t=test1.pcap"]
+    doFirst { println ">> Running CLI with params: " + args + "..."}
+}
+
+task runGui(type: JavaExec, dependsOn: jar) {
+    description = 'Run EnergyBox GUI.'
+    group = 'application'
+    // run without args --> run GUI
+    doFirst { println ">> Running GUI..." }
+}
+
 task wrapper(type: Wrapper) {
-    gradleVersion '2.0'
+    gradleVersion '2.3'
 }
 
 task createPom << {
+    description = 'Create pom.xml for maven.'
     pom {
         project {
             groupId project.group
