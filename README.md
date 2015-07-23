@@ -37,5 +37,46 @@ http://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-98656
 Bachelor thesis:
 http://liu.diva-portal.org/smash/record.jsf?pid=diva2%3A783681
 
+## Requirements:
+* Java JDK 8u40 or greater
+* Gradle
+* tshark (OSX and Linux only)
+
+OS X:
+* `brew install tshark gradle`
+
+Linux:
+* `sudo apt-get install tshark`
+* Install gradle from http://gradle.org ([instructions](http://exponential.io/blog/2015/03/30/install-gradle-on-ubuntu-linux/))
+
+Windows:
+* Install gradle from http://gradle.org
+
+## Build
+```
+git clone git@github.com:rtslab/EnergyBox.git
+cd EnergyBox
+gradle jar
+```
+or `gradlew jnetpcapJar` to bundle jnetpcap library (for Windows platforms).
+
+Run `gradle runCli` or `gradle runGui` to verify that build works.
+
+Optionally, the IDE *IntelliJ IDEA* comes with good support for gradle projects.
+
+## Run
+CLI:  
+```java -jar build/libs/energybox-x.y.z.jar --t=<trace pcap> --n=<netork config> --d=<device config>```
+
+GUI:  
+```java -jar build/libs/energybox-x.y.z.jar``` or ```gradle runGui```
+
+Examples:  
+```
+java -jar build/libs/energybox-2.0.0-SNAPSHOT.jar --t=path/to/trace.pcap --n=3g_teliasonera.config --d=nexus_one_3g.config
+```  
+```
+java -jar build/libs/energybox-2.0.0-SNAPSHOT.jar --t=path/to/trace.pcap --n=path/to/external/network.config --d=path/to/external/device.config
+```
 
 
