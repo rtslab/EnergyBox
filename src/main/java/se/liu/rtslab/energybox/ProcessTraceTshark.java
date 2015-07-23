@@ -156,6 +156,11 @@ public class ProcessTraceTshark implements ProcessTrace
                 List<CSVRecord> records = CSVParser.parse(csvFile, CSVFormat.DEFAULT).getRecords();
                 recordsProcessed=0;
                 totalRecords=records.size();
+                if (totalRecords == 0) {
+                    System.err.println("Packet trace is empty -- aborting.");
+                    return;
+                }
+
                 System.out.println("Total packets: " + totalRecords);
                 //IP detection needs to be done here
                 for(CSVRecord record : records){

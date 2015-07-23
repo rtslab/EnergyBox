@@ -14,8 +14,6 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Properties;
 
 import javafx.collections.ObservableList;
@@ -52,8 +50,7 @@ public class ConsoleBox
             e.printStackTrace();
         }
 
-        engine = buildEngine(trace.getPacketList(), deviceProperties, networkProperties);
-
+        engine = tryBuildEngine(trace.getPacketList(), deviceProperties, networkProperties);
         engine.modelStates();
         engine.calculatePower();
         printStates = engine.getPower(); // so that the states could be accesed for outputToFile
@@ -81,13 +78,24 @@ public class ConsoleBox
             e.printStackTrace();
         }
 
-        engine = buildEngine(trace.getPacketList(),
-                buildDeviceProperties(deviceProperties),
-                getNetworkProperties(networkProperties));
-
+        engine = tryBuildEngine(trace.getPacketList(), buildDeviceProperties(deviceProperties), getNetworkProperties(networkProperties));
         engine.modelStates();
         engine.calculatePower();
         printStates = engine.getPower(); // so that the states could be accesed for outputToFile
+    }
+
+    // Build engine. If pcap if empty, bail out by exiting application and printing 0.0 Joules
+    // This ensures that energy can always be grepped from stdout.
+    private Engine tryBuildEngine(ObservableList<Packet> tracePackets, Device device, Network network) {
+        try {
+            return buildEngine(tracePackets, device, network);
+        } catch (IllegalArgumentException e) {
+            if (tracePackets.size() == 0) {
+                System.out.println("Total power in Joules: 0.0");
+                System.exit(0);
+            }
+            throw e;
+        }
     }
 
     public void printResults()
@@ -118,6 +126,11 @@ public class ConsoleBox
     private Engine buildEngine(ObservableList<Packet> packetList,
                              Device deviceProperties,
                              Network networkProperties) {
+        // Engines do not handle empty pcaps gracefully, so fail fast if one is encountered
+        if (packetList.size() == 0) {
+            throw new IllegalArgumentException("Packet trace file is empty.");
+        }
+
         // CHOOSING THE ENGINE
         if (networkProperties instanceof Properties3G) {
             return new Engine3G(packetList, sourceIP, ((Properties3G) networkProperties), ((PropertiesDevice3G) deviceProperties));
