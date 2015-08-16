@@ -59,6 +59,8 @@ Windows:
 * Install WinPcap from https://www.winpcap.org/install/
 
 ## Build
+[![Build Status](https://travis-ci.org/jensgreen/EnergyBox.svg?branch=travis-ci)](https://travis-ci.org/jensgreen/EnergyBox)
+
 ```
 git clone git@github.com:rtslab/EnergyBox.git
 cd EnergyBox
