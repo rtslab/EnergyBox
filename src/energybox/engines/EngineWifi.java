@@ -48,12 +48,8 @@ public class EngineWifi extends Engine
         // Timer variables
         long deltaT = 0;
         long previousTime = packetList.get(0).getTimeInMicros();
-        //System.out.println(hasCAMH());
-        //testThroughput();
         State state = State.PSM;
         // For CAMH calculation
-        //int dataSum = 0, firstSeriesIndex = 0;
-        //double chunkStart = 0, chunkEnd = networkProperties.getCAM_TIME_WIMDOW();
         
         for (int i = 0; i < packetList.size(); i++) 
         {
@@ -102,76 +98,6 @@ public class EngineWifi extends Engine
                 case CAM:
                 {
                     drawState(packetList.get(i).getTimeInMicros(), state.getValue());
-                    /*
-                    // CAMH CALCULCATION
-                    // If the packet is within the current chunk, add the packet's
-                    // length to the chunk's dataSum.
-                    if ((chunkStart <= packetList.get(i).getTimeInMicros()) && (packetList.get(i).getTimeInMicros() < chunkEnd))
-                    {
-                        dataSum += packetList.get(i).getLength();
-                    }
-                    // If the packet is beyond chunkEnd and the dataSum exceeds
-                    // the data rate threshold, take all the packets in the previous
-                    // chunk and bump up the CAM points to CAMH.
-                    else
-                    {
-                        
-                        if (dataSum > networkProperties.getWINDOW_DATA_RATE_THRESHOLD())
-                        {
-                            int last = 0;
-                            boolean first = true;
-                            // Goes through the chart point series starting from
-                            // the begining of the last chunks end (to save on iterations)
-                            for (int j = firstSeriesIndex-1; j < stateSeries.getData().size(); j++)
-                            {
-                                // Checks for weather the point is between the 
-                                // chunk boundries and if it's CAM
-                                if ((stateSeries.getData().get(j).getYValue() == State.CAM.getValue()) &&
-                                        ((chunkStart/1000000) <= stateSeries.getData().get(j).getXValue()) &&
-                                        (stateSeries.getData().get(j).getXValue() < (chunkEnd/1000000)))
-                                {
-                                    // Inserts a new point if it's the start of a
-                                    // streak. Bumps up the point if it's in the
-                                    // middle of a streak.
-                                    if (first)
-                                    {
-                                        // If the start of the current streak is
-                                        // the end of the previous chunk's streak
-                                        // promote the first CAM point as well to
-                                        // have a continuous streak.
-                                        if (stateSeries.getData().get(j-1).getYValue() == State.CAMH.getValue())
-                                            stateSeries.getData().get(j).setYValue(State.CAMH.getValue());
-                                        
-                                        stateSeries.getData().add(j+1, new XYChart.Data(
-                                                stateSeries.getData().get(j).getXValue(), 
-                                                State.CAMH.getValue()));
-                                        first = false;
-                                    }
-                                    else
-                                        stateSeries.getData().get(j).setYValue(State.CAMH.getValue());
-                                    // saves the index of the last altered point
-                                    // for the final two points after the loop.
-                                    last = j;
-                                }
-                            }
-                            // Two final points following the original tool's implementation
-                            stateSeries.getData().add(last+1, new XYChart.Data(
-                                    (chunkEnd/1000000), 
-                                    State.CAM.getValue()));
-                            stateSeries.getData().add(last+1, new XYChart.Data(
-                                    (chunkEnd/1000000), 
-                                    State.CAMH.getValue()));
-                        }
-                        //if ((chunkEnd/1000000 > 8) && (chunkEnd/1000000 < 10)) System.out.println(chunkStart + " | " + dataSum + " | " + chunkEnd);
-                        dataSum = 0;
-                        // The original implementation rounds the chunk start and
-                        // end values to one tenth of the window size.
-                        chunkStart = packetList.get(i).getTimeInMicros()-(packetList.get(i).getTimeInMicros() % (networkProperties.getCAM_TIME_WIMDOW()/10));
-                        chunkEnd = packetList.get(i).getTimeInMicros()-(packetList.get(i).getTimeInMicros() % (networkProperties.getCAM_TIME_WIMDOW()/10))+(networkProperties.getCAM_TIME_WIMDOW()/10);
-                        dataSum = packetList.get(i).getLength();
-                        firstSeriesIndex = stateSeries.getData().size()-1;
-                    }
-                    */
                 }
                 break;
             }
@@ -271,12 +197,9 @@ public class EngineWifi extends Engine
         {
             // Needs camhToPsm if the end state is CAMH
             camToPsm(previousTime + networkProperties.getCAM_PSM_INACTIVITY_TIME());
-            //drawState(previousTime, state.getValue());// + (long)networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
             drawState(previousTime + (long)networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
             state = State.PSM;
-            //drawState(previousTime, state.getValue());// + (long)networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
             drawState(previousTime + (long)networkProperties.getCAM_PSM_INACTIVITY_TIME(), state.getValue());
-            //drawState(Long.valueOf(270046000L), state.getValue());
         }
         linkDistrData.add(new PieChart.Data("Uplink", uplinkPacketCount));
         linkDistrData.add(new PieChart.Data("Downlink", packetList.size()-uplinkPacketCount));
@@ -288,12 +211,9 @@ public class EngineWifi extends Engine
     @Override
     public void calculatePower()
     {
-        //Double power = Double.valueOf(0);
         int timeInPSM = 0, timeInCAM = 0, timeInCAMH = 0;
         for (int i = 1; i < stateSeries.getData().size(); i++)
         {
-            if (true)//(stateSeries.getData().get(i).getXValue() <= Double.valueOf(310.97))
-            {//////
             double timeDifference = (stateSeries.getData().get(i).getXValue() - stateSeries.getData().get(i-1).getXValue());
             switch(stateSeries.getData().get(i-1).getYValue())
             {
@@ -301,7 +221,6 @@ public class EngineWifi extends Engine
                 {
                     power += timeDifference * deviceProperties.getPOWER_IN_PSM();
                     timeInPSM += timeDifference;
-                    //System.out.println(stateSeries.getData().get(i).getXValue() + " : " + power);
                 }
                 break;
                     
@@ -309,18 +228,15 @@ public class EngineWifi extends Engine
                 {
                     power += timeDifference * deviceProperties.getPOWER_IN_CAM();
                     timeInCAM += timeDifference;
-                    //System.out.println(stateSeries.getData().get(i).getXValue() + " : " + power);
-               }
+                }
                 break;
                     
                 case 3:
                 {
                     power += timeDifference * deviceProperties.getPOWER_IN_CAMH();
                     timeInCAMH += timeDifference;
-                    //System.out.println(stateSeries.getData().get(i).getXValue() + " : " + power);
                 }
                 break;
-            }/////
             }
         }
         // Total power used rounded down to four decimal places
@@ -346,7 +262,6 @@ public class EngineWifi extends Engine
             if(isHighChunk(i)) 
             {
                 return true;
-                //return false;
             }
         }
         return false;
@@ -368,44 +283,4 @@ public class EngineWifi extends Engine
     
     // GETTERS
     public XYChart.Series<Long, Integer> getCAM(){ return camSeries; }
-    
-    
-    
-    private void testThroughput()
-    {
-        File file = new File("D:\\testUL.csv");
-
-        try
-        {
-            FileWriter writer = new FileWriter(file.getAbsolutePath());
-            for (int i = 0; i < uplinkSeries.getData().size(); i++)
-            {
-                writer.append(uplinkSeries.getData().get(i).getYValue().toString());
-                writer.append(",");
-                writer.append(Double.valueOf(uplinkSeries.getData().get(i).getXValue().doubleValue()).toString());
-                writer.append("\n");
-            }
-            writer.flush();
-	    writer.close();
-        }
-        catch(IOException e){ e.printStackTrace();}
-        
-        
-        File file2 = new File("D:\\testDL.csv");
-
-        try
-        {
-            FileWriter writer = new FileWriter(file2.getAbsolutePath());
-            for (int i = 0; i < downlinkSeries.getData().size(); i++)
-            {
-                writer.append(downlinkSeries.getData().get(i).getYValue().toString());
-                writer.append(",");
-                writer.append(Double.valueOf(downlinkSeries.getData().get(i).getXValue().doubleValue()).toString());
-                writer.append("\n");
-            }
-            writer.flush();
-	    writer.close();
-        }
-        catch(IOException e){ e.printStackTrace();}
-    }
 }
