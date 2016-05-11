@@ -1,7 +1,10 @@
 build/
+gradle/
 nbproject/
 dist/
+target/
 out/
 .idea/
 .classpath
+.gradle/
 .project
