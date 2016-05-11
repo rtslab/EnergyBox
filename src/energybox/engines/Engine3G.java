@@ -136,7 +136,6 @@ public class Engine3G extends Engine
                             // Bug correction for when the trace is not realistic.
                             // Ignores the the transition time if there are packets
                             // before the transition is suppose to end.
-                            //if (packetList.get(i+1).getTimeInMicros() > packetList.get(i).getTimeInMicros() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME())
                             if ((packetList.get(i).getTimeInMicros() + networkProperties.getIDLE_TO_DCH_TRANSITION_TIME()) < (double)packetList.get(i+1).getTimeInMicros())
                             {
                                 System.out.println("Next packet at : " + (double)packetList.get(i+1).getTimeInMicros());
