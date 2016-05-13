@@ -1,11 +1,11 @@
-description = """energybox"""
+description = """EnergyBox"""
 
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'application'
 
 group = 'se.liu.rtslab.energybox'
-version = '2.0.0-SNAPSHOT'
+version = '2.0'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -46,7 +46,6 @@ dependencies {
     testCompile 'commons-io:commons-io:2.4'
     testCompile 'junit:junit:4.12'
     provided files('lib/jnetpcap-1.4.r1425/jnetpcap.jar')
-
     jnetpcap 'org.apache.commons:commons-csv:1.1'
     jnetpcap 'org.apache.commons:commons-exec:1.3'
     jnetpcap files('lib/jnetpcap-1.4.r1425/jnetpcap.jar')
@@ -60,30 +59,57 @@ task copyTestResources(type: Copy) {
 }
 processTestResources.dependsOn copyTestResources
 
-jar {
-    description = 'Build EnergyBox .jar *without* bundled jnetpcap library.'
+task EnergyBox(type: Jar) {
+    description = 'Build EnergyBox.jar for OS X and Linux *without* bundled jnetpcap library.'
     group = 'build'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	copy{
+		from 'config'
+		into 'build/libs/configurationFiles'
+	}
 }
 
-task jnetpcapJar(type: Jar) {
-    description = 'Build EnergyBox .jar *with* bundle jnetpcap library (Windows compatible).'
+task EnergyBoxWindows(type: Jar) {
+    description = 'Build EnergyBox.jar *with* bundle jnetpcap library (Windows compatible).'
     group = 'build'
     from sourceSets.main.allSource
     from { configurations.jnetpcap.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
+	copy{
+		from 'lib/jnetpcap-1.4.r1425/jnetpcap.dll'
+		into 'build/libs'
+	}
+	copy{
+		from 'config'
+		into 'build/libs/configurationFiles'
+	}
 }
 
-task runCli(type: JavaExec, dependsOn: jar) {
-    description = 'Run EnergyBox CLI with prefined parameters.'
+task runCli(type: JavaExec, dependsOn: EnergyBox) {
+    description = 'Run EnergyBox CLI with predefined parameters in OS X and Linux.'
     group = 'application'
     // run with args --> run CLI
     args = ["--d=nexus_one_3g.config", "--n=3g_teliasonera.config", "--t=test1.pcap"]
     doFirst { println ">> Running CLI with params: " + args + "..."}
 }
 
-task runGui(type: JavaExec, dependsOn: jar) {
-    description = 'Run EnergyBox GUI.'
+task runGui(type: JavaExec, dependsOn: EnergyBox) {
+    description = 'Run EnergyBox GUI in OS X and Linux.'
+    group = 'application'
+    // run without args --> run GUI
+    doFirst { println ">> Running GUI..." }
+}
+
+task runCliWindows(type: JavaExec, dependsOn: EnergyBoxWindows) {
+    description = 'Run EnergyBox CLI with predefined parameters for Windows.'
+    group = 'application'
+    // run with args --> run CLI
+    args = ["--d=nexus_one_3g.config", "--n=3g_teliasonera.config", "--t=test1.pcap"]
+    doFirst { println ">> Running CLI with params: " + args + "..."}
+}
+
+task runGuiWindows(type: JavaExec, dependsOn: EnergyBoxWindows) {
+    description = 'Run EnergyBox GUI in Windows.'
     group = 'application'
     // run without args --> run GUI
     doFirst { println ">> Running GUI..." }

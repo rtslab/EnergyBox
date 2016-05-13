@@ -64,7 +64,7 @@ public class ProcessTraceLibpcap implements ProcessTrace
 
         // Get size of trace for progress display.
         totalBytes = (new File(tracePath)).length();
-        // Check weather the .dll file can be found
+        // Check wether the .dll file can be found
         try { pcap = Pcap.openOffline(tracePath, errbuf); }
         catch(UnsatisfiedLinkError e)
         {

@@ -75,7 +75,6 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
     String sourceIP = "";
     HashMap<String, Integer> addressOccurrence = new HashMap();
     boolean error = false;
-    String os;
     
     final ObservableList<Packet> packetList = FXCollections.observableList(new ArrayList());
     @FXML
@@ -100,10 +99,12 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         }
         
         // Checks between the two supported operating systems and tries to add
-        // the directory where the JAR file is locted to the PATH or CLASSPATH
+        // the directory where the JAR file is located to the PATH or CLASSPATH
         // variables in the JVM.
         // OS X uses tshark instead, so the process is different.
+/*
         os = OSTools.getOS();
+        System.out.println("MFC: "+os);
         switch(os)
         {
             case "Windows":
@@ -120,9 +121,10 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
                 {
                     OSTools.showErrorDialog("JVM path error!", e.getMessage());
                 }
+                System.out.println("MFC: "+relativePath.toString());
             }
             break;
-                
+
             case "Linux":
             {
                 String location = MainFormController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -144,24 +146,23 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
                 }
             }
             break;
-            
+
             case "Mac":
             {
                 //The OS X version uses tshark as a temporary fix
                 //This code only checks whether tshark is installed and it can be executed,
-                //and shows an error otherwise. 
+                //and shows an error otherwise.
                 //Apache Commons Exec is used:
                  //Good tutorial http://blog.sanaulla.info/2010/09/07/execute-external-process-from-within-jvm-using-apache-commons-exec-library/
                 String answer = null;
                 final CommandLine cmdLine = new CommandLine("which");
                 cmdLine.addArgument("tshark");
-                
+
                 DefaultExecutor executor = new DefaultExecutor();
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 //Handle the output of the program
                 PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
                 executor.setStreamHandler(streamHandler);
-                
                 try {
                     int exitValue = executor.execute(cmdLine,EnvironmentUtils.getProcEnvironment());
                     answer=outputStream.toString();
@@ -176,16 +177,17 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
                     //ToDo: Add a dialog "Tshark is not installed or in the path"
                     OSTools.showErrorDialog("MainFormController","Tshark is not installed or in the path");
                     //JOptionPane.showMessageDialog(null, "Tshark is not installed or in the path");
-                } 
+                }
                 //It does not work if its launched from NetBeans, launch from the terminal
-     
+
                 //http://commons.apache.org/proper/commons-exec/tutorial.html
                 //http://www.coderanch.com/t/624006/java/java/tshark-giving-output
            }
            break;
-                
+
         }
-        
+*/
+
         // Default 3G values for testing
         /*
         tracePath = "D:\\\\Source\\\\NetBeansProjects\\\\EnergyBox\\\\traces\\\\test1UL.pcap";
@@ -234,7 +236,7 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         error = false;
 
         final UpdatesController controller = new ControllerUpdater(this);
-        final ProcessTrace trace = ProcessTrace.Factory.build(tracePath, controller);
+        final ProcessTrace trace = ProcessTrace.Factory.build(tracePath, controller,OSTools.getOS());
         System.out.println("Running " + trace.getClass().getSimpleName());
 
         // override ip. if "", will be calculated in ProcessTrace
@@ -328,7 +330,7 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         Stage stage = new Stage();
         FileChooser fileChooser = new FileChooser();
         String path = OSTools.getJarLocation();
-        fileChooser.setInitialDirectory((new File(path)).getParentFile().getParentFile());
+        fileChooser.setInitialDirectory((new File(path)).getParentFile());
         fileChooser.setTitle("Open Device Configuration File");
         File file = fileChooser.showOpenDialog(stage);
         try
@@ -386,7 +388,7 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         Stage stage = new Stage();
         FileChooser fileChooser = new FileChooser();
         String path = OSTools.getJarLocation();
-        fileChooser.setInitialDirectory((new File(path)).getParentFile().getParentFile());
+        fileChooser.setInitialDirectory((new File(path)).getParentFile());
         fileChooser.setTitle("Open Network Configuration File");
         File file = fileChooser.showOpenDialog(stage);
         try
@@ -446,7 +448,7 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         Stage stage = new Stage();
         FileChooser fileChooser = new FileChooser();
         String path = OSTools.getJarLocation();
-        fileChooser.setInitialDirectory((new File(path)).getParentFile().getParentFile());
+        fileChooser.setInitialDirectory((new File(path)).getParentFile());
         fileChooser.setTitle("Open Network Configuration File");
         try
         {
@@ -504,7 +506,7 @@ public class MainFormController implements Initializable, Runnable, ProgressObse
         return null;
     }
 
-    // Depricated! Only used for testing    
+    // Deprecated! Only used for testing
     public Properties pathToProperties(String path)
     {
         Properties properties = new Properties();

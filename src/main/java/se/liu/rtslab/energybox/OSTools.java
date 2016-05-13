@@ -20,9 +20,13 @@ public class OSTools
 {
     private static String OS = System.getProperty("os.name").toLowerCase();
 
-    public static String getOS() 
+    public static String getOS(){
+        return OS;
+    }
+    //
+    public static void checkOS()
     {
-        if (isWindows()) 
+        if (isWindows())
             OS = "Windows";
         else if (isMac()) 
             OS = "Mac";
@@ -32,7 +36,6 @@ public class OSTools
             OS = "Solaris";
         else 
             OS = "error";
-        return OS;
     }
     public static boolean isWindows() { return (OS.indexOf("win") >= 0); }
     public static boolean isMac() { return (OS.indexOf("mac") >= 0); }

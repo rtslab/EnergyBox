@@ -162,11 +162,11 @@ public class ConsoleBox
 
         // ...then try jar dir...
         String jarLocation = OSTools.getJarLocation();
-        StringBuilder relativePath = new StringBuilder();
-        relativePath.append(new File(jarLocation).getParent());
-        relativePath.append(File.separator);
-        relativePath.append(path);
-        file = new File(relativePath.toString());
+        StringBuilder propertyPath = new StringBuilder();
+        propertyPath.append(new File(jarLocation).getParent());
+        propertyPath.append(File.separator);
+        propertyPath.append(path);
+        file = new File(propertyPath.toString());
         if (file.exists())
         {
             InputStream in = new FileInputStream(file);
