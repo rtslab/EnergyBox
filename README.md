@@ -43,7 +43,50 @@ Master thesis (Jens Green Olander):
 http://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-125789
 
 Additional publications using EnergyBox can be found in the following website:
-
 http://www.ida.liu.se/labs/rtslab/energy-efficient-networking/publications.html
 
+## Requirements:
+* Java JDK 8u40 or greater
+* Gradle
+* tshark (OS X and Linux only)
+
+OS X:
+* `brew install tshark gradle`
+
+Linux:
+* `sudo apt-get install tshark`
+* Install gradle from http://gradle.org ([instructions](http://exponential.io/blog/2015/03/30/install-gradle-on-ubuntu-linux/))
+
+Windows:
+* Install gradle from http://gradle.org
+* Install WinPcap from https://www.winpcap.org/install/
+
+## Build
+```
+git clone git@github.com:rtslab/EnergyBox.git
+cd EnergyBox
+```
+For Windows platforms use the following command: `gradle EnergyBoxWindows`
+
+For OS X and Linux use the following command: `gradle EnergyBox`
+
+Optionally, the IDE *IntelliJ IDEA* comes with good support for gradle projects.
+
+The build in Windows includes the jnetpcap library used to read pcap files. 
+In order to work the jnetpcap.dll needs to be in the same directory as the compiled Jar file.
+
+## Run
+CLI:  
+```java -jar build/libs/energybox-x.y.jar --t=<trace pcap> --n=<network config> --d=<device config>```
+
+GUI:  
+```java -jar build/libs/energybox-x.y.jar```
+
+Examples:  
+```
+java -jar build/libs/energybox-2.0.jar --t=path/to/trace.pcap --n=3g_teliasonera.config --d=nexus_one_3g.config
+```  
+```
+java -jar build/libs/energybox-2.0.jar --t=path/to/trace.pcap --n=path/to/external/network.config --d=path/to/external/device.config
+```
 

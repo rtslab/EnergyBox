@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="215.0" maxWidth="341.0" minHeight="211.0" minWidth="341.0" prefHeight="211.0" prefWidth="341.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="se.liu.rtslab.energybox.MainFormController">
+    <children>
+        <Button fx:id="modelButton" layoutX="264.0" layoutY="72.0" onAction="#handleButtonAction" prefHeight="45.0" prefWidth="72.0" textAlignment="CENTER" wrapText="true">
+<font>
+<Font name="System Bold" size="12.0" />
+</font>
+<graphic><ImageView fx:id="image" fitHeight="37.0" fitWidth="51.0" layoutX="104.0" layoutY="21.0" pickOnBounds="true" preserveRatio="true" />
+</graphic></Button>
+        <Label layoutX="10.0" layoutY="73.0" minHeight="16" minWidth="69" text="Packet Trace:" />
+        <TextField fx:id="textField" editable="false" focusTraversable="false" layoutX="10.0" layoutY="92.0" prefHeight="25.0" prefWidth="92.0" text="" />
+        <Label fx:id="errorText" layoutX="10.0" layoutY="158.0" minHeight="16" minWidth="69" prefHeight="17.0" prefWidth="158.0" wrapText="true" />
+        <Label layoutX="171.0" layoutY="14.0" minHeight="16" minWidth="69" text="Device Model:" />
+        <TextField fx:id="deviceField" editable="false" focusTraversable="false" layoutX="173.0" layoutY="36.0" prefHeight="25.0" prefWidth="92.0" text="" />
+        <Label layoutX="173.0" layoutY="139.0" minHeight="16" minWidth="69" text="Network Model:" />
+        <TextField fx:id="networkField" editable="false" focusTraversable="false" layoutX="173.0" layoutY="154.0" prefHeight="25.0" prefWidth="92.0" text="" />
+        <Button fx:id="deviceButton" layoutX="266.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleDeviceButton" prefHeight="45.0" prefWidth="72.0" text="Device Model" textAlignment="CENTER" wrapText="true" />
+        <Button fx:id="networkButton" layoutX="266.0" layoutY="134.0" mnemonicParsing="false" onAction="#handleNetworkButton" prefHeight="45.0" prefWidth="72.0" text="Network Model" textAlignment="CENTER" wrapText="true" />
+        <TextField fx:id="ipField" focusTraversable="false" layoutX="14.0" layoutY="36.0" prefHeight="25.0" prefWidth="92.0" text="" />
+        <Label layoutX="14.0" layoutY="16.0" minHeight="16" minWidth="69" text="Source IP:" />
+        <Button fx:id="traceButton" layoutX="102.0" layoutY="73.0" onAction="#handleTraceButton" prefHeight="45.0" prefWidth="72.0" text="Trace" /><Line endX="-12.0" layoutX="275.0" layoutY="95.0" startX="-100.0" stroke="#8e93a1" strokeWidth="5.0" /><Line endY="12.0" layoutX="300.0" layoutY="60.0" stroke="#8e93a1" strokeWidth="5.0" /><Line endY="15.0" layoutX="300.0" layoutY="118.0" stroke="#8e93a1" strokeWidth="5.0" /><ProgressBar fx:id="progressBar" focusTraversable="false" layoutX="10.0" layoutY="179.0" prefHeight="25.0" prefWidth="328.0" progress="0.0" visible="false" />
+    </children>
+</AnchorPane>
