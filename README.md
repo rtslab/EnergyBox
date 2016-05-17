@@ -47,18 +47,15 @@ http://www.ida.liu.se/labs/rtslab/energy-efficient-networking/publications.html
 
 ## Requirements:
 * Java JDK 8u40 or greater
-* Gradle
 * tshark (OS X and Linux only)
 
 OS X:
-* `brew install tshark gradle`
+* `brew install tshark`
 
 Linux:
 * `sudo apt-get install tshark`
-* Install gradle from http://gradle.org ([instructions](http://exponential.io/blog/2015/03/30/install-gradle-on-ubuntu-linux/))
 
 Windows:
-* Install gradle from http://gradle.org
 * Install WinPcap from https://www.winpcap.org/install/
 
 ## Build
@@ -66,9 +63,9 @@ Windows:
 git clone git@github.com:rtslab/EnergyBox.git
 cd EnergyBox
 ```
-For Windows platforms use the following command: `gradle EnergyBoxWindows`
+For Windows platforms use the following command: `gradle.bat EnergyBoxWindows`
 
-For OS X and Linux use the following command: `gradle EnergyBox`
+For OS X and Linux use the following command: `./gradlew EnergyBox`
 
 Optionally, the IDE *IntelliJ IDEA* comes with good support for gradle projects.
 
@@ -89,4 +86,3 @@ java -jar build/libs/energybox-2.0.jar --t=path/to/trace.pcap --n=3g_teliasonera
 ```
 java -jar build/libs/energybox-2.0.jar --t=path/to/trace.pcap --n=path/to/external/network.config --d=path/to/external/device.config
 ```
-
