@@ -51,7 +51,7 @@ dependencies {
     jnetpcap files('lib/jnetpcap-1.4.r1425/jnetpcap.jar')
 }
 
-sourceSets.main.compileClasspath += [configurations.provided]
+sourceSets.main.compileClasspath += configurations.provided
 
 task copyTestResources(type: Copy) {
     from "${projectDir}/src/test/resources"
