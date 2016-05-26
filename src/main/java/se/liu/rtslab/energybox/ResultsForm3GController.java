@@ -184,7 +184,7 @@ public class ResultsForm3GController implements Initializable
             {
                 writer.append(states.getData().get(i).getYValue().toString());
                 writer.append(",");
-                writer.append(Double.valueOf(states.getData().get(i).getXValue().doubleValue()).toString());
+                writer.append(states.getData().get(i).getXValue().toString());
                 writer.append("\n");
             }
             writer.flush();
@@ -247,7 +247,7 @@ public class ResultsForm3GController implements Initializable
         }
         else
         {
-            double newToTime = Double.valueOf(engine.getPacketList().get(engine.getPacketList().size()-1).getTime());
+            double newToTime = engine.getPacketList().get(engine.getPacketList().size() - 1).getTime();
             for (NumberAxis axis : axisList)
             {
                 axis.setAutoRanging(false);
@@ -261,27 +261,23 @@ public class ResultsForm3GController implements Initializable
     @FXML
     private void chunkSizeAction(ActionEvent event)
     {
-        if (!chuckSizeField.getText().equals(""))
+        long newChunkValue = 0;
+        try
         {
-            try
+            if (!chuckSizeField.getText().equals(""))
             {
-                long newChunkValue = (long)(Double.parseDouble(chuckSizeField.getText()));
-                throughputChart.getData().clear();
-                throughputChart.getData().add(engine.getUplinkThroughput(newChunkValue));
-                throughputChart.getData().add(engine.getDownlinkThroughput(newChunkValue));
+                newChunkValue = Long.parseLong(chuckSizeField.getText());
             }
-            catch (NumberFormatException e)
+            else
             {
-                OSTools.showNumberErrorDialog();
+                newChunkValue = engine.getPacketList().get(engine.getPacketList().size()-1).getTimeInMicros()/50;
             }
+            engine.getUplinkThroughput(newChunkValue);
+            engine.getDownlinkThroughput(newChunkValue);
         }
-        else
+        catch (NumberFormatException e)
         {
-            long newChunkValue = engine.getPacketList().get(engine.getPacketList().size()-1).getTimeInMicros()/50;
-            throughputChart.getData().clear();
-            throughputChart.getData().add(engine.getUplinkThroughput(newChunkValue));
-            throughputChart.getData().add(engine.getDownlinkThroughput(newChunkValue));
+            OSTools.showNumberErrorDialog();
         }
     }
-
 }
