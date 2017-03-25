@@ -20,7 +20,6 @@ public class CliLibpcapOutputTest extends CliOutputTest {
 
     @BeforeClass
     public static void skipUnlessWindows() {
-        OSTools.checkOS();
         final boolean isWindows = OSTools.isWindows();
         assumeTrue(isWindows);
         if (!isWindows) {

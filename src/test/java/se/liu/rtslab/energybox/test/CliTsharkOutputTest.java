@@ -31,7 +31,6 @@ public class CliTsharkOutputTest extends CliOutputTest {
 
     @BeforeClass
     public static void skipUnlessUnix() {
-        OSTools.checkOS();
         final boolean isUnix = OSTools.isUnix();
         assumeTrue(isUnix);
         if (!isUnix) {

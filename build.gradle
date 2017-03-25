@@ -57,7 +57,6 @@ task copyConfig(type: Copy) {
 }
 
 jar {
-    println "conf jar"
     description = 'Build EnergyBox.jar for OS X and Linux *without* bundled jnetpcap library.'
     group = 'build'
     from {
@@ -96,6 +95,12 @@ task createPom << {
             version project.version
         }
     }.writeTo("pom.xml")
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
 
 buildscript {
