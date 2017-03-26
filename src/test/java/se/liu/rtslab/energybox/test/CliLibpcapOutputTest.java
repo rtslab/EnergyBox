@@ -21,10 +21,10 @@ public class CliLibpcapOutputTest extends CliOutputTest {
     @BeforeClass
     public static void skipUnlessWindows() {
         final boolean isWindows = OSTools.isWindows();
-        assumeTrue(isWindows);
         if (!isWindows) {
             Logger.getLogger(CliLibpcapOutputTest.class.getName()).
-                    warning("Skipping libpcap tests -- not a UNIX system");
+                    info("Skipping libpcap tests -- not a Windows system");
         }
+        assumeTrue(isWindows);
     }
 }

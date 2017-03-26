@@ -31,12 +31,12 @@ public class CliTsharkOutputTest extends CliOutputTest {
 
     @BeforeClass
     public static void skipUnlessUnix() {
-        final boolean isUnix = OSTools.isUnix();
-        assumeTrue(isUnix);
+        final boolean isUnix = OSTools.isUnix() || OSTools.isMac();
         if (!isUnix) {
             Logger.getLogger(CliTsharkOutputTest.class.getName()).
-                    warning("Skipping tshark tests -- not a UNIX system");
+                    info("Skipping tshark tests -- not a UNIX system");
         }
+        assumeTrue(isUnix);
 
     }
 }
