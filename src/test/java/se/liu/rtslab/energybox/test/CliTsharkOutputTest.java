@@ -1,10 +1,15 @@
 package se.liu.rtslab.energybox.test;
 
+import org.junit.BeforeClass;
+import se.liu.rtslab.energybox.OSTools;
 import se.liu.rtslab.energybox.ProcessTrace;
 import se.liu.rtslab.energybox.ProcessTraceTshark;
 import se.liu.rtslab.energybox.UpdatesController;
 
 import java.util.Map;
+import java.util.logging.Logger;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Verifies that the ConsoleBox/ProcessTrace output matches that of previous, verified versions of EnergyBox.
@@ -22,5 +27,16 @@ public class CliTsharkOutputTest extends CliOutputTest {
     @Override
     public ProcessTrace getImplementation(Map<String, String> flags, UpdatesController updater) {
         return new ProcessTraceTshark(flags.get("t"), updater);
+    }
+
+    @BeforeClass
+    public static void skipUnlessUnix() {
+        final boolean isUnix = OSTools.isUnix() || OSTools.isMac();
+        if (!isUnix) {
+            Logger.getLogger(CliTsharkOutputTest.class.getName()).
+                    info("Skipping tshark tests -- not a UNIX system");
+        }
+        assumeTrue(isUnix);
+
     }
 }

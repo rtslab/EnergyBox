@@ -14,33 +14,48 @@ import javafx.scene.control.Alert;
  * Linkoping University
  */
 
-// All the methods for this class are static, thus there's no need to instance
-// it. It's only used for grouping the utility methods.
 public class OSTools
 {
-    private static String OS = System.getProperty("os.name").toLowerCase();
+    private OSTools() {}
+
+    private static String OS = null;
 
     public static String getOS(){
+        if (OS == null) {
+            String systemOS = System.getProperty("os.name").toLowerCase();
+            OS = OSFamily(systemOS);
+        }
         return OS;
     }
-    //
-    public static void checkOS()
+
+    private static String OSFamily(String os)
     {
-        if (isWindows())
-            OS = "Windows";
-        else if (isMac()) 
-            OS = "Mac";
-        else if (isUnix()) 
-            OS = "Linux";
-        else if (isSolaris()) 
-            OS = "Solaris";
+        if (isWindows(os))
+            return "Windows";
+        else if (isMac(os))
+            return "Mac";
+        else if (isUnix(os))
+            return "Linux";
+        else if (isSolaris(os))
+            return "Solaris";
         else 
-            OS = "error";
+            throw new IllegalArgumentException("Could not determine OS family of " + os);
     }
-    public static boolean isWindows() { return (OS.indexOf("win") >= 0); }
-    public static boolean isMac() { return (OS.indexOf("mac") >= 0); }
-    public static boolean isUnix() { return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("aix") > 0 ); }
-    public static boolean isSolaris() { return (OS.indexOf("sunos") >= 0); }
+
+    private static boolean isWindows(String os) { return os.toLowerCase().contains("win"); }
+    public static boolean isWindows() { return isWindows(getOS()); }
+
+    private static boolean isMac(String os) { return os.toLowerCase().contains("mac"); }
+    public static boolean isMac() { return isMac(getOS()); }
+
+    private static boolean isUnix(String os) {
+        String osLower = os.toLowerCase();
+        return osLower.contains("nix") || osLower.contains("nux") || osLower.indexOf("aix") > 0;
+    }
+    public static boolean isUnix() { return isUnix(getOS()); }
+
+    private static boolean isSolaris(String os) { return os.contains("sunos"); }
+    public static boolean isSolaris() { return isSolaris(getOS()); }
     
     public static void addDirectory(String s) throws IOException 
     {

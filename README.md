@@ -45,7 +45,7 @@ http://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-125789
 Additional publications using EnergyBox can be found in the following website:
 http://www.ida.liu.se/labs/rtslab/energy-efficient-networking/publications.html
 
-## Requirements:
+## Requirements
 * Java JDK 8u40 or greater
 * tshark (OS X and Linux only)
 
@@ -63,14 +63,16 @@ Windows:
 git clone git@github.com:rtslab/EnergyBox.git
 cd EnergyBox
 ```
-For Windows platforms use the following command: `gradle.bat EnergyBoxWindows`
+For Windows platforms use the following command: `gradle.bat jar`
 
-For OS X and Linux use the following command: `./gradlew EnergyBox`
+For OS X and Linux use the following command: `./gradlew jar`
 
 Optionally, the IDE *IntelliJ IDEA* comes with good support for gradle projects.
 
 The build in Windows includes the jnetpcap library used to read pcap files. 
 In order to work the jnetpcap.dll needs to be in the same directory as the compiled Jar file.
+
+Make sure the `JAVA_HOME` environment variable points to the JDK directory.
 
 ## Run
 CLI:  

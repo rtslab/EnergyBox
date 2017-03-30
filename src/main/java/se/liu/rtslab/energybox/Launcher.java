@@ -118,7 +118,6 @@ public class Launcher {
     }
 
     private static void setEnvironment() {
-        OSTools.checkOS();
         os = OSTools.getOS();
         //System.out.println("Operating system: " + os);
         switch (os) {
