@@ -1,5 +1,6 @@
 EnergyBox
 =========
+[![Build Status](https://travis-ci.org/rtslab/EnergyBox.svg?branch=master)](https://travis-ci.org/rtslab/EnergyBox)
 
 EnergyBox is a parametrised tool that enables accurate studies of communication energy
 at the user end, using real traffic traces as input. Currently it focuses on the most
